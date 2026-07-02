@@ -42,7 +42,9 @@ _W_A = {
     "openness":         [ 0.0,  0.1, -0.3,  0.6,  0.0,  0.3,  0.8,  0.1,  0.1,  0.0,  0.0],
     "conscientiousness":[ 0.0, -0.3,  0.8,  0.4,  0.1, -0.5, -0.1,  0.2,  0.2, -0.3,  0.3],
     "extraversion":     [ 0.8,  0.6,  0.0,  0.0,  0.0,  0.0,  0.0,  0.5,  0.0,  0.0,  0.0],  # sparse (A)
-    "agreeableness":    [ 0.3,  0.0,  0.1,  0.0,  0.0, -0.1,  0.0,  0.6,  0.8, -0.7, -0.2],
+    # A->conflict -0.7 -> -0.9 in tuning round 3: low-A combat drive is the only
+    # action-level channel for "loves legitimate fighting" (docs/tuning_log.md).
+    "agreeableness":    [ 0.3,  0.0,  0.1,  0.0,  0.0, -0.1,  0.0,  0.6,  0.8, -0.9, -0.2],
     "neuroticism":      [-0.3, -0.3,  0.3,  0.1,  0.0, -0.4, -0.2,  0.0,  0.1,  0.2, -0.1],
 }
 

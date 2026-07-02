@@ -105,8 +105,13 @@ action set where given). "top" = argmax.
   socialising; an argmax check was too strict for a near-tie distribution —
   revised 2026-07-02 after the library action set was reworked, see
   docs/tuning_log.md).
-- **F2 Laezel** (O−.3 C+.8 E−.2 A−.7 N−.7): top = `training_yard`; at the
-  training yard `P(coach)` is the lowest of the three actions.
+- **F2 Laezel** (O−.3 C+.7 E−.2 A−.9 N−.7; revised round 3, see
+  docs/tuning_log.md): top = `training_yard`; at the training yard `P(coach)` is
+  the lowest of the three actions; at the arena, top action = `fight`
+  (blood-seeking warrior — added round 3). Known limitation: her arena
+  *location* probability stays second-tier (~0.07) because the v1 location
+  schema has no combat/opposition feature for the low-A drive to act on;
+  stronger generic levers (A→risk, C softening) broke B1/C3/F5 in testing.
 - **F3 Shadowheart** (O+.1 C+.4 E−.5 A+.1 N+.6): top = `chapel`; at the chapel,
   top action ∈ {pray, meditate}.
 - **F4 Astarion** (O+.4 C−.5 E+.6 A−.7 N+.4): top ∈ {tavern, market};

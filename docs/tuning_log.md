@@ -92,3 +92,43 @@ Halsin's E questioned).
 ### End state
 
 Scorecard 25/25; pytest 16/16.
+
+## Round 3 — 2026-07-02 · Laezel blood-seeker fix (25/25 kept)
+
+Trigger: user correction — "养鸡妹" (githyanki girl) = **Laezel**, not Karlach
+(nickname misread in round 1); she craves combat and must fight at the arena,
+where she was mostly spectating (0.53 vs fight 0.24).
+
+Diagnosis: high C's stimulation (−0.2) and risk (−0.3) aversion suppress all
+combat actions; the only "loves legitimate fighting" channel is low-A × conflict.
+
+### Changes (user-approved)
+
+| change | from → to | reason |
+|---|---|---|
+| `arena fight.structure` (world) | 0.3 → 0.5 | A sanctioned duel is a rule-bound activity. |
+| `W_A[A, conflict]` (weights, also feeds `W_rel`) | −0.7 → −0.9 | Strengthen the low-A combat-drive channel. |
+| Laezel `conscientiousness` | 0.8 → 0.7 | Slightly less stim/risk damping; still clearly disciplined. |
+| Laezel `agreeableness` | −0.7 → −0.9 | Canon-level harshness; feeds the conflict channel. |
+| F2 criterion | + "at the arena, top action = fight" | Locks the intended behaviour. |
+
+Grid evidence: milder combos left spectate on top; stronger generic levers
+(A→risk −0.2, C-row softening) broke B1/C3/F5.
+
+### Effects and known limitation
+
+- Laezel @ arena: fight 0.41 > spectate 0.39 (was 0.24/0.53); yard spar 0.44
+  (blood-seeker), coach 0.10 (still lowest).
+- **Known limitation:** her arena *location* probability stays ~0.07 (rank 6).
+  The v1 location schema has no combat/opposition feature, so a high-C warrior's
+  combat-venue seeking is inexpressible at the location level; all tested
+  location-level levers broke other checks. Candidate future fix: a location
+  schema revision (phase-1 material), recorded here rather than forced.
+- Observation for a future round: Astarion's top tavern action is now `brawl`
+  (0.42 vs chat 0.28 / drink 0.30; the −0.9 conflict weight boosted it). F4's
+  mass criterion still passes (0.58 ≥ 0.42). Judged borderline in-character;
+  revisit if it reads as off.
+
+### End state
+
+Scorecard 25/25; pytest 16/16.

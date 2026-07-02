@@ -1,7 +1,7 @@
 {
   "personalities": [
     {"name": "Gale",        "ocean": {"openness": 0.9, "conscientiousness": 0.5, "extraversion": 0.1, "agreeableness": 0.4, "neuroticism": 0.3}},
-    {"name": "Laezel",      "ocean": {"openness": -0.3, "conscientiousness": 0.8, "extraversion": -0.2, "agreeableness": -0.7, "neuroticism": -0.7}},
+    {"name": "Laezel",      "ocean": {"openness": -0.3, "conscientiousness": 0.7, "extraversion": -0.2, "agreeableness": -0.9, "neuroticism": -0.7}},
     {"name": "Shadowheart", "ocean": {"openness": 0.1, "conscientiousness": 0.4, "extraversion": -0.5, "agreeableness": 0.1, "neuroticism": 0.6}},
     {"name": "Astarion",    "ocean": {"openness": 0.4, "conscientiousness": -0.5, "extraversion": 0.6, "agreeableness": -0.7, "neuroticism": 0.4}},
     {"name": "Karlach",     "ocean": {"openness": 0.3, "conscientiousness": -0.4, "extraversion": 0.9, "agreeableness": 0.6, "neuroticism": -0.5}},

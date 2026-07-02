@@ -204,8 +204,11 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
 
     lae = npcs["Laezel"]
     yard_d = p_actions(lae, "training_yard")
-    check("F2 Laezel", top_loc(lae) == "training_yard" and min(yard_d, key=yard_d.get) == "coach",
-          f"top={top_loc(lae)}, yard actions={ {k: round(v, 2) for k, v in yard_d.items()} }")
+    arena_d = p_actions(lae, "arena")
+    check("F2 Laezel", top_loc(lae) == "training_yard" and min(yard_d, key=yard_d.get) == "coach"
+          and max(arena_d, key=arena_d.get) == "fight",
+          f"top={top_loc(lae)}, yard={ {k: round(v, 2) for k, v in yard_d.items()} }, "
+          f"arena top={max(arena_d, key=arena_d.get)}")
 
     sh = npcs["Shadowheart"]
     check("F3 Shadowheart", top_loc(sh) == "chapel" and top_action(sh, "chapel") in {"pray", "meditate"},
