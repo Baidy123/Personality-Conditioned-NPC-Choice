@@ -58,3 +58,37 @@ imbalance" was not the root cause of F1/F6.
 Scorecard 25/25; pytest 16/16. Known risks to re-check in later rounds: C2
 novelty ratio for O+1 sits near its 0.87 upper bound; B1 openness TVD sits at
 the 0.15 lower bound before the C[O,cognitive] increase (now comfortable).
+
+## Round 2 — 2026-07-02 · conflict semantics + Halsin/Karlach fixes (25/25 kept)
+
+Trigger: user review of character behaviour (Karlach too tame at the arena;
+Halsin's E questioned).
+
+### Data changes (world.json, user-approved)
+
+| value | from → to | reason |
+|---|---|---|
+| `spar.conflict` | 0.5 → 0.2 | `conflict` semantics tightened to "hostility toward an unwilling target"; sparring is consensual training. |
+| `arena fight.conflict` | 0.9 → 0.45 | Sanctioned sport with willing opponents; distinct from `brawl` (0.9, unprovoked). Lets agreeable-but-chaotic profiles enjoy legitimate violence. |
+| `arena fight.social` | 0.3 → 0.5 | Fighting before a crowd is performative; 0.3 over-penalised it for social profiles. |
+
+### Profile changes (personalities.json, user-approved)
+
+- Halsin `openness` 0.6 → 0.8 (E stays −0.5). Raising E was tested (−0.35, −0.2,
+  with and without O boosts): the market overtakes the forest in every variant,
+  so his nature-seeking must be carried by O (exploration channel) with E kept
+  low. Reading: E here encodes preferred crowd level of places, not warmth
+  (his warmth is A+0.7). Margin now forest 0.29 vs market 0.25.
+
+### Effects
+
+- Karlach @ arena: fight 0.15 → 0.27 (spectate 0.42, bet 0.31 — near-even mix).
+- Astarion tops `fight` at the arena (0.36; low A makes conflict a bonus);
+  Laezel mostly spectates (0.53; high-C risk aversion) — both judged in-character.
+- Correction note: an earlier in-conversation estimate ("fight ≈ 0.30 after the
+  conflict fix") was not an actual measurement; measured value was 0.20 before
+  the social bump, 0.27 after.
+
+### End state
+
+Scorecard 25/25; pytest 16/16.

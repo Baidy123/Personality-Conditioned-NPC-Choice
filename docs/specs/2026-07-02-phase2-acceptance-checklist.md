@@ -115,8 +115,10 @@ action set where given). "top" = argmax.
 - **F5 Karlach** (O+.3 C−.4 E+.9 A+.6 N−.5): top ∈ {tavern, arena,
   training_yard}; at the training yard top action ∈ {spar, coach} (friendly
   fighter: sparring yes, brawling no); at the tavern `P(brawl)` is the lowest.
-- **F6 Halsin** (O+.6 C+.1 E−.2 A+.7 N−.6): top = `forest`; at the forest, top
-  action ∈ {explore, forage}.
+- **F6 Halsin** (O+.8 C+.1 E−.5 A+.7 N−.6; revised round 1–2, see
+  docs/tuning_log.md): top = `forest`; at the forest, top action ∈ {explore,
+  forage}. Note on E−.5: in this schema E encodes the preferred crowd/stimulation
+  level of places, not interpersonal warmth — Halsin's warmth lives in A+.7.
 
 ## Runner
 

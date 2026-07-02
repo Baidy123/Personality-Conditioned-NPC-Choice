@@ -36,7 +36,7 @@
       "id": "training_yard",
       "features": {"social": 0.4, "stimulation": 0.5, "structure": 0.6, "cognitive": 0.2, "physical": 0.9, "risk": 0.4, "exploration": 0.2, "privacy": 0.2},
       "actions": [
-        {"id": "spar",  "features": {"social": 0.4, "stimulation": 0.7, "structure": 0.4, "cognitive": 0.2, "physical": 0.8, "risk": 0.4, "exploration": 0.1, "conflict": 0.5}},
+        {"id": "spar",  "features": {"social": 0.4, "stimulation": 0.7, "structure": 0.4, "cognitive": 0.2, "physical": 0.8, "risk": 0.4, "exploration": 0.1, "conflict": 0.2}},
         {"id": "drill", "features": {"social": 0.2, "stimulation": 0.4, "structure": 0.8, "cognitive": 0.2, "physical": 0.7, "risk": 0.2, "exploration": 0.05}},
         {"id": "coach", "features": {"social": 0.6, "stimulation": 0.4, "structure": 0.6, "cognitive": 0.4, "physical": 0.5, "risk": 0.1, "exploration": 0.1, "helping": 0.7, "cooperation": 0.6, "control": 0.5}}
       ]
@@ -63,7 +63,7 @@
       "id": "arena",
       "features": {"social": 0.5, "stimulation": 0.9, "structure": 0.4, "cognitive": 0.1, "physical": 0.8, "risk": 0.8, "exploration": 0.2, "privacy": 0.1},
       "actions": [
-        {"id": "fight",    "features": {"social": 0.3, "stimulation": 0.9, "structure": 0.3, "cognitive": 0.2, "physical": 0.9, "risk": 0.7, "exploration": 0.1, "conflict": 0.9}},
+        {"id": "fight",    "features": {"social": 0.5, "stimulation": 0.9, "structure": 0.3, "cognitive": 0.2, "physical": 0.9, "risk": 0.7, "exploration": 0.1, "conflict": 0.45}},
         {"id": "spectate", "features": {"social": 0.6, "stimulation": 0.7, "structure": 0.3, "cognitive": 0.2, "physical": 0.1, "risk": 0.1, "exploration": 0.1}},
         {"id": "bet",      "features": {"social": 0.4, "stimulation": 0.6, "structure": 0.2, "cognitive": 0.3, "physical": 0.05, "risk": 0.8, "exploration": 0.1}}
       ]
