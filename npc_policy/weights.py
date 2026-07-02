@@ -66,16 +66,18 @@ def default_W_action() -> np.ndarray:
 # seeded from the last four columns of the fallback W^A.
 
 # LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy]
-_B_L = [0.50, 0.50, 0.50, 0.40, 0.40, 0.20, 0.40, 0.40]
+# Tuning round 1 (2026-07-02, docs/tuning_log.md): b_social 0.50->0.475,
+# w_social 1.0->0.8, C[O,cognitive] 0.30->0.45, w_cognitive 0.6->0.7.
+_B_L = [0.475, 0.50, 0.50, 0.40, 0.40, 0.20, 0.40, 0.40]
 _C_L = {
     #                    soc    stim   struct cog    phys   risk   expl   priv
-    "openness":         [ 0.00,  0.10, -0.20,  0.30,  0.00,  0.20,  0.50,  0.00],
+    "openness":         [ 0.00,  0.10, -0.20,  0.45,  0.00,  0.20,  0.50,  0.00],
     "conscientiousness":[ 0.00, -0.20,  0.40,  0.10,  0.10, -0.30, -0.10,  0.10],
     "extraversion":     [ 0.45,  0.35,  0.00,  0.00,  0.00,  0.00,  0.00, -0.40],
     "agreeableness":    [ 0.15,  0.00,  0.10,  0.00,  0.00, -0.10,  0.00, -0.05],
     "neuroticism":      [-0.15, -0.20,  0.15,  0.00,  0.00, -0.35, -0.10,  0.30],
 }
-_W_COST_L = [1.0, 0.8, 0.8, 0.6, 0.5, 0.9, 0.6, 0.7]
+_W_COST_L = [0.8, 0.8, 0.8, 0.7, 0.5, 0.9, 0.6, 0.7]
 
 _B_A = _B_L[:7]
 _C_A = {trait: row[:7] for trait, row in _C_L.items()}

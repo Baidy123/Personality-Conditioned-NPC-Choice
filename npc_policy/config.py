@@ -24,11 +24,12 @@ BASE_FORMS = ("ideal_point", "bilinear")
 class LevelParams:
     """Equation coefficients for one decision level (location or action)."""
 
+    # lambda_R / lambda_N tuned in round 1 (2026-07-02, docs/tuning_log.md).
     tau_0: float = 1.0     # base sharpness knob                       [PROVISIONAL]
-    lambda_R: float = 1.0  # repetition penalty (universal satiation)  [PROVISIONAL]
+    lambda_R: float = 1.2  # repetition penalty (universal satiation)  [PROVISIONAL]
     lambda_O: float = 1.0  # Openness familiarity aversion             [PROVISIONAL]
     lambda_C: float = 1.0  # Conscientiousness familiarity preference  [PROVISIONAL]
-    lambda_N: float = 1.0  # Neuroticism temperature scale, exp form   [PROVISIONAL]
+    lambda_N: float = 1.5  # Neuroticism temperature scale, exp form   [PROVISIONAL]
 
     def __post_init__(self) -> None:
         if self.tau_0 <= 0.0:
