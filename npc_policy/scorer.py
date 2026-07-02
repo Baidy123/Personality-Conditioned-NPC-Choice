@@ -17,13 +17,16 @@ learned-model input feature only:
 
     # memory + temperature (shared by both base forms)
     gamma    = lambda_C * C - lambda_O * O
-    q_i      = base_i / tau_0 + gamma * fam_i - lambda_R * rep_i
+    rho      = lambda_R * (1 - kappa_C * C)          # v1.2: C-modulated satiation
+    q_i      = base_i / tau_0 + gamma * fam_i - rho * rep_i
     T_N      = exp(lambda_N * N)
     P_rule   = softmax(q / T_N)
 
-``rep`` is a personality-independent repetition penalty (universal satiation);
-``gamma`` makes high C favour recently similar options (routine) and high O avoid
-them (novelty seeking). When the relevant buffer is empty all relation features
+``rep`` is the repetition (satiation) penalty; since v1.2 its strength is
+modulated by Conscientiousness — high C tolerates routine, low C gets bored
+faster (pilot evidence: docs/tuning_log.md round 4). ``gamma`` makes high C
+favour recently similar options (routine) and high O avoid them (novelty
+seeking). When the relevant buffer is empty all relation features
 are 0, so ``P_rule = softmax(base / tau_0 / T_N)`` — the first action after a
 location change uses the unadjusted base distribution (only the temperature
 applies).
@@ -184,7 +187,8 @@ class HandAuthoredScorer:
                 relations = compute_relations(candidates, buffer, cfg)
 
         gamma = prm.lambda_C * personality.C - prm.lambda_O * personality.O
-        q = base / prm.tau_0 + gamma * relations.sim - prm.lambda_R * relations.rep
+        rho = prm.lambda_R * (1.0 - prm.kappa_C * personality.C)
+        q = base / prm.tau_0 + gamma * relations.sim - rho * relations.rep
         T_N = math.exp(prm.lambda_N * personality.N)
         P_rule = softmax(q, T_N)
 

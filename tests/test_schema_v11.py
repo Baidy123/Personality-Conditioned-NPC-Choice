@@ -9,7 +9,7 @@ from npc_policy.schema import (
 
 
 def test_intensity_tags():
-    assert INTENSITY_TAGS["location"] == LOCATION_TAGS          # all 8
+    assert INTENSITY_TAGS["location"] == LOCATION_TAGS          # all 9 (v1.2)
     assert INTENSITY_TAGS["action"] == ACTION_TAGS[:7]          # shared 7
 
 
@@ -23,5 +23,13 @@ def test_native_action_layout():
 
 
 def test_n_intensity():
-    assert n_intensity("location") == 8
+    assert n_intensity("location") == 9    # v1.2: + location-level conflict
     assert n_intensity("action") == 7
+
+
+def test_location_conflict_reuses_model_slot():
+    # the 9th location feature must land in the existing 12-dim conflict slot
+    from npc_policy.representation import Option
+    from npc_policy.schema import model_index
+    loc = Option.location("pit", conflict=0.8)
+    assert loc.to_padded12()[model_index("conflict")] == 0.8

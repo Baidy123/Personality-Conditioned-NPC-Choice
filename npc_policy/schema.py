@@ -28,7 +28,10 @@ _SHARED = (
 )
 
 # --- native schemas ------------------------------------------------------------
-LOCATION_TAGS: tuple[str, ...] = (*_SHARED, "privacy")                       # 8
+# v1.2 (tuning round 4): locations gained a 9th feature, `conflict` ("this place
+# hosts combat / open opposition"). It reuses the action-side `conflict` slot in
+# the unified 12-dim model vector, so the learned-model interface is unchanged.
+LOCATION_TAGS: tuple[str, ...] = (*_SHARED, "privacy", "conflict")           # 9
 ACTION_TAGS: tuple[str, ...] = (*_SHARED, "cooperation", "helping", "conflict", "control")  # 11
 
 # --- unified learned-model order (interface only) ------------------------------

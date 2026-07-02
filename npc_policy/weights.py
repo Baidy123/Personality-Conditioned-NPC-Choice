@@ -25,14 +25,15 @@ import numpy as np
 
 from .schema import ACTION_TAGS, LOCATION_TAGS, OCEAN
 
-# LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy]
+# LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy, conflict]
+# (conflict column added in v1.2, tuning round 4 — fallback-only draft values)
 _W_L = {
-    #                    soc   stim  struct cog   phys  risk  expl  priv
-    "openness":         [ 0.0,  0.1, -0.3,  0.6,  0.0,  0.3,  0.8,  0.2],
-    "conscientiousness":[ 0.0, -0.3,  0.8,  0.4,  0.1, -0.5, -0.1,  0.1],
-    "extraversion":     [ 0.8,  0.6,  0.0,  0.0,  0.0,  0.0,  0.0, -0.7],  # sparse (A)
-    "agreeableness":    [ 0.3,  0.0,  0.1,  0.0,  0.0, -0.1,  0.0, -0.1],
-    "neuroticism":      [-0.3, -0.3,  0.3,  0.1,  0.0, -0.4, -0.2,  0.5],
+    #                    soc   stim  struct cog   phys  risk  expl  priv  confl
+    "openness":         [ 0.0,  0.1, -0.3,  0.6,  0.0,  0.3,  0.8,  0.2,  0.0],
+    "conscientiousness":[ 0.0, -0.3,  0.8,  0.4,  0.1, -0.5, -0.1,  0.1, -0.2],
+    "extraversion":     [ 0.8,  0.6,  0.0,  0.0,  0.0,  0.0,  0.0, -0.7,  0.0],  # sparse (A)
+    "agreeableness":    [ 0.3,  0.0,  0.1,  0.0,  0.0, -0.1,  0.0, -0.1, -0.5],
+    "neuroticism":      [-0.3, -0.3,  0.3,  0.1,  0.0, -0.4, -0.2,  0.5, -0.2],
 }
 
 # ACTION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration,
@@ -67,19 +68,21 @@ def default_W_action() -> np.ndarray:
 # per-level during pilot tuning. W_rel (linear, action relational features) is
 # seeded from the last four columns of the fallback W^A.
 
-# LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy]
+# LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy, conflict]
 # Tuning round 1 (2026-07-02, docs/tuning_log.md): b_social 0.50->0.475,
 # w_social 1.0->0.8, C[O,cognitive] 0.30->0.45, w_cognitive 0.6->0.7.
-_B_L = [0.475, 0.50, 0.50, 0.40, 0.40, 0.20, 0.40, 0.40]
+# Round 4 (v1.2): conflict column added — ideal combat-venue level is driven by
+# low A (harshness) and low N (fearlessness): mu_conflict = 0.10 - 0.35A - 0.20N.
+_B_L = [0.475, 0.50, 0.50, 0.40, 0.40, 0.20, 0.40, 0.40, 0.10]
 _C_L = {
-    #                    soc    stim   struct cog    phys   risk   expl   priv
-    "openness":         [ 0.00,  0.10, -0.20,  0.45,  0.00,  0.20,  0.50,  0.00],
-    "conscientiousness":[ 0.00, -0.20,  0.40,  0.10,  0.10, -0.30, -0.10,  0.10],
-    "extraversion":     [ 0.45,  0.35,  0.00,  0.00,  0.00,  0.00,  0.00, -0.40],
-    "agreeableness":    [ 0.15,  0.00,  0.10,  0.00,  0.00, -0.10,  0.00, -0.05],
-    "neuroticism":      [-0.15, -0.20,  0.15,  0.00,  0.00, -0.35, -0.10,  0.30],
+    #                    soc    stim   struct cog    phys   risk   expl   priv   confl
+    "openness":         [ 0.00,  0.10, -0.20,  0.45,  0.00,  0.20,  0.55,  0.00,  0.00],
+    "conscientiousness":[ 0.00, -0.20,  0.40,  0.10,  0.10, -0.30, -0.10,  0.10,  0.00],
+    "extraversion":     [ 0.45,  0.35,  0.00,  0.00,  0.00,  0.00,  0.00, -0.40,  0.00],
+    "agreeableness":    [ 0.15,  0.00,  0.10,  0.00,  0.00, -0.10,  0.00, -0.05, -0.35],
+    "neuroticism":      [-0.15, -0.20,  0.15,  0.00,  0.00, -0.35, -0.10,  0.30, -0.20],
 }
-_W_COST_L = [0.8, 0.8, 0.8, 0.7, 0.5, 0.9, 0.6, 0.7]
+_W_COST_L = [0.8, 0.8, 0.8, 0.7, 0.5, 0.9, 0.6, 0.7, 0.6]
 
 _B_A = _B_L[:7]
 _C_A = {trait: row[:7] for trait, row in _C_L.items()}

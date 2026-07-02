@@ -158,9 +158,13 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
     check("C2 routine C", 1.15 <= r_c <= 2.0, f"P(market) ratio for C+1 = {r_c:.2f} (1.15-2.0)")
     check("C2 novelty O", 0.50 <= r_o <= 0.87, f"P(market) ratio for O+1 = {r_o:.2f} (0.50-0.87)")
 
+    # v1.2 revision: C-modulated satiation deliberately lets routine (high-C)
+    # personalities concentrate, so named profiles get looser bounds; the neutral
+    # profile keeps the strict bound as the mechanism-degeneracy guard.
     traj_profiles = dict(npcs)
     traj_profiles["Neutral"] = neutral
     worst_share, worst_who, min_distinct = 0.0, "", 99
+    neutral_share, neutral_distinct = 0.0, 0
     for name, p in traj_profiles.items():
         ctrl = DecisionController(scorer, mode="sample", rng=np.random.default_rng(42),
                                   selection_temperature=0.1)
@@ -170,11 +174,17 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
             ctrl.choose_action(p, world.actions_at(loc.option.id))
             visits[loc.option.id] = visits.get(loc.option.id, 0) + 1
         share = max(visits.values()) / 50.0
-        if share > worst_share:
-            worst_share, worst_who = share, name
-        min_distinct = min(min_distinct, len(visits))
-    check("C3 no collapse", worst_share <= 0.60 and min_distinct >= 4,
-          f"worst top-location share={worst_share:.2f} ({worst_who}) (<=0.60), min distinct={min_distinct} (>=4)")
+        if name == "Neutral":
+            neutral_share, neutral_distinct = share, len(visits)
+        else:
+            if share > worst_share:
+                worst_share, worst_who = share, name
+            min_distinct = min(min_distinct, len(visits))
+    check("C3 no collapse",
+          worst_share <= 0.75 and min_distinct >= 3
+          and neutral_share <= 0.60 and neutral_distinct >= 4,
+          f"named worst share={worst_share:.2f} ({worst_who}) (<=0.75), named min distinct={min_distinct} (>=3); "
+          f"neutral share={neutral_share:.2f} (<=0.60), neutral distinct={neutral_distinct} (>=4)")
 
     acts0 = p_actions(neutral, "tavern")
     buf_a = RecentBuffer(maxlen=3)

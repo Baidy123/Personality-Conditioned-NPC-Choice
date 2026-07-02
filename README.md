@@ -54,12 +54,14 @@ Dependency direction: `schema` → `representation` / `weights` → `relations` 
 ## Representation (`project_flow.md` §1)
 
 - **Personality:** OCEAN vector in `[-1, 1]` (`Personality`).
-- **Location schema (8):** `social, stimulation, structure, cognitive, physical,
-  risk, exploration, privacy`.
+- **Location schema (9, v1.2):** `social, stimulation, structure, cognitive, physical,
+  risk, exploration, privacy, conflict` (`conflict` = the place hosts combat /
+  open opposition; added in tuning round 4, see `docs/tuning_log.md`).
 - **Action schema (11):** the shared first seven, then `cooperation, helping,
   conflict, control`.
-- **Unified 12-dim model vector** (`MODEL_TAGS`): location pads the four action-only
-  fields with zeros, action pads `privacy` with zero. Interface padding only — used
+- **Unified 12-dim model vector** (`MODEL_TAGS`): location fills `conflict` natively
+  (v1.2) and pads the three remaining action-only fields with zeros, action pads
+  `privacy` with zero. Interface padding only — used
   by future learned models, **not** by the scorer. Produced on demand by
   `Option.to_padded12()`; an `Option` stores its **native** vector (8 or 11).
 - **Option:** carries `id` (identity, for exact repetition) + native `features`
@@ -130,7 +132,8 @@ base_i   = p^T W^d o_i^d
 
 # memory + temperature (shared)
 gamma    = lambda_C·C − lambda_O·O
-q_i      = base_i / tau_0 + gamma·fam_i − lambda_R·rep_i
+rho      = lambda_R·(1 − kappa_C·C)     # v1.2: routine-tolerant satiation
+q_i      = base_i / tau_0 + gamma·fam_i − rho·rep_i
 T_N      = exp(lambda_N·N)
 P_rule   = softmax(q / T_N)
 ```

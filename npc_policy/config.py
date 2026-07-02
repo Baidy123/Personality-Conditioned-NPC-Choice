@@ -24,9 +24,12 @@ BASE_FORMS = ("ideal_point", "bilinear")
 class LevelParams:
     """Equation coefficients for one decision level (location or action)."""
 
-    # lambda_R / lambda_N tuned in round 1 (2026-07-02, docs/tuning_log.md).
+    # lambda_R / lambda_N tuned in round 1; kappa_C added in round 4 (v1.2)
+    # (2026-07-02, docs/tuning_log.md).
     tau_0: float = 1.0     # base sharpness knob                       [PROVISIONAL]
-    lambda_R: float = 1.2  # repetition penalty (universal satiation)  [PROVISIONAL]
+    lambda_R: float = 1.2  # repetition penalty (satiation)            [PROVISIONAL]
+    kappa_C: float = 0.5   # C discount on satiation: high C tolerates
+                           # routine, low C gets bored faster (v1.2)   [PROVISIONAL]
     lambda_O: float = 1.0  # Openness familiarity aversion             [PROVISIONAL]
     lambda_C: float = 1.0  # Conscientiousness familiarity preference  [PROVISIONAL]
     lambda_N: float = 1.5  # Neuroticism temperature scale, exp form   [PROVISIONAL]
@@ -34,6 +37,8 @@ class LevelParams:
     def __post_init__(self) -> None:
         if self.tau_0 <= 0.0:
             raise ValueError("tau_0 must be > 0")
+        if not (0.0 <= self.kappa_C <= 1.0):
+            raise ValueError("kappa_C must be in [0, 1]")
 
 
 @dataclass(frozen=True)

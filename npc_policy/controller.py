@@ -56,11 +56,14 @@ class DecisionController:
         mode: SelectionMode = "argmax",
         rng: np.random.Generator | None = None,
         selection_temperature: float = 1.0,
+        min_p: float = 0.0,
     ):
         if mode not in ("argmax", "sample"):
             raise ValueError("mode must be 'argmax' or 'sample'")
         if selection_temperature <= 0.0:
             raise ValueError("selection_temperature must be > 0")
+        if not (0.0 <= min_p < 1.0):
+            raise ValueError("min_p must be in [0, 1)")
         self.scorer = scorer
         self.config = config
         self.mode = mode
@@ -69,6 +72,10 @@ class DecisionController:
         # the distribution unchanged; T < 1 sharpens (suppresses the low-prob tail);
         # T -> 0 approaches argmax. Only affects ``mode == 'sample'``.
         self.selection_temperature = selection_temperature
+        # Game-layer fuse: options below this probability (in P_rule, before
+        # sharpening) are excluded from sampling. Presentation-level truncation
+        # only — the recorded distribution / research object stays P_rule.
+        self.min_p = min_p
 
         self.H_L = RecentBuffer(maxlen=config.K_L)   # recent locations
         self.H_A = RecentBuffer(maxlen=config.K_A)   # local recent actions
@@ -79,6 +86,9 @@ class DecisionController:
         if self.mode == "argmax":
             return int(np.argmax(dist))
         p = np.asarray(dist, dtype=float)
+        if self.min_p > 0.0:                         # game-layer fuse
+            p = np.where(p >= self.min_p, p, 0.0)
+            p = p / p.sum()                          # >= 1 entry survives (max >= mean)
         if self.selection_temperature != 1.0:        # sharpen before sampling
             p = p ** (1.0 / self.selection_temperature)
             p = p / p.sum()

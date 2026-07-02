@@ -141,3 +141,52 @@ Grid evidence: milder combos left spectate on top; stronger generic levers
 ### End state
 
 Scorecard 25/25; pytest 16/16.
+
+## Round 4 — 2026-07-02 · equation v1.2 + location `conflict` feature (25/25)
+
+Trigger: trajectory review — the universal satiation penalty exiled Laezel from
+her routine (training_yard → library/chapel visits, "转职成法师"), and the base
+ranking had no channel for combat-venue seeking. User-approved package:
+
+### Design changes (equation v1.2 + schema)
+
+| change | detail | reason |
+|---|---|---|
+| C-modulated satiation | `rho = lambda_R·(1 − kappa_C·C)`, `kappa_C = 0.5` [PROVISIONAL] | Satiation rate is a personality trait: high C tolerates routine, low C bores fast. Universal penalty was the v1.1 assumption; pilot falsified it. Alternatives considered and rejected: probability-threshold discounts / hard cutoffs in the scorer (candidate-set dependent, discontinuous, and personality-external — bad for RQ1 attribution). |
+| Location schema 8 → 9 | + `conflict` ("hosts combat / open opposition"); `mu_conflict = 0.10 − 0.35·A − 0.20·N` | Combat-venue seeking was inexpressible at the location level (round-3 known limitation). Reuses the action-side `conflict` slot in the 12-dim model vector — learned-model interface unchanged. Low A (harsh) and low N (fearless) raise the ideal; separates Laezel (both low → seeks arenas) from Astarion (low A but anxious → avoids them). |
+| `min_p` selection fuse | `DecisionController(min_p=...)`, default 0 | Game-layer truncation of the low tail before sampling; the research object `P_rule` stays continuous. |
+| celebration buff | `active: true → false` | A permanently-active festival kept the tavern at social/stim 1.0, distorting all social ideals. |
+
+### Data/table/profile adjustments (user-approved)
+
+- world.json: per-location `conflict` values (arena .8, enemy_camp .9,
+  training_yard .4, tavern .15, market/forest .05, library/chapel 0);
+  tavern `cognitive` 0.1 → 0.2 (tall tales, games — restored Karlach's
+  tavern-vs-market tie-break after the buff removal).
+- weights: `C[O, exploration]` 0.50 → 0.55 (B1 openness TVD had hit its 0.15
+  floor after the world changes); bilinear fallback `W_L` gained a draft
+  conflict column.
+- profiles: Karlach `openness` 0.3 → 0.2 (offsets the O-boost pulling her to
+  the market; she is not the curious type).
+
+### Criterion revision
+
+- C3 split: neutral profile keeps share ≤ 0.60 / distinct ≥ 4 (degeneracy
+  guard); named profiles loosened to ≤ 0.75 / ≥ 3 — personality-driven
+  concentration is now intended behaviour (Laezel 66% training_yard).
+
+### Effects
+
+- Laezel 50-round trajectory: training_yard 66%, market 26%, arena 8%,
+  **zero library/chapel visits** (was the complaint). Static ranking:
+  yard .37, market .15, library/chapel .12, tavern .09, arena .08 — tavern rose
+  from .04 and the memory system can no longer reach library/chapel (gap >
+  max satiation swing), though statically they remain slightly above tavern.
+- Astarion: P(arena) 0.13 rank 5 (combat venues now repel the anxious).
+- All six trajectories in character; scorecard 25/25; pytest 18/18.
+- Note: `docs/v11_tables.png` / `equation_v1.1_tables_example.md` predate the
+  conflict column; `weights.py` is the source of truth for current values.
+
+### End state
+
+Scorecard 25/25; pytest 18/18.

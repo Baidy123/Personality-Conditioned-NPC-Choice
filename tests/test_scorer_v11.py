@@ -85,3 +85,19 @@ def test_6_gamma_direction_routine_vs_novelty():
     assert after > before                      # high C: familiarity attracts
     before, after = p_market(Personality.from_traits(openness=1.0))
     assert after < before                      # high O: familiarity repels
+
+
+def test_7_satiation_modulated_by_C():
+    # v1.2: after visiting the tavern, high C keeps more of its probability
+    # (routine tolerance) than low C (gets bored fast)
+    scorer = HandAuthoredScorer()
+    buf = RecentBuffer(maxlen=3)
+    buf.push(LOCS[0])                          # just visited the tavern
+
+    def retention(c: float) -> float:
+        p = Personality.from_traits(conscientiousness=c)
+        before = scorer.distribution(p, LOCS, level="location")[0]
+        after = scorer.distribution(p, LOCS, buffer=buf, level="location")[0]
+        return after / before
+
+    assert retention(1.0) > retention(0.0) > retention(-1.0)

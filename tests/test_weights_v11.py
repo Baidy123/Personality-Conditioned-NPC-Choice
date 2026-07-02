@@ -14,9 +14,9 @@ from npc_policy.weights import (
 
 
 def test_shapes():
-    assert default_b_location().shape == (8,)
-    assert default_C_location().shape == (5, 8)
-    assert default_w_location().shape == (8,)
+    assert default_b_location().shape == (9,)      # v1.2: + conflict column
+    assert default_C_location().shape == (5, 9)
+    assert default_w_location().shape == (9,)
     assert default_b_action().shape == (7,)
     assert default_C_action().shape == (5, 7)
     assert default_w_action().shape == (7,)
