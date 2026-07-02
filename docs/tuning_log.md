@@ -124,10 +124,19 @@ Grid evidence: milder combos left spectate on top; stronger generic levers
   combat-venue seeking is inexpressible at the location level; all tested
   location-level levers broke other checks. Candidate future fix: a location
   schema revision (phase-1 material), recorded here rather than forced.
-- Observation for a future round: Astarion's top tavern action is now `brawl`
-  (0.42 vs chat 0.28 / drink 0.30; the −0.9 conflict weight boosted it). F4's
-  mass criterion still passes (0.58 ≥ 0.42). Judged borderline in-character;
-  revisit if it reads as off.
+- Observation (corrected): Astarion's top tavern action has been `brawl` since
+  round 1 (0.404 under conflict −0.7; the round-3 −0.9 change only nudged it to
+  0.420 — the earlier "it changed in round 3" attribution was wrong). Cause:
+  low-A conflict bonus (+0.44) plus his high stimulation appetite; the schema
+  cannot distinguish covert hostility (his style) from open aggression.
+- **N-lever test (failed, kept N=0.4):** raising his neuroticism 0.4→0.6 only
+  moved brawl 0.42→0.39. Reason: N's risk-avoidance shift is diluted by N's own
+  temperature (T = exp(1.5N) flattens all differences as N rises) — the two N
+  channels partially cancel for per-option avoidance effects. Note this when
+  analysing the N channel in RQ1. Decision: accept brawl-top (chat+drink 0.58
+  remains the majority; the F4 mass criterion guards the boundary); the
+  covert/open-hostility distinction joins the schema-revision candidate list
+  alongside the location-level combat feature.
 
 ### End state
 
