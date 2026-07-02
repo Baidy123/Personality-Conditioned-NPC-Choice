@@ -1,41 +1,57 @@
-"""Hand-authored scorer: base personality-option score + recent-choice reweighting.
+"""Hand-authored scorer v1.1: ideal-point base + familiarity reweighting.
 
-Implements the provisional equations of ``project_flow.md`` §2. For a decision
-level ``d in {L, A}`` over candidates ``o_1..o_m`` (in their native schema) with
-relation features ``rep/sim/nov`` from the relevant bounded buffer:
+Implements ``project_flow.md`` §2 (spec:
+``docs/specs/2026-07-02-equation-v1.1-design.md``). For a decision
+level ``d in {L, A}`` over candidates ``o_1..o_m`` (native schema) with relation
+features ``rep``/``fam`` from the relevant bounded buffer — ``fam`` is the
+recency-weighted semantic similarity, stored as ``Relations.sim``; ``nov`` is a
+learned-model input feature only:
 
-    base_i      = p^T W^d o_i^d
-    P_base      = softmax(base / tau_0)
+    # base_form = "ideal_point" (default)
+    mu_f(p)  = clip(b_f + Sigma_t C[t, f] * p_t, 0, 1)        # intensity features
+    base_i   = - Sigma_f w_f * (o_i[f] - mu_f(p))^2
+               + Sigma_t Sigma_f p_t * W_rel[t, f] * o_i[f]   # action relational features
 
-    compat_E_i  = W^d[E, :] · o_i^d          # E-row compatibility (history term)
+    # base_form = "bilinear" (debugging fallback)
+    base_i   = p^T W^d o_i^d
 
-    q_i         = log(P_base_i + epsilon)
-                  - lambda_R * rep_i
-                  + lambda_O * O * nov_i
-                  + lambda_E * E * compat_E_i * sim_i
+    # memory + temperature (shared by both base forms)
+    gamma    = lambda_C * C - lambda_O * O
+    q_i      = base_i / tau_0 + gamma * fam_i - lambda_R * rep_i
+    T_N      = exp(lambda_N * N)
+    P_rule   = softmax(q / T_N)
 
-    T_N         = 1 + lambda_N * max(N, 0)
-    P_rule      = softmax(q / T_N)
-
-``W^L`` (location) and ``W^A`` (action) are separate; coefficients are per-level
-(``config.LevelParams``). When the relevant buffer is empty all relation features
-are 0, so ``P_rule == P_base`` (the first action after a location change uses the
-base distribution).
+``rep`` is a personality-independent repetition penalty (universal satiation);
+``gamma`` makes high C favour recently similar options (routine) and high O avoid
+them (novelty seeking). When the relevant buffer is empty all relation features
+are 0, so ``P_rule = softmax(base / tau_0 / T_N)`` — the first action after a
+location change uses the unadjusted base distribution (only the temperature
+applies).
 """
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
+from typing import Callable
 
 import numpy as np
 
 from .config import DEFAULT_CONFIG, ScorerConfig
 from .relations import Relations, compute_relations
 from .representation import Option, Personality, RecentBuffer, stack_features
-from .schema import trait_index
-from .weights import default_W_action, default_W_location
-
-_E_IDX = trait_index("extraversion")
+from .schema import n_intensity
+from .weights import (
+    default_b_action,
+    default_b_location,
+    default_C_action,
+    default_C_location,
+    default_w_action,
+    default_w_location,
+    default_W_action,
+    default_W_location,
+    default_W_rel_action,
+)
 
 
 def softmax(x: np.ndarray, temperature: float = 1.0) -> np.ndarray:
@@ -51,12 +67,17 @@ class ScoreTrace:
     """Intermediate quantities, kept for the RQ1 transparency analysis."""
 
     base: np.ndarray
-    P_base: np.ndarray
+    P_base: np.ndarray            # softmax(base / tau_0): memory-free distribution
     relations: Relations
-    compat_E: np.ndarray
+    mu: np.ndarray | None         # ideal levels used; None under the bilinear fallback
+    gamma: float                  # lambda_C * C - lambda_O * O
     q: np.ndarray
     T_N: float
     P_rule: np.ndarray
+
+
+def _table(override: np.ndarray | None, default: Callable[[], np.ndarray]) -> np.ndarray:
+    return default() if override is None else np.asarray(override, dtype=float)
 
 
 class HandAuthoredScorer:
@@ -66,10 +87,32 @@ class HandAuthoredScorer:
         self,
         W_location: np.ndarray | None = None,
         W_action: np.ndarray | None = None,
+        b_location: np.ndarray | None = None,
+        C_location: np.ndarray | None = None,
+        w_location: np.ndarray | None = None,
+        b_action: np.ndarray | None = None,
+        C_action: np.ndarray | None = None,
+        w_action: np.ndarray | None = None,
+        W_rel_action: np.ndarray | None = None,
         config: ScorerConfig = DEFAULT_CONFIG,
     ):
-        self.W_L = default_W_location() if W_location is None else np.asarray(W_location, dtype=float)
-        self.W_A = default_W_action() if W_action is None else np.asarray(W_action, dtype=float)
+        # bilinear fallback tables
+        self.W_L = _table(W_location, default_W_location)
+        self.W_A = _table(W_action, default_W_action)
+        # ideal-point tables (v1.1 default form)
+        self.b = {
+            "location": _table(b_location, default_b_location),
+            "action": _table(b_action, default_b_action),
+        }
+        self.C = {
+            "location": _table(C_location, default_C_location),
+            "action": _table(C_action, default_C_action),
+        }
+        self.w = {
+            "location": _table(w_location, default_w_location),
+            "action": _table(w_action, default_w_action),
+        }
+        self.W_rel_A = _table(W_rel_action, default_W_rel_action)
         self.config = config
 
     def W_for(self, level: str) -> np.ndarray:
@@ -80,14 +123,23 @@ class HandAuthoredScorer:
         raise ValueError(f"level must be 'location' or 'action', got {level!r}")
 
     # -- base score -------------------------------------------------------------
+    def ideal_levels(self, personality: Personality, level: str) -> np.ndarray:
+        """``mu_f(p)`` over the level's intensity features."""
+        return np.clip(self.b[level] + personality.vector @ self.C[level], 0.0, 1.0)
+
     def base_scores(
         self, personality: Personality, candidates: list[Option], level: str
     ) -> np.ndarray:
-        """``base_i = p^T W^d o_i^d`` for every candidate."""
-        W = self.W_for(level)
-        feats = stack_features(candidates)         # (m, d)
-        wp = personality.vector @ W                 # (d,)
-        return feats @ wp                           # (m,)
+        """v1.1 base score for every candidate (form selected by ``config.base_form``)."""
+        feats = stack_features(candidates)          # (m, d)
+        if self.config.base_form == "bilinear":
+            return feats @ (personality.vector @ self.W_for(level))
+        n_int = n_intensity(level)
+        mu = self.ideal_levels(personality, level)  # (n_int,)
+        base = -((feats[:, :n_int] - mu) ** 2) @ self.w[level]
+        if level == "action":
+            base = base + feats[:, n_int:] @ (personality.vector @ self.W_rel_A)
+        return base
 
     # -- full distribution ------------------------------------------------------
     def distribution(
@@ -102,7 +154,7 @@ class HandAuthoredScorer:
 
         Provide either a ``buffer`` (relations are computed from it) or pre-computed
         ``relations``. With neither, relations are all-zero (no-context ablation).
-        ``level`` selects the location vs action schema, weights, and coefficients.
+        ``level`` selects the location vs action schema, tables, and coefficients.
         """
         return self.trace(personality, candidates, buffer, relations, level).P_rule
 
@@ -119,11 +171,9 @@ class HandAuthoredScorer:
             raise ValueError("candidate set must be non-empty")
 
         cfg = self.config
-        prm = cfg.params_for(level)
-        W = self.W_for(level)
+        prm = cfg.params_for(level)                 # also validates level
 
-        feats = stack_features(candidates)          # (m, d)
-        base = feats @ (personality.vector @ W)     # (m,)
+        base = self.base_scores(personality, candidates, level)
         P_base = softmax(base, prm.tau_0)
 
         if relations is None:
@@ -133,23 +183,18 @@ class HandAuthoredScorer:
             else:
                 relations = compute_relations(candidates, buffer, cfg)
 
-        # E-row compatibility, reused from the base table (no second weight table).
-        compat_E = feats @ W[_E_IDX, :]             # (m,)
-
-        q = (
-            np.log(P_base + cfg.epsilon)
-            - prm.lambda_R * relations.rep
-            + prm.lambda_O * personality.O * relations.nov
-            + prm.lambda_E * personality.E * compat_E * relations.sim
-        )
-        T_N = 1.0 + prm.lambda_N * max(personality.N, 0.0)
+        gamma = prm.lambda_C * personality.C - prm.lambda_O * personality.O
+        q = base / prm.tau_0 + gamma * relations.sim - prm.lambda_R * relations.rep
+        T_N = math.exp(prm.lambda_N * personality.N)
         P_rule = softmax(q, T_N)
 
+        mu = None if cfg.base_form == "bilinear" else self.ideal_levels(personality, level)
         return ScoreTrace(
             base=base,
             P_base=P_base,
             relations=relations,
-            compat_E=compat_E,
+            mu=mu,
+            gamma=gamma,
             q=q,
             T_N=T_N,
             P_rule=P_rule,

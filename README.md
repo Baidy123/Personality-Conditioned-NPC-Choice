@@ -26,7 +26,7 @@ python -m examples.demo
 4. **Relation features:** exact repetition (`rep`, by id) is separate from semantic
    similarity (`sim`, by features).
 5. **Transparency:** `scorer.trace(...)` exposes every intermediate quantity
-   (`base / P_base / compat_E / rep / sim / nov / T_N / P_rule`) for the RQ1 analysis.
+   (`base / P_base / mu / gamma / rep / sim / nov / T_N / P_rule`) for the RQ1 analysis.
 6. **Data formats:** JSON read/write for both decision-case types (carrying `level`).
 7. **Selection modes:** `argmax` (reproducible) or `sample` (draw from the distribution).
 
@@ -36,7 +36,7 @@ python -m examples.demo
 code/npc_policy/
   schema.py         # feature schemas + OCEAN axes; per-level indexing & 12-dim padding
   representation.py  # Option, Personality, RecentBuffer
-  weights.py        # two provisional weight tables W_L (5x8) and W_A (5x11)
+  weights.py        # v1.1 tables b/C/w (+ W_rel for actions) + fallback W_L / W_A
   config.py         # ScorerConfig: tunables; LevelParams for location vs action
   relations.py      # rep / sim / nov from a buffer
   scorer.py         # HandAuthoredScorer: base score + reweighting -> distribution
@@ -73,21 +73,21 @@ Dependency direction: `schema` → `representation` / `weights` → `relations` 
 ```
 (1) choose_location(personality, available_locations)
     read H_L -> relations.py computes rep/sim/nov for each location
-    -> scorer: base = p^T W_L o -> P_base -> reweight q -> P_rule  (level="location")
+    -> scorer: ideal-point base (b/C/w) -> reweight q (gamma*fam - lambda_R*rep) -> P_rule  (level="location")
     -> pick a location L_t from P_rule
     -> if L_t != previous location: clear H_A      # the reset rule, automatic
     -> push L_t into H_L
 
 (2) choose_action(personality, actions_at(L_t))
     read H_A (empty right after a location change) -> rep/sim/nov for each action
-    -> scorer: same structure with W_A             (level="action")
+    -> scorer: same structure with the action tables (+ W_rel)      (level="action")
     -> pick an action -> push it into H_A
 
 -> wait for the next checkpoint, back to (1)
 ```
 
 Location and action share the **same equation structure**; they differ only in
-which `W` is used, which memory is read, and which per-level coefficients apply.
+which tables are used, which memory is read, and which per-level coefficients apply.
 
 ## World content & local events (`world.py`)
 
@@ -116,37 +116,41 @@ game-engine layer; in the JSON these flags are set directly.
 ## Scorer equations (`scorer.py`, from `project_flow.md` §2)
 
 For decision level `d ∈ {L, A}`, candidate `o_i` in its native schema, relation
-features from the relevant buffer:
+features from the relevant buffer (`fam` = recency-weighted similarity, stored as
+`sim`; `nov` is a learned-model input feature only):
 
 ```
-base_i     = p^T W^d o_i^d                 # W_L for location, W_A for action
-P_base     = softmax(base / tau_0)
+# base_form = ideal_point (default)
+mu_f(p)  = clip(b_f + Σ_t C[t,f]·p_t, 0, 1)        # intensity features
+base_i   = − Σ_f w_f·(o_i[f] − mu_f(p))²
+           + Σ_t Σ_f p_t·W_rel[t,f]·o_i[f]         # action relational features only
 
-compat_E_i = W^d[E, :] · o_i^d             # Extraversion-row compatibility
+# base_form = bilinear (debugging fallback)
+base_i   = p^T W^d o_i^d
 
-q_i        = log(P_base_i + epsilon)
-             - lambda_R * rep_i
-             + lambda_O * O * nov_i
-             + lambda_E * E * compat_E_i * sim_i
-
-T_N        = 1 + lambda_N * max(N, 0)
-P_rule     = softmax(q / T_N)
+# memory + temperature (shared)
+gamma    = lambda_C·C − lambda_O·O
+q_i      = base_i / tau_0 + gamma·fam_i − lambda_R·rep_i
+T_N      = exp(lambda_N·N)
+P_rule   = softmax(q / T_N)
 ```
 
-When the relevant buffer is empty, `rep = sim = nov = 0`, so `P_rule = P_base`
-(the first action after a location change uses the base distribution).
+When the relevant buffer is empty, `rep = fam = 0`, so `P_rule = softmax(base/tau_0 / T_N)`
+(the first action after a location change uses the unadjusted base distribution;
+only the temperature applies).
 
 ## Status of values
 
 Everything marked `PROVISIONAL` in `config.py` or `weights.py` is a starting value,
 not a decided one (`project_flow.md` §9):
 
-- the coefficients `lambda_R / lambda_O / lambda_E / lambda_N`, base temperature
-  `tau_0`, `recency_decay`, `epsilon`, and buffer lengths live in `config.py`
-  (location and action each get their own `LevelParams`, defaulting to equal values);
-- the two weight tables `W_L` / `W_A` live in `weights.py`. The Extraversion row is
-  deliberately **sparse** (only strongly E-related features are non-zero); the other
-  rows (O/C/A/N) are hand-authored provisional directions to be tuned there.
+- the coefficients `lambda_R / lambda_O / lambda_C / lambda_N`, base temperature
+  `tau_0`, `recency_decay`, buffer lengths, and the `base_form` switch live in
+  `config.py` (location and action each get their own `LevelParams`, defaulting to
+  equal values);
+- the v1.1 tables `b / C / w` (per level) and `W_rel` live in `weights.py`, alongside
+  the fallback `W_L` / `W_A`. Draft values follow `docs/v11_tables.png`; all are
+  hand-authored provisional directions to be tuned there.
 
 These values must be examined empirically (RQ1), not assumed correct.
 
@@ -156,8 +160,9 @@ Done:
 
 - [x] Representation: location (8) / action (11) schemas, 12-dim padding, `Option`,
       `Personality`, FIFO buffers (§1).
-- [x] Hand-authored scorer with the full §2 equations (two `W`, `compat_E`, per-level
-      coefficients) and `rep / sim / nov` relation features.
+- [x] Hand-authored scorer with the v1.1 equations (ideal-point base + bilinear
+      fallback, gamma-familiarity memory term, bidirectional N temperature) and
+      `rep / sim / nov` relation features.
 - [x] `DecisionController`: nested location → action cycle, buffer ownership, the
       action-buffer reset rule (§5).
 - [x] World loader + local-event resolution (`unlocked`, active-event buffs); content

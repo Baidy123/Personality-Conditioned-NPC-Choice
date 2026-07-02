@@ -41,6 +41,26 @@ MODEL_TAGS: tuple[str, ...] = (
     "control",
 )  # 12
 
+# --- v1.1 base-form split (project_flow.md §2) ----------------------------------
+# Intensity features use the ideal-point base form; the four action-only
+# relational features keep a linear form. Layout guarantee (relied on by the
+# scorer): in the native action vector the intensity block comes first and the
+# relational block last.
+INTENSITY_TAGS: dict[str, tuple[str, ...]] = {
+    "location": LOCATION_TAGS,   # all 8
+    "action": _SHARED,           # shared 7 (privacy is location-only)
+}
+RELATIONAL_TAGS: tuple[str, ...] = ("cooperation", "helping", "conflict", "control")
+
+
+def n_intensity(level: str) -> int:
+    """Number of intensity features at the start of a level's native vector."""
+    try:
+        return len(INTENSITY_TAGS[level])
+    except KeyError:
+        raise KeyError(f"level must be 'location' or 'action', got {level!r}") from None
+
+
 # --- personality axes (OCEAN) --------------------------------------------------
 OCEAN: tuple[str, ...] = (
     "openness",

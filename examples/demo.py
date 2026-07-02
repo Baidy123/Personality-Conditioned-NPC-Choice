@@ -100,8 +100,9 @@ def main(rounds: int = 1, seed: int | None = None) -> None:
     ctrl.choose_location(npc, [world.effective_location(b_id)])     # forced move
     assert len(ctrl.H_A) == 0
     first = ctrl.choose_action(npc, world.actions_at(b_id))
-    assert np.allclose(first.trace.P_rule, first.trace.P_base)
-    print(f"self-check: move {a_id} -> {b_id} cleared H_A; first action used base dist [OK]")
+    assert np.allclose(first.trace.relations.rep, 0.0)
+    assert np.allclose(first.trace.relations.sim, 0.0)
+    print(f"self-check: move {a_id} -> {b_id} cleared H_A; first action was memory-free [OK]")
 
 
 def _parse_rounds(argv: list[str]) -> int:
