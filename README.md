@@ -1,0 +1,182 @@
+# NPC Policy — core representation & hand-authored scorer
+
+Initial scaffold for the MSc dissertation *"Personality-conditioned discrete NPC
+choice with bounded recent-choice context"*. This package implements the core of
+`project_flow.md` §1–§2: the representation, the bounded recent-choice memory, the
+hand-authored scorer (with its full equations), the controller that drives the
+nested location → action decision, and the world loader / local-event resolver that
+keeps authored content (and a future game engine) out of the policy code.
+
+## Quick start
+
+```bash
+cd code
+pip install -r requirements.txt
+python -m examples.demo
+```
+
+## What is implemented (verified)
+
+1. Given a personality, a candidate set, and the relevant memory, produce a
+   **choice distribution** over candidates (for a location or an action decision).
+2. **Nested decision:** the controller runs the full location → action cycle,
+   maintaining both memory buffers and enforcing the reset rule automatically.
+3. **Per-level parameters:** action coefficients (λ, temperature) can be tuned
+   independently of location ones.
+4. **Relation features:** exact repetition (`rep`, by id) is separate from semantic
+   similarity (`sim`, by features).
+5. **Transparency:** `scorer.trace(...)` exposes every intermediate quantity
+   (`base / P_base / compat_E / rep / sim / nov / T_N / P_rule`) for the RQ1 analysis.
+6. **Data formats:** JSON read/write for both decision-case types (carrying `level`).
+7. **Selection modes:** `argmax` (reproducible) or `sample` (draw from the distribution).
+
+## Module map
+
+```
+code/npc_policy/
+  schema.py         # feature schemas + OCEAN axes; per-level indexing & 12-dim padding
+  representation.py  # Option, Personality, RecentBuffer
+  weights.py        # two provisional weight tables W_L (5x8) and W_A (5x11)
+  config.py         # ScorerConfig: tunables; LevelParams for location vs action
+  relations.py      # rep / sim / nov from a buffer
+  scorer.py         # HandAuthoredScorer: base score + reweighting -> distribution
+  controller.py     # DecisionController: owns H_L/H_A, nested choice + reset rule
+  world.py          # load world.json + local-event resolution (game-layer boundary)
+  cases.py          # ControlledCase / IndependentCase + (de)serialisation
+data/world.json        # authored locations, action sets, unlocked flags, local events
+data/personalities.json # named NPC OCEAN profiles
+examples/demo.py    # end-to-end demo + self-checks
+```
+
+Dependency direction: `schema` → `representation` / `weights` → `relations` /
+`scorer` → `controller` / `world` / `cases` → `demo`.
+
+## Representation (`project_flow.md` §1)
+
+- **Personality:** OCEAN vector in `[-1, 1]` (`Personality`).
+- **Location schema (8):** `social, stimulation, structure, cognitive, physical,
+  risk, exploration, privacy`.
+- **Action schema (11):** the shared first seven, then `cooperation, helping,
+  conflict, control`.
+- **Unified 12-dim model vector** (`MODEL_TAGS`): location pads the four action-only
+  fields with zeros, action pads `privacy` with zero. Interface padding only — used
+  by future learned models, **not** by the scorer. Produced on demand by
+  `Option.to_padded12()`; an `Option` stores its **native** vector (8 or 11).
+- **Option:** carries `id` (identity, for exact repetition) + native `features`
+  (semantics, for similarity) + `level` (`location` / `action`).
+- **Memory buffers (`RecentBuffer`, FIFO):** `H_L` recent locations (length `K_L`);
+  `H_A` recent actions at the *current* location (length `K_A`), reset on a location
+  change. Both store full `Option`s (id + features). Provisional `K_L = K_A = 3`.
+
+## One decision cycle (controller view)
+
+```
+(1) choose_location(personality, available_locations)
+    read H_L -> relations.py computes rep/sim/nov for each location
+    -> scorer: base = p^T W_L o -> P_base -> reweight q -> P_rule  (level="location")
+    -> pick a location L_t from P_rule
+    -> if L_t != previous location: clear H_A      # the reset rule, automatic
+    -> push L_t into H_L
+
+(2) choose_action(personality, actions_at(L_t))
+    read H_A (empty right after a location change) -> rep/sim/nov for each action
+    -> scorer: same structure with W_A             (level="action")
+    -> pick an action -> push it into H_A
+
+-> wait for the next checkpoint, back to (1)
+```
+
+Location and action share the **same equation structure**; they differ only in
+which `W` is used, which memory is read, and which per-level coefficients apply.
+
+## World content & local events (`world.py`)
+
+Content lives in `data/*.json`, not in code. `load_world` / `load_personalities`
+read it into `Option` / `Personality` objects, so changing the world means editing
+JSON only. A live game engine is just another source feeding the same policy inputs
+`(personality, candidates, memory, level)` — the same door.
+
+Each location (see `location_schema_figure.html`, Listing 1) carries base `features`,
+its action set, a game-layer `unlocked` flag, and a set of **local events**. A local
+event has `active`, a `buff` (temporary feature deltas added while active, location
+features only), and `force_npc` (a scripted override). `unlocked`, the events, and
+`force_npc` stay in the game layer — the model never sees them.
+
+`World.resolve()` produces the current location candidate set:
+
+1. drop locations whose `unlocked` is false;
+2. for each remaining location, add every **active** event's `buff` to the base
+   features, clamped to `[0, 1]`, giving the **effective** features;
+3. the scorer receives only these effective options.
+
+Global events (the upper-layer switches that toggle `unlocked` / `active`, e.g.
+"war won" unlocking a camp or activating a tavern celebration) are handled at the
+game-engine layer; in the JSON these flags are set directly.
+
+## Scorer equations (`scorer.py`, from `project_flow.md` §2)
+
+For decision level `d ∈ {L, A}`, candidate `o_i` in its native schema, relation
+features from the relevant buffer:
+
+```
+base_i     = p^T W^d o_i^d                 # W_L for location, W_A for action
+P_base     = softmax(base / tau_0)
+
+compat_E_i = W^d[E, :] · o_i^d             # Extraversion-row compatibility
+
+q_i        = log(P_base_i + epsilon)
+             - lambda_R * rep_i
+             + lambda_O * O * nov_i
+             + lambda_E * E * compat_E_i * sim_i
+
+T_N        = 1 + lambda_N * max(N, 0)
+P_rule     = softmax(q / T_N)
+```
+
+When the relevant buffer is empty, `rep = sim = nov = 0`, so `P_rule = P_base`
+(the first action after a location change uses the base distribution).
+
+## Status of values
+
+Everything marked `PROVISIONAL` in `config.py` or `weights.py` is a starting value,
+not a decided one (`project_flow.md` §9):
+
+- the coefficients `lambda_R / lambda_O / lambda_E / lambda_N`, base temperature
+  `tau_0`, `recency_decay`, `epsilon`, and buffer lengths live in `config.py`
+  (location and action each get their own `LevelParams`, defaulting to equal values);
+- the two weight tables `W_L` / `W_A` live in `weights.py`. The Extraversion row is
+  deliberately **sparse** (only strongly E-related features are non-zero); the other
+  rows (O/C/A/N) are hand-authored provisional directions to be tuned there.
+
+These values must be examined empirically (RQ1), not assumed correct.
+
+## Status & next steps (maps to `project_flow.md` §10)
+
+Done:
+
+- [x] Representation: location (8) / action (11) schemas, 12-dim padding, `Option`,
+      `Personality`, FIFO buffers (§1).
+- [x] Hand-authored scorer with the full §2 equations (two `W`, `compat_E`, per-level
+      coefficients) and `rep / sim / nov` relation features.
+- [x] `DecisionController`: nested location → action cycle, buffer ownership, the
+      action-buffer reset rule (§5).
+- [x] World loader + local-event resolution (`unlocked`, active-event buffs); content
+      authored in `data/*.json` (§5b).
+- [x] Decision-case formats with JSON (de)serialisation (`cases.py`), native vectors.
+
+Next:
+
+- [ ] Matched-case generator for the personality-expression analysis (§10 step 2).
+- [ ] Initial RQ1 analyses: trait sensitivity, profile distinguishability, context
+      ablations (§10 step 3).
+- [ ] Personality-agnostic control + simple + nonlinear learned policies under the
+      shared 12-dim interface (§10 step 4).
+- [ ] Add the learned-model fields to `cases.py` (padded-12 candidates,
+      `selected_location_context`, decision-type interactions).
+- [ ] Controlled dataset generation + controlled-learning experiments (§10 step 5).
+- [ ] Independent dataset protocol, training, and the cross-variant comparison
+      (§10 steps 6–8).
+- [ ] Evaluation world materials + human study (§10 step 9).
+
+Global-event switches (toggling `unlocked` / `active`) are deferred to game-engine
+integration; `force_npc` is stored but unused (game layer, excluded from data per §5c).

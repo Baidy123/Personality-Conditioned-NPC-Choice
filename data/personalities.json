@@ -1,0 +1,9 @@
+{
+  "personalities": [
+    {"name": "Extravert",         "ocean": {"extraversion": 0.9}},
+    {"name": "Introvert scholar", "ocean": {"extraversion": -0.7, "openness": 0.6, "conscientiousness": 0.5}},
+    {"name": "Disciplined",       "ocean": {"conscientiousness": 0.9}},
+    {"name": "Agreeable helper",  "ocean": {"agreeableness": 0.9}},
+    {"name": "Neurotic",          "ocean": {"neuroticism": 0.8}}
+  ]
+}
