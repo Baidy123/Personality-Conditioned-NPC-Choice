@@ -75,6 +75,27 @@ def main() -> None:
     rho_act = spearman(x, D_act[iu])
     rho_m, p_m = mantel(D_pers, D_beh, n_perm=MANTEL_PERMS, seed=0)
 
+    # Channel-strength-weighted personality distance: the plain Euclidean
+    # metric counts channels a level deliberately leaves silent (A at the
+    # location level), which drags the correlation down. Weighting each trait
+    # by its measured E1 endpoint TVD is a *consistency check* (weights come
+    # from the same scorer via E1, so it is not independent validation) —
+    # report both numbers.
+    def weighted_rho(level_col: str, D_level: np.ndarray) -> float:
+        e1 = (RESULTS / "e1_sensitivity.csv").read_text().strip().splitlines()
+        header = e1[0].split(",")
+        w = np.array([float(line.split(",")[header.index(level_col)])
+                      for line in e1[1:]])
+        v = vecs * w
+        d = np.sqrt(((v[:, None, :] - v[None, :, :]) ** 2).sum(axis=2))
+        return spearman(d[iu], D_level[iu])
+
+    try:
+        rho_loc_w = weighted_rho("tvd_rule_location", D_loc)
+        rho_act_w = weighted_rho("tvd_rule_action_avg", D_act)
+    except FileNotFoundError:  # run_e1 not run yet
+        rho_loc_w = rho_act_w = float("nan")
+
     # Binned means for the trend line and the CSV.
     edges = np.linspace(x.min(), x.max(), N_BINS + 1)
     centers, means, stds, counts = [], [], [], []
@@ -111,15 +132,21 @@ def main() -> None:
     write_csv(RESULTS / "e2_summary.csv",
               ["n_profiles", "n_pairs", "n_contexts", "spearman_rho",
                "spearman_rho_location_only", "spearman_rho_action_only",
+               "spearman_rho_location_tvd_weighted",
+               "spearman_rho_action_tvd_weighted",
                "mantel_rho", "mantel_p", "mantel_perms"],
               [[n, n * (n - 1) // 2, n_ctx, f"{rho:.4f}",
                 f"{rho_loc:.4f}", f"{rho_act:.4f}",
+                f"{rho_loc_w:.4f}", f"{rho_act_w:.4f}",
                 f"{rho_m:.4f}", f"{p_m:.4f}", MANTEL_PERMS]])
 
     print(f"E2: Spearman rho = {rho:.3f} combined "
           f"(location-only {rho_loc:.3f} over {n_loc} contexts, "
           f"action-only {rho_act:.3f} over {n_act} contexts), "
           f"Mantel p = {p_m:.3f}, {n * (n - 1) // 2} pairs")
+    print(f"    channel-strength-weighted personality distance: "
+          f"location {rho_loc_w:.3f}, action {rho_act_w:.3f} "
+          "(consistency check, weights from E1)")
     print(f"figure: {RESULTS / 'e2_scatter.png'}")
 
 
