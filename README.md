@@ -45,7 +45,9 @@ code/npc_policy/
   cases.py          # ControlledCase / IndependentCase + (de)serialisation
 data/world.json        # authored locations, action sets, unlocked flags, local events
 data/personalities.json # named NPC OCEAN profiles
+data/rq1_cases/        # generated matched cases (profiles + contexts + world variants)
 examples/demo.py    # end-to-end demo + self-checks
+experiments/rq1/    # RQ1 automated analyses (gen_cases + run_e1..e4 -> results/rq1)
 ```
 
 Dependency direction: `schema` → `representation` / `weights` → `relations` /
@@ -174,11 +176,12 @@ Done:
       authored in `data/*.json` (§5b).
 - [x] Decision-case formats with JSON (de)serialisation (`cases.py`), native vectors.
 
-Next:
+- [x] Matched-case generator (§10 step 2) and the automated RQ1 analyses
+      (§10 step 3): trait sensitivity, profile distinguishability, trajectory
+      patterns, memory ablations (`experiments/rq1/`, design record:
+      `docs/specs/2026-07-03-rq1-experiments.md`).
 
-- [ ] Matched-case generator for the personality-expression analysis (§10 step 2).
-- [ ] Initial RQ1 analyses: trait sensitivity, profile distinguishability, context
-      ablations (§10 step 3).
+Next:
 - [ ] Personality-agnostic control + simple + nonlinear learned policies under the
       shared 12-dim interface (§10 step 4).
 - [ ] Add the learned-model fields to `cases.py` (padded-12 candidates,

@@ -1,0 +1,420 @@
+{
+  "locations": [
+    {
+      "id": "tavern",
+      "features": {
+        "social": 0.9,
+        "stimulation": 0.8,
+        "structure": 0.3,
+        "cognitive": 0.2,
+        "physical": 0.2,
+        "risk": 0.3,
+        "exploration": 0.2,
+        "privacy": 0.1,
+        "conflict": 0.15
+      },
+      "unlocked": true,
+      "actions": [
+        {
+          "id": "chat",
+          "features": {
+            "social": 0.9,
+            "stimulation": 0.4,
+            "structure": 0.2,
+            "cognitive": 0.3,
+            "physical": 0.1,
+            "risk": 0.1,
+            "exploration": 0.2,
+            "cooperation": 0.4
+          }
+        },
+        {
+          "id": "drink",
+          "features": {
+            "social": 0.6,
+            "stimulation": 0.5,
+            "structure": 0.1,
+            "cognitive": 0.1,
+            "physical": 0.1,
+            "risk": 0.3,
+            "exploration": 0.1
+          }
+        },
+        {
+          "id": "brawl",
+          "features": {
+            "social": 0.5,
+            "stimulation": 0.8,
+            "structure": 0.1,
+            "cognitive": 0.1,
+            "physical": 0.7,
+            "risk": 0.8,
+            "exploration": 0.1,
+            "conflict": 0.9
+          }
+        }
+      ],
+      "events": [
+        {
+          "name": "celebration",
+          "active": false,
+          "buff": {
+            "social": 0.1,
+            "stimulation": 0.2
+          },
+          "force_npc": null
+        }
+      ]
+    },
+    {
+      "id": "library",
+      "features": {
+        "social": 0.2,
+        "stimulation": 0.1,
+        "structure": 0.7,
+        "cognitive": 0.8,
+        "physical": 0.1,
+        "risk": 0.1,
+        "exploration": 0.3,
+        "privacy": 0.6,
+        "conflict": 0.0
+      },
+      "actions": [
+        {
+          "id": "read",
+          "features": {
+            "social": 0.1,
+            "stimulation": 0.1,
+            "structure": 0.6,
+            "cognitive": 0.9,
+            "physical": 0.1,
+            "risk": 0.05,
+            "exploration": 0.3
+          }
+        },
+        {
+          "id": "research",
+          "features": {
+            "social": 0.1,
+            "stimulation": 0.2,
+            "structure": 0.5,
+            "cognitive": 0.8,
+            "physical": 0.1,
+            "risk": 0.1,
+            "exploration": 0.6
+          }
+        },
+        {
+          "id": "discuss",
+          "features": {
+            "social": 0.6,
+            "stimulation": 0.3,
+            "structure": 0.3,
+            "cognitive": 0.6,
+            "physical": 0.05,
+            "risk": 0.1,
+            "exploration": 0.3,
+            "cooperation": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "chapel",
+      "features": {
+        "social": 0.2,
+        "stimulation": 0.1,
+        "structure": 0.6,
+        "cognitive": 0.4,
+        "physical": 0.1,
+        "risk": 0.1,
+        "exploration": 0.1,
+        "privacy": 0.9,
+        "conflict": 0.0
+      },
+      "actions": [
+        {
+          "id": "pray",
+          "features": {
+            "social": 0.1,
+            "stimulation": 0.05,
+            "structure": 0.7,
+            "cognitive": 0.4,
+            "physical": 0.05,
+            "risk": 0.05,
+            "exploration": 0.05
+          }
+        },
+        {
+          "id": "meditate",
+          "features": {
+            "social": 0.05,
+            "stimulation": 0.05,
+            "structure": 0.5,
+            "cognitive": 0.6,
+            "physical": 0.1,
+            "risk": 0.05,
+            "exploration": 0.1
+          }
+        },
+        {
+          "id": "confess",
+          "features": {
+            "social": 0.4,
+            "stimulation": 0.2,
+            "structure": 0.5,
+            "cognitive": 0.3,
+            "physical": 0.05,
+            "risk": 0.2,
+            "exploration": 0.05,
+            "helping": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "features": {
+        "social": 0.7,
+        "stimulation": 0.7,
+        "structure": 0.4,
+        "cognitive": 0.3,
+        "physical": 0.3,
+        "risk": 0.2,
+        "exploration": 0.5,
+        "privacy": 0.1,
+        "conflict": 0.05
+      },
+      "actions": [
+        {
+          "id": "haggle",
+          "features": {
+            "social": 0.7,
+            "stimulation": 0.5,
+            "structure": 0.3,
+            "cognitive": 0.4,
+            "physical": 0.1,
+            "risk": 0.2,
+            "exploration": 0.1,
+            "conflict": 0.3,
+            "control": 0.4
+          }
+        },
+        {
+          "id": "browse",
+          "features": {
+            "social": 0.3,
+            "stimulation": 0.4,
+            "structure": 0.2,
+            "cognitive": 0.3,
+            "physical": 0.2,
+            "risk": 0.1,
+            "exploration": 0.6
+          }
+        },
+        {
+          "id": "trade",
+          "features": {
+            "social": 0.5,
+            "stimulation": 0.3,
+            "structure": 0.5,
+            "cognitive": 0.4,
+            "physical": 0.1,
+            "risk": 0.2,
+            "exploration": 0.1,
+            "cooperation": 0.6
+          }
+        }
+      ],
+      "unlocked": false
+    },
+    {
+      "id": "forest",
+      "features": {
+        "social": 0.1,
+        "stimulation": 0.3,
+        "structure": 0.1,
+        "cognitive": 0.3,
+        "physical": 0.5,
+        "risk": 0.3,
+        "exploration": 0.9,
+        "privacy": 0.5,
+        "conflict": 0.05
+      },
+      "actions": [
+        {
+          "id": "explore",
+          "features": {
+            "social": 0.05,
+            "stimulation": 0.5,
+            "structure": 0.1,
+            "cognitive": 0.3,
+            "physical": 0.6,
+            "risk": 0.4,
+            "exploration": 0.9
+          }
+        },
+        {
+          "id": "forage",
+          "features": {
+            "social": 0.05,
+            "stimulation": 0.2,
+            "structure": 0.3,
+            "cognitive": 0.3,
+            "physical": 0.4,
+            "risk": 0.2,
+            "exploration": 0.5
+          }
+        },
+        {
+          "id": "rest",
+          "features": {
+            "social": 0.05,
+            "stimulation": 0.05,
+            "structure": 0.2,
+            "cognitive": 0.2,
+            "physical": 0.05,
+            "risk": 0.05,
+            "exploration": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "id": "arena",
+      "features": {
+        "social": 0.5,
+        "stimulation": 0.7,
+        "structure": 0.55,
+        "cognitive": 0.15,
+        "physical": 0.9,
+        "risk": 0.6,
+        "exploration": 0.2,
+        "privacy": 0.1,
+        "conflict": 0.6
+      },
+      "actions": [
+        {
+          "id": "fight",
+          "features": {
+            "social": 0.5,
+            "stimulation": 0.8,
+            "structure": 0.5,
+            "cognitive": 0.2,
+            "physical": 0.9,
+            "risk": 0.6,
+            "exploration": 0.1,
+            "conflict": 0.6
+          }
+        },
+        {
+          "id": "spar",
+          "features": {
+            "social": 0.4,
+            "stimulation": 0.7,
+            "structure": 0.4,
+            "cognitive": 0.2,
+            "physical": 0.8,
+            "risk": 0.4,
+            "exploration": 0.1,
+            "conflict": 0.2
+          }
+        },
+        {
+          "id": "drill",
+          "features": {
+            "social": 0.2,
+            "stimulation": 0.4,
+            "structure": 0.8,
+            "cognitive": 0.2,
+            "physical": 0.7,
+            "risk": 0.2,
+            "exploration": 0.05
+          }
+        },
+        {
+          "id": "coach",
+          "features": {
+            "social": 0.6,
+            "stimulation": 0.4,
+            "structure": 0.6,
+            "cognitive": 0.4,
+            "physical": 0.5,
+            "risk": 0.1,
+            "exploration": 0.1,
+            "helping": 0.7,
+            "cooperation": 0.6,
+            "control": 0.5
+          }
+        },
+        {
+          "id": "spectate",
+          "features": {
+            "social": 0.6,
+            "stimulation": 0.7,
+            "structure": 0.3,
+            "cognitive": 0.2,
+            "physical": 0.1,
+            "risk": 0.1,
+            "exploration": 0.1
+          }
+        },
+        {
+          "id": "bet",
+          "features": {
+            "social": 0.4,
+            "stimulation": 0.6,
+            "structure": 0.2,
+            "cognitive": 0.3,
+            "physical": 0.05,
+            "risk": 0.8,
+            "exploration": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "enemy_camp",
+      "features": {
+        "social": 0.1,
+        "stimulation": 0.7,
+        "structure": 0.2,
+        "cognitive": 0.2,
+        "physical": 0.6,
+        "risk": 0.9,
+        "exploration": 0.5,
+        "privacy": 0.3,
+        "conflict": 0.9
+      },
+      "unlocked": false,
+      "actions": [
+        {
+          "id": "raid",
+          "features": {
+            "social": 0.2,
+            "stimulation": 0.8,
+            "structure": 0.3,
+            "cognitive": 0.3,
+            "physical": 0.8,
+            "risk": 0.8,
+            "exploration": 0.3,
+            "conflict": 0.9
+          }
+        },
+        {
+          "id": "scout",
+          "features": {
+            "social": 0.05,
+            "stimulation": 0.6,
+            "structure": 0.3,
+            "cognitive": 0.5,
+            "physical": 0.5,
+            "risk": 0.5,
+            "exploration": 0.7
+          }
+        }
+      ],
+      "events": []
+    }
+  ]
+}

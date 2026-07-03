@@ -1,0 +1,6 @@
+trait,tvd_base_location,tvd_rule_location,tvd_rule_location_ctx_avg,tvd_rule_action_avg
+openness,0.1638,0.1638,0.2056,0.1310
+conscientiousness,0.2794,0.2794,0.2628,0.2571
+extraversion,0.5140,0.5140,0.5066,0.1666
+agreeableness,0.0948,0.0948,0.0977,0.2314
+neuroticism,0.3545,0.5002,0.5542,0.3770
