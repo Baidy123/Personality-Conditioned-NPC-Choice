@@ -39,32 +39,40 @@ def main() -> None:
     vecs = np.array([e["vector"] for e in profiles])
     n = len(profiles)
 
-    # Behavioural distance: mean JSD over every matched context.
-    D_beh = np.zeros((n, n))
-    n_ctx = 0
+    # Behavioural distance: mean JSD per decision level, then combined —
+    # the split answers how much distinguishability each level carries.
+    D_loc = np.zeros((n, n))
     for ctx in cases["location_contexts"]:
         w = world_for(ctx["world"])
         cand = w.resolve()
         buf = location_buffer(w, ctx["memory"])
         P = np.stack([scorer.distribution(personality_of(e), cand, buffer=buf,
                                           level="location") for e in profiles])
-        D_beh += pairwise_jsd(P)
-        n_ctx += 1
+        D_loc += pairwise_jsd(P)
+    n_loc = len(cases["location_contexts"])
+    D_loc /= n_loc
+
+    D_act = np.zeros((n, n))
     for ctx in cases["action_contexts"]:
         w = world_for(ctx["world"])
         acts = w.actions_at(ctx["location"])
         buf = action_buffer(w, ctx["location"], ctx["memory"])
         P = np.stack([scorer.distribution(personality_of(e), acts, buffer=buf,
                                           level="action") for e in profiles])
-        D_beh += pairwise_jsd(P)
-        n_ctx += 1
-    D_beh /= n_ctx
+        D_act += pairwise_jsd(P)
+    n_act = len(cases["action_contexts"])
+    D_act /= n_act
+
+    n_ctx = n_loc + n_act
+    D_beh = (n_loc * D_loc + n_act * D_act) / n_ctx
 
     D_pers = np.sqrt(((vecs[:, None, :] - vecs[None, :, :]) ** 2).sum(axis=2))
 
     iu = np.triu_indices(n, k=1)
     x, y = D_pers[iu], D_beh[iu]
     rho = spearman(x, y)
+    rho_loc = spearman(x, D_loc[iu])
+    rho_act = spearman(x, D_act[iu])
     rho_m, p_m = mantel(D_pers, D_beh, n_perm=MANTEL_PERMS, seed=0)
 
     # Binned means for the trend line and the CSV.
@@ -102,12 +110,16 @@ def main() -> None:
                for c, m, s, k in zip(centers, means, stds, counts)])
     write_csv(RESULTS / "e2_summary.csv",
               ["n_profiles", "n_pairs", "n_contexts", "spearman_rho",
+               "spearman_rho_location_only", "spearman_rho_action_only",
                "mantel_rho", "mantel_p", "mantel_perms"],
               [[n, n * (n - 1) // 2, n_ctx, f"{rho:.4f}",
+                f"{rho_loc:.4f}", f"{rho_act:.4f}",
                 f"{rho_m:.4f}", f"{p_m:.4f}", MANTEL_PERMS]])
 
-    print(f"E2: Spearman rho = {rho:.3f}, Mantel p = {p_m:.3f} over "
-          f"{n * (n - 1) // 2} pairs x {n_ctx} contexts")
+    print(f"E2: Spearman rho = {rho:.3f} combined "
+          f"(location-only {rho_loc:.3f} over {n_loc} contexts, "
+          f"action-only {rho_act:.3f} over {n_act} contexts), "
+          f"Mantel p = {p_m:.3f}, {n * (n - 1) // 2} pairs")
     print(f"figure: {RESULTS / 'e2_scatter.png'}")
 
 

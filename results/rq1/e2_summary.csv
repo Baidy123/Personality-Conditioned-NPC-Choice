@@ -1,2 +1,2 @@
-n_profiles,n_pairs,n_contexts,spearman_rho,mantel_rho,mantel_p,mantel_perms
-300,44850,33,0.4514,0.4514,0.0010,999
+n_profiles,n_pairs,n_contexts,spearman_rho,spearman_rho_location_only,spearman_rho_action_only,mantel_rho,mantel_p,mantel_perms
+300,44850,33,0.4514,0.3941,0.4631,0.4514,0.0010,999
