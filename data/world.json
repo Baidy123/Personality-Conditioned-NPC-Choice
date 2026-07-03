@@ -54,7 +54,7 @@
       "id": "arena",
       "features": {"social": 0.5, "stimulation": 0.7, "structure": 0.55, "cognitive": 0.15, "physical": 0.9, "risk": 0.6, "exploration": 0.2, "privacy": 0.1, "conflict": 0.6},
       "actions": [
-        {"id": "fight",    "features": {"social": 0.5, "stimulation": 0.9, "structure": 0.5, "cognitive": 0.2, "physical": 0.9, "risk": 0.7, "exploration": 0.1, "conflict": 0.45}},
+        {"id": "fight",    "features": {"social": 0.5, "stimulation": 0.8, "structure": 0.5, "cognitive": 0.2, "physical": 0.9, "risk": 0.6, "exploration": 0.1, "conflict": 0.6}},
         {"id": "spar",     "features": {"social": 0.4, "stimulation": 0.7, "structure": 0.4, "cognitive": 0.2, "physical": 0.8, "risk": 0.4, "exploration": 0.1, "conflict": 0.2}},
         {"id": "drill",    "features": {"social": 0.2, "stimulation": 0.4, "structure": 0.8, "cognitive": 0.2, "physical": 0.7, "risk": 0.2, "exploration": 0.05}},
         {"id": "coach",    "features": {"social": 0.6, "stimulation": 0.4, "structure": 0.6, "cognitive": 0.4, "physical": 0.5, "risk": 0.1, "exploration": 0.1, "helping": 0.7, "cooperation": 0.6, "control": 0.5}},

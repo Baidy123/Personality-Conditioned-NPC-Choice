@@ -253,3 +253,40 @@ action set should absorb the yard's.
 ### End state
 
 Scorecard 25/25; pytest 18/18 (world: 7 locations, arena = combat complex).
+
+## Round 6 — 2026-07-03 · arena `fight` re-authored so Laezel actually fights (25/25)
+
+Trigger: user review of the round-5 trajectories — Laezel never picked `fight`
+in 22 arena visits ("没有fight不太合理"); Karlach's arena retreat was explicitly
+accepted ("应该无所谓").
+
+Diagnosis: static fight 0.16 vs drill 0.29 / spar 0.27; under the demo layer's
+`selection_temperature = 0.1` sharpening, a 0.13 gap is unreachable even with
+action satiation rotating drill/spar.
+
+### Data changes (world.json `arena.fight`, user-requested outcome; grid-tested)
+
+| feature | from → to | reason |
+|---|---|---|
+| `conflict` | 0.45 → 0.60 | An arena bout is genuine violence against a resisting opponent — closer to `raid` (0.9) than to `spar` (0.2). The round-2 value 0.45 was chosen to keep agreeable-chaotic profiles (Karlach) fighting; with her non-fighter reading now accepted, the low-A blood-seeker channel can carry more weight. |
+| `stimulation` | 0.9 → 0.8 | A sanctioned duel has rules and a referee; its chaos should not exceed the tavern `brawl` (0.8). Also relieves the high-C stimulation penalty that suppressed fight for disciplined warriors. |
+| `risk` | 0.7 → 0.6 | Same rationale: regulated < unregulated (`brawl` risk 0.8). |
+
+Grid evidence (all measured, seed 42): conflict alone → fight 0.18, no
+trajectory fights; +stim → 0.22, 1 fight; +risk (chosen) → fight 0.25 ≈
+drill 0.25 / spar 0.24, trajectory drill 10 / fight 8 / spar 4. A demo-layer
+alternative (`selection_temperature` 0.1 → 0.2) was tested and rejected: with
+the baseline features it produced zero fights, and it perturbs every profile's
+trajectory rather than the one mis-authored action.
+
+### Effects
+
+- Laezel @ arena: static fight 0.25 / drill 0.25 / spar 0.24 (three-way combat
+  tie); 50-round trajectory arena 22 visits = drill 10 / fight 8 / spar 4.
+- Astarion @ arena trajectory: fight 4 / spar 3 (duelist reading, in character).
+- Karlach: unchanged (arena 0.099, coach-top when there) — accepted by user.
+- Scorecard 25/25; pytest 18/18; all six trajectories in character.
+
+### End state
+
+Scorecard 25/25; pytest 18/18.
