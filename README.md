@@ -152,8 +152,10 @@ not a decided one (`project_flow.md` §9):
   `config.py` (location and action each get their own `LevelParams`, defaulting to
   equal values);
 - the v1.1 tables `b / C / w` (per level) and `W_rel` live in `weights.py`, alongside
-  the fallback `W_L` / `W_A`. Draft values follow `docs/v11_tables.png`; all are
-  hand-authored provisional directions to be tuned there.
+  the fallback `W_L` / `W_A`. All are hand-authored provisional directions to be
+  tuned there; `python -m examples.make_tables_figures` renders the current values
+  to `docs/v12_tables.png` / `docs/v12_ideal_levels_demo.png` (walkthrough:
+  `docs/equation_v1.2_tables_example.md`).
 
 These values must be examined empirically (RQ1), not assumed correct.
 

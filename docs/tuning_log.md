@@ -290,3 +290,22 @@ trajectory rather than the one mis-authored action.
 ### End state
 
 Scorecard 25/25; pytest 18/18.
+
+## Docs refresh + world-scope decision — 2026-07-03 (no behaviour change)
+
+- **User decision:** the current 7-location world is the keeper for the formal
+  experiments — locations may be *extended* later but not redesigned; future
+  variation comes mainly from personality profiles. This removes the "pilot
+  world vs formal world" rerun risk flagged before the RQ1 station.
+- The outdated hand-drawn v1.1 figures (`v11_tables.png`,
+  `v11_ideal_levels_demo.png`, pre-round-1 values, no conflict column) and
+  `equation_v1.1_tables_example.md` were deleted. Replacements are generated
+  from the live tables by `examples/make_tables_figures.py` →
+  `docs/v12_tables.png`, `docs/v12_ideal_levels_demo.png` (adds a low-A/low-N
+  profile that shows the v1.2 conflict column); worked example rewritten as
+  `docs/equation_v1.2_tables_example.md` with current values and the v1.2
+  memory term. Rerun the script after any `weights.py` change.
+- References updated in `README.md`, `weights.py`, `project_flow.md`, and root
+  `CLAUDE.md` (the latter two also had stale "eight intensity features" /
+  "personality-independent satiation" phrasings corrected to v1.2). The frozen
+  2026-07-02 spec/plan documents keep their historical v1.1 file references.

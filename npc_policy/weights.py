@@ -60,7 +60,8 @@ def default_W_action() -> np.ndarray:
     return np.array([_W_A[trait] for trait in OCEAN], dtype=float)
 
 
-# --- v1.1 ideal-point tables (PROVISIONAL; draft values from docs/v11_tables.png) ---
+# --- v1.1 ideal-point tables (PROVISIONAL; rendered to docs/v12_tables.png by
+# `python -m examples.make_tables_figures` — rerun after edits here) ---
 # b: baseline ideal level per intensity feature (neutral personality).
 # C: trait -> ideal-level shift (rows in OCEAN order).
 # w: deviation cost per intensity feature.
