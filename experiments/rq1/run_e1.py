@@ -9,7 +9,8 @@ measures how strongly the choice distribution responds:
     preference signal), plus the context-averaged and action-level values;
   - the N entropy curve (bidirectional temperature, checklist A5 formalised).
 
-Outputs: results/rq1/e1_curves.png, e1_strength.png, e1_sensitivity.csv
+Outputs: results/rq1/e1_curves.png, e1_action_curves.png, e1_strength.png,
+e1_sensitivity.csv
 
 Run from ``code/``:  python -m experiments.rq1.run_e1
 """
@@ -69,6 +70,42 @@ def main() -> None:
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e1_curves.png", bbox_inches="tight")
+    plt.close(fig)
+
+    # ------------------------------------------------- action-level curves ---
+    # One diagnostic (trait, location) pair per panel: the action set where the
+    # trait's designed channel should be most visible. A gets two panels — its
+    # home level is actions (checklist §E2), so it carries the heaviest claim.
+    panels = [
+        ("openness", "library", "O @ library"),
+        ("conscientiousness", "arena", "C @ arena"),
+        ("extraversion", "tavern", "E @ tavern"),
+        ("agreeableness", "tavern", "A @ tavern"),
+        ("agreeableness", "arena", "A @ arena"),
+        ("neuroticism", "arena", "N @ arena"),
+    ]
+    # Okabe-Ito order, assigned per panel (action sets differ between panels;
+    # identity is carried by each panel's own legend).
+    action_cycle = ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9"]
+
+    fig, axes = plt.subplots(2, 3, figsize=(13, 7), sharex=True)
+    for ax, (trait, loc_id, title) in zip(axes.flat, panels):
+        acts = world.actions_at(loc_id)
+        P = np.stack([
+            scorer.distribution(personality_of(sweep_entry(trait, v)), acts, level="action")
+            for v in values
+        ])
+        for k, a in enumerate(acts):
+            ax.plot(values, P[:, k], color=action_cycle[k % len(action_cycle)],
+                    label=a.id)
+        ax.set_title(title)
+        ax.set_ylabel("P_rule")
+        ax.set_xlabel(f"{TRAIT_SHORT[trait]} value")
+        ax.legend(frameon=False, fontsize=8)
+    fig.suptitle("E1 — action-choice sensitivity at diagnostic locations "
+                 "(empty action memory)", y=1.0)
+    fig.tight_layout()
+    fig.savefig(RESULTS / "e1_action_curves.png", bbox_inches="tight")
     plt.close(fig)
 
     # ---------------------------------------------- expression strength (TVD) --
@@ -143,7 +180,8 @@ def main() -> None:
     print(f"\nN dilution: preference signal {n['base']:.3f} (P_base) -> "
           f"{n['rule']:.3f} (P_rule) = {100 * (1 - n['rule'] / n['base']):.0f}% absorbed"
           " by N's own temperature" if n["base"] > n["rule"] else "")
-    print(f"figures: {RESULTS / 'e1_curves.png'}, {RESULTS / 'e1_strength.png'}")
+    print(f"figures: {RESULTS / 'e1_curves.png'}, "
+          f"{RESULTS / 'e1_action_curves.png'}, {RESULTS / 'e1_strength.png'}")
 
 
 if __name__ == "__main__":

@@ -49,7 +49,11 @@ market locked) and 24 action contexts (4 action-memory states × 6 locations).
   A 0.10. A expresses at the action level instead (0.23) — by design
   (checklist §E2: keeps A and E distinguishable); O is the weakest live
   channel; N's location TVD is dominated by its temperature channel
-  (P_base 0.36 vs P_rule 0.50).
+  (P_base 0.36 vs P_rule 0.50). Action-level sensitivity curves
+  (`e1_action_curves.png`, added on user review — one diagnostic
+  trait-location pair per panel, A gets two): A@tavern brawl 0.51 -> 0.10 /
+  chat 0.20 -> 0.53 is the strongest single action channel; A@arena shows
+  the low-A combat drive (fight 0.25 -> 0.07, coach 0.08 -> 0.42).
 - E2: Spearman rho = 0.45, Mantel p = 0.001 (300 profiles, 44 850 pairs,
   33 contexts) — personality distance and behavioural distance correlate;
   distinguishability holds beyond the single-trait sweeps.
