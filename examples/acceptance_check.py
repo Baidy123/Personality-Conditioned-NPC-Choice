@@ -31,7 +31,7 @@ TRAITS = ("openness", "conscientiousness", "extraversion", "agreeableness", "neu
 
 SOCIAL = {"tavern", "market", "arena"}
 QUIET = {"library", "chapel", "forest"}
-STRUCT = {"library", "chapel", "training_yard"}
+STRUCT = {"library", "chapel"}
 
 results: list[tuple[str, bool, str]] = []
 
@@ -102,7 +102,7 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
     check("A5 N temp", strictly_increasing(hs), f"entropy={['%.2f' % h for h in hs]}")
 
     tav = [p_actions(p, "tavern") for p in sweep_profiles("agreeableness")]
-    yard = [p_actions(p, "training_yard") for p in sweep_profiles("agreeableness")]
+    yard = [p_actions(p, "arena") for p in sweep_profiles("agreeableness")]
     check("A6 A actions",
           strictly_increasing([d["chat"] for d in tav])
           and strictly_increasing([d["brawl"] for d in tav][::-1])
@@ -213,12 +213,12 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
           f"read+research={bookish:.2f} vs discuss={lib['discuss']:.2f}")
 
     lae = npcs["Laezel"]
-    yard_d = p_actions(lae, "training_yard")
     arena_d = p_actions(lae, "arena")
-    check("F2 Laezel", top_loc(lae) == "training_yard" and min(yard_d, key=yard_d.get) == "coach"
-          and max(arena_d, key=arena_d.get) == "fight",
-          f"top={top_loc(lae)}, yard={ {k: round(v, 2) for k, v in yard_d.items()} }, "
-          f"arena top={max(arena_d, key=arena_d.get)}")
+    combat = arena_d["fight"] + arena_d["spar"] + arena_d["drill"]
+    check("F2 Laezel", top_loc(lae) == "arena" and min(arena_d, key=arena_d.get) == "coach"
+          and combat >= 0.60 and arena_d["fight"] >= arena_d["spectate"],
+          f"top={top_loc(lae)}, arena={ {k: round(v, 2) for k, v in arena_d.items()} }, "
+          f"combat mass={combat:.2f} (>=0.60)")
 
     sh = npcs["Shadowheart"]
     check("F3 Shadowheart", top_loc(sh) == "chapel" and top_action(sh, "chapel") in {"pray", "meditate"},
@@ -234,13 +234,13 @@ def main(scorer: HandAuthoredScorer | None = None) -> int:
           f"tavern={ {k: round(v, 2) for k, v in tav_a.items()} }")
 
     kar = npcs["Karlach"]
-    yard_k = p_actions(kar, "training_yard")
+    yard_k = p_actions(kar, "arena")
     tav_k = p_actions(kar, "tavern")
     check("F5 Karlach",
-          top_loc(kar) in {"tavern", "arena", "training_yard"}
+          top_loc(kar) in {"tavern", "arena"}
           and max(yard_k, key=yard_k.get) in {"spar", "coach"}
           and min(tav_k, key=tav_k.get) == "brawl",
-          f"top={top_loc(kar)}, yard action={max(yard_k, key=yard_k.get)}, "
+          f"top={top_loc(kar)}, arena action={max(yard_k, key=yard_k.get)}, "
           f"tavern min={min(tav_k, key=tav_k.get)}")
 
     hal = npcs["Halsin"]

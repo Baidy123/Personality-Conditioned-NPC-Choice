@@ -24,7 +24,9 @@ Tuning rules of engagement (agreed 2026-07-02):
 Location checks use the memory-free, temperature-free base distribution
 `P_base = softmax(base / tau_0)` so trait-preference direction is not confounded
 by the N temperature. `SOCIAL = {tavern, market, arena}`,
-`QUIET = {library, chapel, forest}`, `STRUCT = {library, chapel, training_yard}`.
+`QUIET = {library, chapel, forest}`, `STRUCT = {library, chapel}` (revised round 5:
+`training_yard` merged into `arena`, which is too high-risk/-conflict to stand in
+for structure seeking).
 
 - **A1 (E):** `P_base(SOCIAL)` strictly increases over the E sweep; top choice at
   E=−1 is in QUIET and at E=+1 is in SOCIAL.
@@ -36,8 +38,9 @@ by the N temperature. `SOCIAL = {tavern, market, arena}`,
 - **A5 (N, temperature):** on `P_rule`, entropy strictly increases over the N
   sweep (bidirectional temperature).
 - **A6 (A, actions):** at the tavern action set, `P(chat)` increases and
-  `P(brawl)` decreases over the A sweep; analogous direction at `training_yard`
-  (`P(coach)` up, `P(spar)` down).
+  `P(brawl)` decreases over the A sweep; analogous direction at the `arena`
+  (`P(coach)` up, `P(spar)` down; revised round 5 — the arena hosts the merged
+  training actions).
 
 ## B. Magnitude checks (tuning targets)
 
@@ -109,21 +112,22 @@ action set where given). "top" = argmax.
   socialising; an argmax check was too strict for a near-tie distribution —
   revised 2026-07-02 after the library action set was reworked, see
   docs/tuning_log.md).
-- **F2 Laezel** (O−.3 C+.7 E−.2 A−.9 N−.7; revised round 3, see
-  docs/tuning_log.md): top = `training_yard`; at the training yard `P(coach)` is
-  the lowest of the three actions; at the arena, top action = `fight`
-  (blood-seeking warrior — added round 3). Known limitation: her arena
-  *location* probability stays second-tier (~0.07) because the v1 location
-  schema has no combat/opposition feature for the low-A drive to act on;
-  stronger generic levers (A→risk, C softening) broke B1/C3/F5 in testing.
+- **F2 Laezel** (O−.3 C+.7 E−.2 A−.9 N−.7; revised rounds 3 and 5, see
+  docs/tuning_log.md): top = `arena` (the merged combat complex is her home
+  venue); at the arena `P(coach)` is the lowest of the six actions,
+  `P(fight) + P(spar) + P(drill) ≥ 0.60` (combat/training mass dominates), and
+  `P(fight) ≥ P(spectate)` (she would rather fight than watch). The round-3
+  known limitation (combat-venue seeking inexpressible at the location level)
+  was resolved by the v1.2 `conflict` feature plus the round-5 merge.
 - **F3 Shadowheart** (O+.1 C+.4 E−.5 A+.1 N+.6): top = `chapel`; at the chapel,
   top action ∈ {pray, meditate}.
 - **F4 Astarion** (O+.4 C−.5 E+.6 A−.7 N+.4): top ∈ {tavern, market};
   `P(arena) ≥ P(chapel)`; at the tavern `P(chat) + P(drink) ≥ P(brawl)` but
   `P(brawl)` is not negligible (≥ 0.15) — scheming, not saintly.
-- **F5 Karlach** (O+.3 C−.4 E+.9 A+.6 N−.5): top ∈ {tavern, arena,
-  training_yard}; at the training yard top action ∈ {spar, coach} (friendly
-  fighter: sparring yes, brawling no); at the tavern `P(brawl)` is the lowest.
+- **F5 Karlach** (O+.2 C−.4 E+.9 A+.6 N−.5; O revised round 4): top ∈ {tavern, arena}; at the
+  arena top action ∈ {spar, coach} (friendly fighter: sparring yes, brawling
+  no); at the tavern `P(brawl)` is the lowest. (Revised round 5: training_yard
+  merged into arena.)
 - **F6 Halsin** (O+.8 C+.1 E−.5 A+.7 N−.6; revised round 1–2, see
   docs/tuning_log.md): top = `forest`; at the forest, top action ∈ {explore,
   forage}. Note on E−.5: in this schema E encodes the preferred crowd/stimulation

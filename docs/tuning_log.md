@@ -190,3 +190,66 @@ ranking had no channel for combat-venue seeking. User-approved package:
 ### End state
 
 Scorecard 25/25; pytest 18/18.
+
+## Round 5 — 2026-07-03 · training_yard merged into arena (25/25)
+
+Trigger: user judgement — training_yard and arena overlapped too much as
+locations; the arena can plausibly contain a training area, so its features and
+action set should absorb the yard's.
+
+### World changes (world.json, user-requested)
+
+- `training_yard` removed (world: 8 → 7 locations, 6 unlocked).
+- `arena` features re-authored as the combined combat complex — the extremes
+  soften because training days are part of the venue now:
+
+  | feature | old arena | old yard | merged |
+  |---|---|---|---|
+  | stimulation | 0.9 | 0.5 | 0.7 |
+  | structure | 0.4 | 0.6 | 0.55 |
+  | physical | 0.8 | 0.9 | 0.9 |
+  | risk | 0.8 | 0.4 | 0.6 |
+  | conflict | 0.8 | 0.4 | 0.6 |
+  | (social 0.5, cognitive 0.15, exploration 0.2, privacy 0.1) | | | |
+
+- `arena` action set = union, 6 actions: `fight, spar, drill, coach, spectate,
+  bet` (per-action features unchanged).
+
+### Scalar change (config.py, grid-searched)
+
+| knob | 1.0 → | reason |
+|---|---|---|
+| `tau_0` (location level only) | 0.9 | B1 openness endpoint TVD fell to 0.149 after the merge (one fewer location dilutes O's exploration/cognitive expression under renormalisation). Grid: 0.95–0.9 pass all 25; 0.85 collapses Shadowheart's trajectory to 2 distinct locations (C3). First per-level split of `LevelParams`; the action level stays at 1.0. |
+
+### Criterion revisions (checklist §A/§F)
+
+- `STRUCT` = {library, chapel} (arena is too high-risk/-conflict to stand in
+  for structure seeking); A6's coach/spar sweep moves to the arena.
+- **F2 Laezel:** top = `arena`; `P(coach)` lowest; combat/training mass
+  `fight+spar+drill ≥ 0.60`; `P(fight) ≥ P(spectate)`. The round-3 known
+  limitation (combat-venue seeking inexpressible at the location level) is now
+  resolved: v1.2 `conflict` gave the channel, the merge gave the venue.
+- **F5 Karlach:** top ∈ {tavern, arena}; spar/coach check moves to the arena.
+
+### Effects
+
+- Laezel: top = arena 0.27 (was training_yard 0.37 + arena 0.08); arena actions
+  drill 0.29 / spar 0.27 / fight 0.16 / spectate 0.15 / bet 0.08 / coach 0.06.
+  50-round trajectory: arena 22, market 18, tavern 10 — **tavern now visited,
+  library/chapel zero**, which also clears the round-4 residual ("statically
+  tavern 0.09 < library 0.12").
+- Karlach: arena 0.099 (rank 3), trajectory tavern 24 / market 25 / arena 1.
+  The merged venue carries conflict 0.6, which repels high-A profiles — her
+  sparring life largely moved to the tavern/market social loop. Flagged for
+  user review (canon judgement), not auto-tuned.
+- Laezel trajectory contains no `fight` picks (drill/spar alternate under
+  action satiation; fight 0.16 rarely survives the demo layer's
+  `selection_temperature = 0.1` sharpening). Static distribution keeps
+  fight ≥ spectate; noted as a demo-layer artefact, not a scorer property.
+- Gale's library margin narrowed to near-tie (library 0.204 vs market 0.196 at
+  tau_0 = 1.0; 0.208 vs 0.199 after the fix; both measured) — watch in later
+  rounds.
+
+### End state
+
+Scorecard 25/25; pytest 18/18 (world: 7 locations, arena = combat complex).

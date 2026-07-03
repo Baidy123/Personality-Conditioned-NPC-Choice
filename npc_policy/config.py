@@ -57,9 +57,11 @@ class ScorerConfig:
     base_form: str = "ideal_point"
 
     # --- per-level equation coefficients ---------------------------------------
-    # Default to identical values (== a tied single set). Tune one level without
-    # touching the other by passing a different LevelParams here.
-    location: LevelParams = field(default_factory=LevelParams)
+    # Levels started tied; round 5 (docs/tuning_log.md) sharpened the location
+    # base (tau_0 0.9) after the training_yard/arena merge shrank the world and
+    # pushed the openness endpoint TVD under its 0.15 floor. Grid-searched:
+    # 0.95-0.9 pass everything, 0.85 collapses Shadowheart's trajectory (C3).
+    location: LevelParams = field(default_factory=lambda: LevelParams(tau_0=0.9))
     action: LevelParams = field(default_factory=LevelParams)
 
     def __post_init__(self) -> None:
