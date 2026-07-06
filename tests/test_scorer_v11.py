@@ -87,6 +87,24 @@ def test_6_gamma_direction_routine_vs_novelty():
     assert after < before                      # high O: familiarity repels
 
 
+def test_8_n_familiarity_clinging():
+    # v1.3: with a familiar buffer, high N keeps more probability on the
+    # similar option than low N (anxiety clings to the recently familiar)
+    scorer = HandAuthoredScorer()
+    market = Option.location("market", social=0.7, stimulation=0.7, exploration=0.5)
+    cands = [market, LOCS[1]]                  # market vs library
+    buf = RecentBuffer(maxlen=3)
+    buf.push(LOCS[0])                          # just visited the tavern (similar to market)
+
+    def retention(n: float) -> float:
+        p = Personality.from_traits(neuroticism=n)
+        without = scorer.distribution(p, cands, level="location")[0]
+        with_buf = scorer.distribution(p, cands, buffer=buf, level="location")[0]
+        return with_buf / without
+
+    assert retention(1.0) > retention(0.0) > retention(-1.0)
+
+
 def test_7_satiation_modulated_by_C():
     # v1.2: after visiting the tavern, high C keeps more of its probability
     # (routine tolerance) than low C (gets bored fast)

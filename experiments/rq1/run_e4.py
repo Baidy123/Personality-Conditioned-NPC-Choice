@@ -3,9 +3,10 @@
 The bounded recent-choice context is a structural component of the proposal.
 E4 reruns trajectories under three conditions — no memory, location memory
 only, location + action memory — and measures what the component contributes,
-and through which traits. By design the memory term works through O and C
-(familiarity affinity) plus the C-modulated satiation; E and A should be
-largely unaffected. E4 verifies that attribution.
+and through which traits. By design the memory term works through O, C, and
+(since v1.3) N: the O/C familiarity affinity, the C-modulated satiation, and
+the N familiarity clinging. E and A should be largely unaffected. E4 verifies
+that attribution.
 
 Outputs: results/rq1/e4_ablation.png, e4_ablation.csv
 

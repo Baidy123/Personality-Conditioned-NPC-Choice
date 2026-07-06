@@ -133,7 +133,7 @@ base_i   = − Σ_f w_f·(o_i[f] − mu_f(p))²
 base_i   = p^T W^d o_i^d
 
 # memory + temperature (shared)
-gamma    = lambda_C·C − lambda_O·O
+gamma    = lambda_C·C − lambda_O·O + lambda_Nf·N   # v1.3: N clings to the familiar
 rho      = lambda_R·(1 − kappa_C·C)     # v1.2: routine-tolerant satiation
 q_i      = base_i / tau_0 + gamma·fam_i − rho·rep_i
 T_N      = exp(lambda_N·N)
@@ -149,7 +149,7 @@ only the temperature applies).
 Everything marked `PROVISIONAL` in `config.py` or `weights.py` is a starting value,
 not a decided one (`project_flow.md` §9):
 
-- the coefficients `lambda_R / lambda_O / lambda_C / lambda_N`, base temperature
+- the coefficients `lambda_R / kappa_C / lambda_O / lambda_C / lambda_N / lambda_Nf`, base temperature
   `tau_0`, `recency_decay`, buffer lengths, and the `base_form` switch live in
   `config.py` (location and action each get their own `LevelParams`, defaulting to
   equal values);

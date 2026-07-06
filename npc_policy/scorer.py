@@ -16,7 +16,7 @@ learned-model input feature only:
     base_i   = p^T W^d o_i^d
 
     # memory + temperature (shared by both base forms)
-    gamma    = lambda_C * C - lambda_O * O
+    gamma    = lambda_C * C - lambda_O * O + lambda_Nf * N   # v1.3: + N term
     rho      = lambda_R * (1 - kappa_C * C)          # v1.2: C-modulated satiation
     q_i      = base_i / tau_0 + gamma * fam_i - rho * rep_i
     T_N      = exp(lambda_N * N)
@@ -25,11 +25,17 @@ learned-model input feature only:
 ``rep`` is the repetition (satiation) penalty; since v1.2 its strength is
 modulated by Conscientiousness — high C tolerates routine, low C gets bored
 faster (pilot evidence: docs/tuning_log.md round 4). ``gamma`` makes high C
-favour recently similar options (routine) and high O avoid them (novelty
-seeking). When the relevant buffer is empty all relation features
-are 0, so ``P_rule = softmax(base / tau_0 / T_N)`` — the first action after a
-location change uses the unadjusted base distribution (only the temperature
-applies).
+favour recently similar options (routine), high O avoid them (novelty
+seeking), and — since v1.3 — high N cling to them (anxiety keeps to the
+recently familiar; docs/tuning_log.md round 7). The two N channels model
+different facets: the temperature is Volatility (erratic base preferences),
+the familiarity term is Withdrawal/Anxiety (stick to the recent and safe).
+They partially cancel in magnitude — the temperature divides the familiarity
+bonus by ``e^lambda_N`` at N=+1 — which is why ``lambda_Nf`` is larger than
+``lambda_O``/``lambda_C``. When the relevant buffer is empty all relation
+features are 0, so ``P_rule = softmax(base / tau_0 / T_N)`` — the first action
+after a location change uses the unadjusted base distribution (only the
+temperature applies).
 """
 
 from __future__ import annotations
@@ -73,7 +79,7 @@ class ScoreTrace:
     P_base: np.ndarray            # softmax(base / tau_0): memory-free distribution
     relations: Relations
     mu: np.ndarray | None         # ideal levels used; None under the bilinear fallback
-    gamma: float                  # lambda_C * C - lambda_O * O
+    gamma: float                  # lambda_C * C - lambda_O * O + lambda_Nf * N
     q: np.ndarray
     T_N: float
     P_rule: np.ndarray
@@ -186,7 +192,8 @@ class HandAuthoredScorer:
             else:
                 relations = compute_relations(candidates, buffer, cfg)
 
-        gamma = prm.lambda_C * personality.C - prm.lambda_O * personality.O
+        gamma = (prm.lambda_C * personality.C - prm.lambda_O * personality.O
+                 + prm.lambda_Nf * personality.N)
         rho = prm.lambda_R * (1.0 - prm.kappa_C * personality.C)
         q = base / prm.tau_0 + gamma * relations.sim - rho * relations.rep
         T_N = math.exp(prm.lambda_N * personality.N)

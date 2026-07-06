@@ -309,3 +309,52 @@ Scorecard 25/25; pytest 18/18.
   `CLAUDE.md` (the latter two also had stale "eight intensity features" /
   "personality-independent satiation" phrasings corrected to v1.2). The frozen
   2026-07-02 spec/plan documents keep their historical v1.1 file references.
+
+## Round 7 — 2026-07-06 · equation v1.3: N familiarity channel + memory rebalance (25/25)
+
+Trigger: supervisor review — "memory is having quite a dramatic effect, and in
+nearly all situations, it means they are less likely to choose the same thing
+as they did last time. … I don't know if I'd say it works." The memory term
+was a near-uniform anti-repeat force; personality barely modulated it
+(repeat rates: C+1 0.19, N+1 0.08, everyone else ≈ 0).
+
+Full design rationale, rejected alternative (memory outside the temperature —
+reverses the intended N effect), and grid evidence:
+`docs/specs/2026-07-06-equation-v1.3-design.md`.
+
+### Equation change (scorer.py, user-approved)
+
+- `gamma^d = lambda_C·C − lambda_O·O + lambda_Nf·N` — N joins the familiarity
+  coefficient: anxiety clings to the recently familiar (Withdrawal facet),
+  coexisting with the N temperature (Volatility facet). The temperature
+  dilutes the bonus by e^1.5 ≈ 4.5 at N=+1, hence the outsized coefficient.
+
+### Scalar changes (config.py, grid-searched 36 cells, tied across levels)
+
+| knob | from → to | reason |
+|---|---|---|
+| `lambda_R` | 1.2 → 0.7 | lower the uniform anti-repeat floor; gives O−1 its channel (0.02 → 0.22) |
+| `kappa_C` | 0.5 → 0.8 | high C nearly immune to satiation; C+1 repeat 0.19 → 0.73 (kappa 1.0 rejected: locks to 2 locations at 0.83+) |
+| `lambda_O` / `lambda_C` | 1.0 → 2.0 | strengthen the trait-carrying familiarity term |
+| `lambda_Nf` | (new) 3.0 | N+1 repeat 0.08 → 0.36 |
+
+### Criterion revision
+
+- C3 named min distinct 3 → 2 (share/neutral bounds unchanged). Shadowheart
+  (N 0.6, C 0.4) now cycles chapel↔library — the new channel working on the
+  most anxious named profile; judged in character by the user. Precedent:
+  round 4 loosened C3 for C-driven concentration.
+
+### Effects
+
+- Memory now has personality-dependent sign: attracts C+1 (+0.13 vs
+  memory-free), N+1 (+0.08); repels O+1/C−1 (−0.52/−0.54); E/A near-unaffected
+  (base-driven, attribution intact); neutral guard intact (0.05 repeat,
+  5.9 distinct).
+- E1 N expression up (ctx-avg TVD 0.48); B4 entropy gap 0.42 → 0.60;
+  E2 Spearman ρ 0.451 → 0.430 (Mantel p = 0.001) — acceptable.
+- Scorecard 25/25; pytest 20/20 (2 new tests). E1–E4 figures regenerated.
+
+### End state
+
+Scorecard 25/25; pytest 20/20.

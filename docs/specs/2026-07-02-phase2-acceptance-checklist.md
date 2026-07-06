@@ -63,13 +63,15 @@ for structure seeking).
 - **C2 (routine/novelty magnitude):** with `tavern` in `H_L`, `P_rule(market)`
   changes vs empty memory by a factor in **[1.15, 2.0]** for C=+1 (up) and
   **[0.5, 0.87]** for O=+1 (down).
-- **C3 (no behavioural collapse; revised round 4):** 50-round controller
+- **C3 (no behavioural collapse; revised rounds 4, 7):** 50-round controller
   trajectory (sample mode, seed 42, `selection_temperature = 0.1`).
   **Neutral profile** (mechanism-degeneracy guard): no location **> 60%** of
   visits, at least **4 distinct** locations. **Named profiles**: no location
-  **> 75%**, at least **3 distinct** — looser because v1.2's C-modulated
+  **> 75%**, at least **2 distinct** — looser because v1.2's C-modulated
   satiation deliberately lets routine (high-C) personalities concentrate
-  (docs/tuning_log.md round 4); personality-driven concentration is a feature,
+  (docs/tuning_log.md round 4), and v1.3's N familiarity channel lets anxious
+  profiles cling to a couple of safe locations (round 7, Shadowheart:
+  chapel↔library); personality-driven concentration is a feature,
   mechanism-driven collapse is not.
 - **C4 (action-level satiation):** stay at the tavern for consecutive decisions;
   after choosing `chat` once, `P_rule(chat)` on the next same-location decision
