@@ -11,6 +11,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,7 +35,7 @@ S0_MODELS = ("simple", "nonlinear", "agnostic_simple", "agnostic_nonlinear")
 SEEDS = tuple(range(5))
 G_SPLITS = ("G1", "G2", "G3", "G4", "G5", "G6")
 ALL_SPLITS = ("S0",) + G_SPLITS
-ABLATIONS = ("none", "location_only")   # "full" is the S0 main configuration
+ABLATIONS = ("no_context", "location_only")   # "full" is the S0 main configuration
 DATA_SIZES = (1_000, 5_000, 20_000)     # 100k point reuses the S0 main runs
 
 
@@ -46,27 +47,39 @@ def dirs(smoke: bool) -> tuple[Path, Path]:
 
 
 def config_hash(config: ScorerConfig = DEFAULT_CONFIG) -> str:
-    """SHA-256 of the serialised scorer config — pins the frozen teacher."""
+    """SHA-256 of the serialised scorer config — pins the teacher's config values
+    (not the scorer implementation)."""
     payload = json.dumps(dataclasses.asdict(config), sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 # ------------------------------------------------------------------ pool I/O --
 def write_pool(path: Path, records: list[tuple[ControlledCase, dict]]) -> None:
+    """Write a JSONL pool atomically; buffer lists are stored oldest→newest.
+
+    The file is written to a ``.tmp`` sibling and renamed into place, so an
+    interrupted process can never leave a silently truncated pool file.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
         for case, tags in records:
             d = case.to_dict()
             d["gen"] = tags
             f.write(json.dumps(d) + "\n")
+    os.replace(tmp, path)
 
 
 def read_pool(path: Path) -> list[tuple[ControlledCase, dict]]:
+    """Read a JSONL pool; buffer lists are stored oldest→newest.
+
+    A record without ``"gen"`` tags is corruption and raises ``KeyError``.
+    """
     records = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
-            tags = d.pop("gen", {})
+            tags = d.pop("gen")
             records.append((ControlledCase.from_dict(d), tags))
     return records
 
@@ -78,11 +91,17 @@ def case_to_inputs(case: ControlledCase, ablation: str = "full") -> dict:
     Action cases take the selected location's features from the newest
     ``recent_locations`` entry — the controller pushes the chosen location into
     ``H_L`` before the action choice, and generation guarantees the invariant.
-    ``ablation`` zeroes relation *inputs* ("none": both levels; "location_only":
-    action cases only); targets are never touched (retrained-ablation design).
+    ``ablation`` zeroes relation *inputs* ("no_context": both levels;
+    "location_only": action cases only); targets are never touched
+    (retrained-ablation design).
     """
-    if ablation not in ("full", "none", "location_only"):
+    if ablation not in ("full", "no_context", "location_only"):
         raise ValueError(f"unknown ablation {ablation!r}")
+    if case.decision_type == "location" and case.selected_location is not None:
+        raise ValueError(
+            "location case carries a stale selected_location "
+            f"({case.selected_location!r}); location cases must have None"
+        )
     selected = None
     if case.decision_type == "action":
         if (not case.recent_locations
@@ -93,14 +112,14 @@ def case_to_inputs(case: ControlledCase, ablation: str = "full") -> dict:
             )
         selected = case.recent_locations[-1]
     relations = case.candidate_history_features
-    if ablation == "none" or (ablation == "location_only" and case.decision_type == "action"):
+    if ablation == "no_context" or (ablation == "location_only" and case.decision_type == "action"):
         relations = None
     d = case_inputs(
-        Personality(np.asarray(case.personality, dtype=float)),
+        Personality(np.array(case.personality, dtype=float)),   # copy: no aliasing
         case.candidates, case.decision_type,
         relations=relations, selected_location=selected,
     )
-    d["target"] = np.asarray(case.target_distribution, dtype=float)
+    d["target"] = np.array(case.target_distribution, dtype=float)   # copy: no aliasing
     return d
 
 
@@ -109,6 +128,9 @@ def kl_np(t: np.ndarray, q: np.ndarray) -> float:
     """``KL(t ‖ q)`` in nats; exact at ``t_i = 0`` (``q > 0`` from the softmax)."""
     t, q = np.asarray(t, dtype=float), np.asarray(q, dtype=float)
     pos = t > 0
+    # float64 softmax can underflow to exact 0 for logit gaps > ~745; an inf
+    # here would poison mean aggregation, so floor q at the smallest positive.
+    q = np.maximum(q, np.finfo(float).tiny)
     return float((t[pos] * (np.log(t[pos]) - np.log(q[pos]))).sum())
 
 
@@ -118,6 +140,7 @@ def jsd_np(p: np.ndarray, q: np.ndarray) -> float:
 
 
 def top1_agree(t: np.ndarray, q: np.ndarray) -> bool:
+    """Argmax tie-breaking is first-index, so ties resolve by candidate order."""
     return int(np.argmax(t)) == int(np.argmax(q))
 
 
@@ -160,7 +183,10 @@ def run_matrix(smoke: bool = False) -> list[RunSpec]:
 
 
 def build_model(name: str, seed: int):
-    """Fresh model, CPU/float64 (the model layer's native precision)."""
+    """Fresh model, CPU/float64 (the model layer's native precision).
+
+    Seeds the *global* torch RNG (``torch.manual_seed``) before construction.
+    """
     import torch
 
     from npc_policy.learned import AgnosticPolicy, NonlinearPolicy, SimplePolicy

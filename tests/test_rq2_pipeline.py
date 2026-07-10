@@ -61,6 +61,50 @@ class TestCommon:
         assert back.decision_type == "location"
         np.testing.assert_allclose(back.target_distribution, case.target_distribution)
 
+    def test_pool_roundtrip_maximal_action_case(self, tmp_path):
+        from npc_policy.relations import Relations
+
+        home = _loc("home", social=0.4, privacy=0.9)
+        far = _loc("far", stimulation=0.6)
+        acts = [_act("rest", social=0.2), _act("read", cognitive=0.8)]
+        rel = Relations(np.array([0.5, 0.0]), np.array([0.7, 0.2]), np.array([0.3, 0.8]))
+        case = _mk_case(
+            "action", personality=[0.5, -0.3, 0.1, 0.9, -1.0], n_cand=2,
+            selected="home", recent_locs=[far, home], recent_acts=acts,
+            target=[0.25, 0.75],
+        )
+        case.candidate_history_features = rel
+        common.write_pool(tmp_path / "p.jsonl", [(case, {"id": "roll-000001", "source": "rollout", "world": "full"})])
+        [(back, tags)] = common.read_pool(tmp_path / "p.jsonl")
+        assert tags == {"id": "roll-000001", "source": "rollout", "world": "full"}
+        np.testing.assert_allclose(back.personality, case.personality)
+        assert back.decision_type == "action"
+        assert back.selected_location == "home"
+        assert [o.id for o in back.candidates] == [o.id for o in case.candidates]
+        assert [o.level for o in back.candidates] == [o.level for o in case.candidates]
+        for b, o in zip(back.candidates, case.candidates):
+            np.testing.assert_allclose(b.features, o.features)
+        assert [o.id for o in back.recent_locations] == ["far", "home"]
+        assert [o.level for o in back.recent_locations] == ["location", "location"]
+        for b, o in zip(back.recent_locations, case.recent_locations):
+            np.testing.assert_allclose(b.features, o.features)
+        assert [o.id for o in back.recent_actions_same_location] == ["rest", "read"]
+        assert [o.level for o in back.recent_actions_same_location] == ["action", "action"]
+        for b, o in zip(back.recent_actions_same_location, case.recent_actions_same_location):
+            np.testing.assert_allclose(b.features, o.features)
+        assert back.candidate_history_features is not None
+        np.testing.assert_allclose(back.candidate_history_features.rep, rel.rep)
+        np.testing.assert_allclose(back.candidate_history_features.sim, rel.sim)
+        np.testing.assert_allclose(back.candidate_history_features.nov, rel.nov)
+        np.testing.assert_allclose(back.target_distribution, case.target_distribution)
+
+    def test_read_pool_rejects_missing_gen_tags(self, tmp_path):
+        d = _mk_case().to_dict()   # no "gen" key: a tagless record is corruption
+        path = tmp_path / "p.jsonl"
+        path.write_text(json.dumps(d) + "\n", encoding="utf-8")
+        with pytest.raises(KeyError):
+            common.read_pool(path)
+
     def test_case_to_inputs_action_uses_newest_recent_location(self):
         home = _loc("home", social=0.4, privacy=0.9)
         case = _mk_case("action", selected="home", recent_locs=[_loc("far"), home])
@@ -74,15 +118,26 @@ class TestCommon:
         with pytest.raises(ValueError):
             common.case_to_inputs(case)
 
+    def test_case_to_inputs_rejects_stale_selected_location_on_location_case(self):
+        case = _mk_case("location", selected="home", recent_locs=[_loc("home")])
+        with pytest.raises(ValueError):
+            common.case_to_inputs(case)
+
+    def test_case_to_inputs_copies_arrays(self):
+        case = _mk_case()
+        d = common.case_to_inputs(case)
+        assert not np.shares_memory(d["p"], case.personality)
+        assert not np.shares_memory(d["target"], case.target_distribution)
+
     def test_ablation_zeroes_relations(self):
         from npc_policy.relations import Relations
         rel = Relations(np.array([0.5, 0.0]), np.array([0.7, 0.2]), np.array([0.3, 0.8]))
         case = _mk_case(n_cand=2)
         case.candidate_history_features = rel
         full = common.case_to_inputs(case, "full")
-        none = common.case_to_inputs(case, "none")
+        no_ctx = common.case_to_inputs(case, "no_context")
         assert full["rel"].any()
-        assert not none["rel"].any()
+        assert not no_ctx["rel"].any()
         # location_only keeps location-case relations, zeroes action-case ones
         loc_only = common.case_to_inputs(case, "location_only")
         assert loc_only["rel"].any()
@@ -97,6 +152,13 @@ class TestCommon:
         assert common.kl_np(t, q) == pytest.approx(np.log(2.0))
         assert common.kl_np(t, t) == pytest.approx(0.0)
         assert common.jsd_np(t, t) == pytest.approx(0.0)
+        # nonzero JSD pins: disjoint supports hit the log(2) maximum, and the
+        # mixed case must match the definitional 0.5*KL(t‖m) + 0.5*KL(q‖m)
+        assert common.jsd_np(np.array([1.0, 0.0]), np.array([0.0, 1.0])) == pytest.approx(np.log(2.0))
+        m = np.array([0.75, 0.25])
+        assert common.jsd_np(t, q) == pytest.approx(
+            0.5 * common.kl_np(t, m) + 0.5 * common.kl_np(q, m)
+        )
         assert common.top1_agree(np.array([0.9, 0.1]), np.array([0.6, 0.4]))
         assert not common.top1_agree(np.array([0.9, 0.1]), np.array([0.4, 0.6]))
 
