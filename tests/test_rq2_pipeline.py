@@ -412,3 +412,94 @@ class TestSplits:
         pert.candidates[0] = _loc("arena#p9", risk=0.8)
         assert g.g6_touches_arena(pert), "perturbed arena variants count as arena"
         assert not g.g6_touches_arena(_mk_case())
+
+
+class TestTraining:
+    @pytest.fixture(scope="class")
+    @classmethod
+    def tiny_cases(cls):
+        """Representable teacher (bilinear, N temperature off) — design §6 item 3."""
+        from experiments.rq2 import gen_controlled as g
+        from npc_policy import load_world
+        from npc_policy.config import LevelParams
+        worlds = g.ensure_worlds()
+        world = load_world(worlds["full"])
+        cfg = ScorerConfig(
+            base_form="bilinear",
+            location=LevelParams(tau_0=0.9, lambda_N=0.0),
+            action=LevelParams(lambda_N=0.0),
+        )
+        scorer = HandAuthoredScorer(config=cfg)
+        s = g.SyntheticSampler(world, scorer, np.random.default_rng(7))
+        cases = ([s.location_case() for _ in range(150)]
+                 + [s.action_case() for _ in range(150)])
+        return cases[:240], cases[240:]        # train, val
+
+    def test_simple_converges_on_representable_teacher(self, tiny_cases):
+        import torch
+        from experiments.rq2 import train as tr
+        train_cases, val_cases = tiny_cases
+        result, state = tr.train_one(
+            common.RunSpec("S0", "simple", 0), train_cases, val_cases,
+            device=torch.device("cpu"),
+            lr=0.05, batch_size=60, max_epochs=500, patience=500,
+        )
+        # representable target (bilinear teacher, N temperature off) + overdetermined
+        # (240 cases >> 228 params) -> near-zero KL certifies representability, not
+        # interpolation (dev_log.md 2026-07-09 lesson). Adam is slower than the
+        # LBFGS certificate in test_learned.py, hence the looser 1e-3 bar.
+        assert result["best_val_kl"] < 1e-3
+        assert result["dtype"] == "float64"
+        assert all(v.dtype == torch.float64 for v in state.values())
+
+    def test_early_stopping_triggers(self, tiny_cases):
+        import torch
+        from experiments.rq2 import train as tr
+        train_cases, val_cases = tiny_cases
+        result, _ = tr.train_one(
+            common.RunSpec("S0", "simple", 0), train_cases[:40], val_cases[:20],
+            device=torch.device("cpu"),
+            lr=0.0, batch_size=40, max_epochs=100, patience=5,
+        )
+        assert result["epochs_run"] == 6       # epoch 0 sets best; 5 stale epochs; stop
+
+    def test_run_all_resumes(self, tiny_cases, tmp_path):
+        import torch
+        from experiments.rq2 import train as tr
+        train_cases, val_cases = tiny_cases
+        specs = [common.RunSpec("S0", "simple", 0), common.RunSpec("S0", "simple", 1)]
+        calls = []
+
+        def fake_train(spec, tc, vc, device, **kw):
+            calls.append(spec.run_id)
+            return ({"run_id": spec.run_id, "best_val_kl": 0.5, "dtype": "float64"},
+                    common.build_model(spec.model, spec.seed).state_dict())
+
+        loader = lambda spec: (train_cases[:10], val_cases[:10])
+        tr.run_all(specs, loader, tmp_path, torch.device("cpu"), train_fn=fake_train)
+        assert sorted(calls) == [s.run_id for s in specs]
+        assert (tmp_path / "runs" / "S0__simple__s0.json").exists()
+        assert (tmp_path / "models" / "S0__simple__s0.pt").exists()
+        calls.clear()
+        tr.run_all(specs, loader, tmp_path, torch.device("cpu"), train_fn=fake_train)
+        assert calls == []                     # everything skipped on re-run
+
+    def test_agnostic_ignores_personality_after_training(self, tiny_cases):
+        import torch
+        from experiments.rq2 import train as tr
+        from npc_policy.learned import predict_distribution
+        train_cases, val_cases = tiny_cases
+        _, state = tr.train_one(
+            common.RunSpec("S0", "agnostic_simple", 0), train_cases[:60], val_cases[:20],
+            device=torch.device("cpu"), lr=0.05, batch_size=60, max_epochs=20, patience=20,
+        )
+        model = common.build_model("agnostic_simple", 0)
+        model.load_state_dict(state)
+        case = train_cases[0]
+        d1 = predict_distribution(model, Personality(np.array([1.0, -1, 1, -1, 1])),
+                                  case.candidates, "location",
+                                  relations=case.candidate_history_features)
+        d2 = predict_distribution(model, Personality(np.zeros(5)),
+                                  case.candidates, "location",
+                                  relations=case.candidate_history_features)
+        np.testing.assert_allclose(d1, d2, atol=1e-12)
