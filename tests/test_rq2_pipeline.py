@@ -239,3 +239,101 @@ class TestGeneration:
         assert first.decision_type == "location"
         assert not first.recent_locations
         assert not first.candidate_history_features.rep.any()
+
+
+class TestSplits:
+    @pytest.fixture(scope="class")
+    @classmethod
+    def tiny_dataset(cls, tmp_path_factory):
+        """End-to-end tiny generation into a temp dir (same code path as the CLI)."""
+        from experiments.rq2 import gen_controlled as g
+        out = tmp_path_factory.mktemp("rq2data")
+        sizes = dict(n_syn_loc=120, n_syn_act=120,
+                     n_traj={"full": 1, "celebration": 1, "war_camp": 1,
+                             "market_locked": 1, "arena_locked": 2},
+                     train=60, val=15, n_test=12, rounds=10)
+        g.generate(sizes, out, seed=123)
+        return g, out
+
+    def test_outputs_exist(self, tiny_dataset):
+        g, out = tiny_dataset
+        assert (out / "pool.jsonl").exists()
+        assert (out / "splits.json").exists()
+        assert (out / "meta.json").exists()
+        for split in common.ALL_SPLITS:
+            assert (out / f"test_{split}.jsonl").exists()
+        meta = json.loads((out / "meta.json").read_text(encoding="utf-8"))
+        assert meta["config_hash"] == common.config_hash()
+
+    def test_manifests_disjoint_and_sized(self, tiny_dataset):
+        g, out = tiny_dataset
+        manifest = json.loads((out / "splits.json").read_text(encoding="utf-8"))
+        s0_test = set(manifest["s0_test_ids"])
+        for split, part in manifest["splits"].items():
+            train, val = part["train"], part["val"]
+            assert len(train) == 60 and len(val) == 15
+            assert not set(train) & set(val)
+            assert not set(train) & s0_test and not set(val) & s0_test
+
+    def test_train_filters_hold(self, tiny_dataset):
+        g, out = tiny_dataset
+        records = common.read_pool(out / "pool.jsonl")
+        by_id = {t["id"]: (c, t) for c, t in records}
+        manifest = json.loads((out / "splits.json").read_text(encoding="utf-8"))
+        for split in common.ALL_SPLITS:
+            for cid in manifest["splits"][split]["train"]:
+                case, tags = by_id[cid]
+                assert g.TRAIN_FILTERS[split](case, tags), f"{split}: {cid}"
+        # arena_locked cases may appear in G6 only
+        for split in common.ALL_SPLITS:
+            if split == "G6":
+                continue
+            for cid in manifest["splits"][split]["train"]:
+                assert by_id[cid][1]["world"] != "arena_locked"
+
+    def test_targeted_test_sets_satisfy_conditions(self, tiny_dataset):
+        g, out = tiny_dataset
+        checks = {
+            "G1": lambda c: c.personality[0] > 0.5 and c.personality[1] < -0.5,
+            "G2": lambda c: c.decision_type == "location" and any(
+                o.tag("risk") > 0.6 and o.tag("privacy") > 0.6 for o in c.candidates),
+            "G3": lambda c: c.decision_type == "location" and len(c.candidates) in (2, 8),
+            "G5": lambda c: g.g5_has_3run(c),
+            "G6": lambda c: g.g6_touches_arena(c),
+        }
+        for split, ok in checks.items():
+            cases = [c for c, _ in common.read_pool(out / f"test_{split}.jsonl")]
+            assert len(cases) == 12
+            assert all(ok(c) for c in cases), split
+        g4 = common.read_pool(out / "test_G4.jsonl")
+        assert all(t["world"] in ("celebration", "war_camp", "market_locked")
+                   for _, t in g4)
+
+    def test_test_labels_match_teacher(self, tiny_dataset):
+        g, out = tiny_dataset
+        scorer = HandAuthoredScorer()
+        for split in ("G1", "G2", "G5", "G6"):
+            for c, _ in common.read_pool(out / f"test_{split}.jsonl"):
+                expect = scorer.distribution(
+                    Personality(c.personality), c.candidates,
+                    relations=c.candidate_history_features, level=c.decision_type)
+                np.testing.assert_allclose(c.target_distribution, expect, atol=1e-12)
+
+    def test_predicates_on_crafted_cases(self):
+        from experiments.rq2 import gen_controlled as g
+        inside = _mk_case(personality=[0.6, -0.7, 0, 0, 0])
+        outside = _mk_case(personality=[0.6, 0.0, 0, 0, 0])
+        assert g.g1_region(inside) and not g.g1_region(outside)
+        risky = _mk_case()
+        risky.candidates[0] = _loc("den", risk=0.8, privacy=0.9)
+        assert g.g2_combo(risky) and not g.g2_combo(_mk_case())
+        rep3 = _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("a")])
+        rep2 = _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("b")])
+        assert g.g5_has_3run(rep3) and not g.g5_has_3run(rep2)
+        arena = _mk_case()
+        arena.candidates[0] = _loc("arena", risk=0.8)
+        assert g.g6_touches_arena(arena)
+        pert = _mk_case()
+        pert.candidates[0] = _loc("arena#p9", risk=0.8)
+        assert g.g6_touches_arena(pert), "perturbed arena variants count as arena"
+        assert not g.g6_touches_arena(_mk_case())
