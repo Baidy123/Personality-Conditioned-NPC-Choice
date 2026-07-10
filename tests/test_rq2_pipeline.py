@@ -179,3 +179,63 @@ class TestCommon:
             assert isinstance(m, torch.nn.Module)
         with pytest.raises(ValueError):
             common.build_model("mlp", 0)
+
+
+class TestGeneration:
+    @pytest.fixture(scope="class")
+    @classmethod
+    def gen(cls):
+        from experiments.rq2 import gen_controlled as g
+        from npc_policy import load_world
+        g_worlds = g.ensure_worlds()          # rq1 variants + arena_locked path dict
+        world = load_world(g_worlds["full"])
+        scorer = HandAuthoredScorer()
+        return g, world, scorer
+
+    def test_synthetic_location_labels_match_teacher(self, gen):
+        g, world, scorer = gen
+        s = g.SyntheticSampler(world, scorer, np.random.default_rng(1))
+        for _ in range(20):
+            c = s.location_case()
+            assert 2 <= len(c.candidates) <= 8
+            ids = [o.id for o in c.candidates]
+            assert len(set(ids)) == len(ids)
+            expect = scorer.distribution(
+                Personality(c.personality), c.candidates,
+                relations=c.candidate_history_features, level="location")
+            np.testing.assert_allclose(c.target_distribution, expect, atol=1e-12)
+
+    def test_synthetic_action_case_invariants(self, gen):
+        g, world, scorer = gen
+        s = g.SyntheticSampler(world, scorer, np.random.default_rng(2))
+        for _ in range(20):
+            c = s.action_case()
+            assert c.decision_type == "action"
+            assert c.recent_locations, "action case must carry its location context"
+            assert c.recent_locations[-1].id == c.selected_location
+            expect = scorer.distribution(
+                Personality(c.personality), c.candidates,
+                relations=c.candidate_history_features, level="action")
+            np.testing.assert_allclose(c.target_distribution, expect, atol=1e-12)
+            # feeds the model layer without tripping the action-context guard
+            common.case_to_inputs(c)
+
+    def test_rollout_labels_and_buffers(self, gen):
+        g, world, scorer = gen
+        recs = g.rollout_records("full", world, scorer, n_traj=1,
+                                 rng=np.random.default_rng(3), rounds=6)
+        assert len(recs) == 12                       # 6 location + 6 action cases
+        for case, tags in recs:
+            assert tags["source"] == "rollout" and tags["world"] == "full"
+            expect = scorer.distribution(
+                Personality(case.personality), case.candidates,
+                relations=case.candidate_history_features,
+                level=case.decision_type)
+            np.testing.assert_allclose(case.target_distribution, expect, atol=1e-12)
+            if case.decision_type == "action":
+                assert case.recent_locations[-1].id == case.selected_location
+        # very first location case: empty buffer -> zero relations
+        first = recs[0][0]
+        assert first.decision_type == "location"
+        assert not first.recent_locations
+        assert not first.candidate_history_features.rep.any()
