@@ -1681,7 +1681,7 @@ def main(argv=None) -> None:
         if main and agn:
             diag_rows.append(["agnostic_gap", fam,
                               agn[0]["kl_mean"] - main[0]["kl_mean"], ""])
-        for abl in ("none", "location_only"):          # ablation deltas
+        for abl in ("no_context", "location_only"):    # ablation deltas
             row = _lookup(table, split="S0", model=fam, ablation=abl, n_train=None,
                           eval_set="S0", decision_type="all")
             if main and row:
@@ -2217,6 +2217,13 @@ git commit -m "rq2 2a: Chinese runbook for the four-step pipeline"
 ```
 
 ---
+
+## Post-review amendments (as-executed deviations)
+
+- **Ablation renamed `"none"` → `"no_context"`** (Task 1 quality review): `"none"` read as "no ablation" while actually meaning "no recent-choice context", and the string is baked into resumable run ids. `ABLATIONS = ("no_context", "location_only")`; `case_to_inputs` accepts `("full", "no_context", "location_only")`. Task 5's diagnostics loop updated above; any other literal `"none"` for ablations in this plan should be read as `"no_context"`. (The trajectory **memory conditions** in Task 6 — `"full"/"location_only"/"none"` — follow the RQ1 convention and are NOT renamed.)
+- **Generation sizes raised** (Task 2/3 implementer, measured): the sizes above under-fill G6 — rollout location cases in arena-unlocked worlds always contain `arena`, so only ~35% of synthetic location cases survive the G6 filter and the plan's pool leaves G6 at ~93k < 105k. As-built: `arena_locked` trajectories 300 → 500 full (pool ≈ 190k), 4 → 8 smoke; the `RuntimeError` guard in `generate()` still protects any future size change.
+- **Fixture style** (pytest 9 deprecation): class-scoped fixtures are declared as plain functions with `@pytest.fixture(scope="class")`, not instance methods, to keep the suite at 0 warnings.
+- **Task 1 hardening** (quality review): atomic `write_pool` (tmp + `os.replace`); `read_pool` requires the `gen` tag; `case_to_inputs` also rejects a location case carrying a `selected_location`, and copies `p`/`target` arrays; `kl_np` floors `q` at `np.finfo(float).tiny`; JSD pinned at nonzero values and a maximal-case pool round-trip test added; docstrings clarified (buffer order oldest→newest on disk, `config_hash` pins config values not scorer code, `build_model` seeds the global torch RNG, `top1_agree` tie-breaking).
 
 ## Post-plan notes for the coordinator
 
