@@ -503,3 +503,60 @@ class TestTraining:
                                   case.candidates, "location",
                                   relations=case.candidate_history_features)
         np.testing.assert_allclose(d1, d2, atol=1e-12)
+
+
+class TestRun2A:
+    def test_eval_cases_uniform_pin(self):
+        from experiments.rq2 import run_2a
+        from npc_policy.learned import UniformBaseline
+        case = _mk_case(n_cand=2, target=[1.0, 0.0])
+        rows = run_2a.eval_cases(UniformBaseline(), [case])
+        assert len(rows) == 1
+        assert rows[0]["decision_type"] == "location"
+        assert rows[0]["kl"] == pytest.approx(np.log(2.0))
+        assert rows[0]["top1"] == 1               # argmax tie resolves to index 0
+
+    def test_eval_cases_applies_ablation(self):
+        from experiments.rq2 import run_2a
+        from npc_policy.learned import SimplePolicy
+        import torch
+        from npc_policy.relations import Relations
+        torch.manual_seed(0)
+        model = SimplePolicy()
+        with torch.no_grad():
+            model.w += torch.randn_like(model.w)
+        case = _mk_case(n_cand=3)
+        case.candidate_history_features = Relations(
+            np.array([0.9, 0.0, 0.0]), np.array([0.8, 0.1, 0.1]), np.array([0.2, 0.9, 0.9]))
+        r_full = run_2a.eval_cases(model, [case], ablation="full")[0]
+        r_none = run_2a.eval_cases(model, [case], ablation="no_context")[0]
+        assert r_full["kl"] != pytest.approx(r_none["kl"])
+
+    def test_aggregate_mean_std(self):
+        from experiments.rq2 import run_2a
+        per_run = [
+            {"split": "S0", "model": "simple", "ablation": "full", "n_train": None,
+             "seed": s, "eval_split": "S0", "decision_type": "all",
+             "kl": v, "jsd": v / 2, "top1": 1.0, "n_cases": 10}
+            for s, v in enumerate([0.1, 0.2, 0.3])
+        ]
+        table = run_2a.aggregate(per_run)
+        [row] = table
+        assert row["kl_mean"] == pytest.approx(0.2)
+        assert row["kl_std"] == pytest.approx(np.std([0.1, 0.2, 0.3]))
+        assert row["n_seeds"] == 3
+
+    def test_load_student_roundtrip(self, tmp_path):
+        import torch
+        from experiments.rq2 import run_2a
+        from npc_policy.learned import predict_distribution
+        model = common.build_model("nonlinear", seed=3)
+        (tmp_path / "models").mkdir()
+        torch.save({"model": "nonlinear", "state_dict": model.state_dict()},
+                   tmp_path / "models" / "X.pt")
+        back = run_2a.load_student(tmp_path, "X")
+        case = _mk_case(n_cand=4)
+        p = Personality(np.array([0.3, -0.2, 0.5, 0.0, -0.9]))
+        np.testing.assert_allclose(
+            predict_distribution(model, p, case.candidates, "location"),
+            predict_distribution(back, p, case.candidates, "location"), atol=1e-12)
