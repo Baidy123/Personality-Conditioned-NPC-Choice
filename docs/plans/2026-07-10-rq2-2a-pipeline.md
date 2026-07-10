@@ -2256,6 +2256,20 @@ git commit -m "rq2 2a: Chinese runbook for the four-step pipeline"
 - **Fixture style** (pytest 9 deprecation): class-scoped fixtures are declared as plain functions with `@pytest.fixture(scope="class")`, not instance methods, to keep the suite at 0 warnings.
 - **Task 1 hardening** (quality review): atomic `write_pool` (tmp + `os.replace`); `read_pool` requires the `gen` tag; `case_to_inputs` also rejects a location case carrying a `selected_location`, and copies `p`/`target` arrays; `kl_np` floors `q` at `np.finfo(float).tiny`; JSD pinned at nonzero values and a maximal-case pool round-trip test added; docstrings clarified (buffer order oldest→newest on disk, `config_hash` pins config values not scorer code, `build_model` seeds the global torch RNG, `top1_agree` tie-breaking).
 
+- **Final-review hardening** (holistic review, commit 00f616c): E1 N-entropy and
+  E2 Mantel computed per seed then mean ± std (entropy of the seed-mean
+  distribution is Jensen-inflated exactly where seeds disagree — the
+  pre-registered regime); `train.py` and `run_e_diag.py` refuse to run if
+  `config_hash()` differs from the dataset's `meta.json` (frozen-teacher drift
+  guard); run result/model files written atomically; RuntimeError on
+  all-NaN val KL; aggregate std uses ddof=1; `eval_splits_for()` extracted and
+  unit-pinned; tests added for best-state snapshotting and `make_loader`
+  prefix nesting; `run_all` progress print tolerates injected train_fn results.
+- **Execution-mode change** (user, token cost): Groups C–E were implemented
+  inline by the coordinator instead of per-task subagents; per-task dual
+  reviews were replaced by the single final holistic review above. Groups A–B
+  retained the full subagent + dual-review flow.
+
 ## Post-plan notes for the coordinator
 
 - Smoke outputs created during Step 7.2 (`data/rq2_controlled_smoke/`, `results/rq2_smoke/`) are verification artefacts — do **not** commit them; leave them for the user to compare against when he runs the smoke himself.
