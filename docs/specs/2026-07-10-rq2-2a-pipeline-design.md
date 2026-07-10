@@ -74,7 +74,9 @@ consecutive repeats), labelled by the same frozen teacher.
   therefore only removes non-base rollout cases.
 - G6 (`arena` left out): rollout location cases always contain `arena`, so the
   G6 train pool adds extra rollouts on an arena-locked world variant to
-  preserve the mixture.
+  preserve the mixture. The variant file lives with the other world variants
+  (`data/rq1_cases/worlds/arena_locked.json`, written idempotently by the
+  generator).
 
 Smoke mode: ~2k pool, ~300 per test set, same code paths.
 
