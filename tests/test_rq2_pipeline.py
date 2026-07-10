@@ -560,3 +560,61 @@ class TestRun2A:
         np.testing.assert_allclose(
             predict_distribution(model, p, case.candidates, "location"),
             predict_distribution(back, p, case.candidates, "location"), atol=1e-12)
+
+
+class TestEDiag:
+    @pytest.fixture()
+    def setup(self):
+        import torch
+        from experiments.rq2 import run_e_diag as ed
+        from experiments.rq2 import gen_controlled as g
+        from npc_policy import load_world
+        from npc_policy.learned import SimplePolicy
+        torch.manual_seed(11)
+        model = SimplePolicy()
+        with torch.no_grad():
+            model.w += 0.3 * torch.randn_like(model.w)
+        world = load_world(g.ensure_worlds()["full"])
+        return ed, ed.StudentTraceAdapter(model), world, model
+
+    def test_adapter_matches_predict_distribution(self, setup):
+        from npc_policy import RecentBuffer
+        from npc_policy.learned import predict_distribution
+        from npc_policy.relations import compute_relations
+        ed, adapter, world, model = setup
+        p = Personality(np.array([0.5, -0.5, 0.2, 0.0, -0.3]))
+        locs = world.resolve()
+        # empty buffer
+        np.testing.assert_allclose(
+            adapter.trace(p, locs, buffer=None, level="location").P_rule,
+            predict_distribution(model, p, locs, "location"), atol=1e-12)
+        # non-empty buffer -> relations computed exactly as the controller would
+        buf = RecentBuffer(maxlen=3)
+        buf.push(locs[0]); buf.push(locs[2])
+        rel = compute_relations(locs, buf, DEFAULT_CONFIG)
+        np.testing.assert_allclose(
+            adapter.trace(p, locs, buffer=buf, level="location").P_rule,
+            predict_distribution(model, p, locs, "location", relations=rel), atol=1e-12)
+        # action level uses current_location as the context
+        adapter.current_location = locs[1]
+        acts = world.actions_at(locs[1].id)
+        np.testing.assert_allclose(
+            adapter.trace(p, acts, buffer=None, level="action").P_rule,
+            predict_distribution(model, p, acts, "action",
+                                 selected_location=locs[1]), atol=1e-12)
+
+    def test_adapter_action_without_location_raises(self, setup):
+        ed, adapter, world, model = setup
+        adapter.current_location = None
+        with pytest.raises(ValueError):
+            adapter.trace(Personality(np.zeros(5)),
+                          world.actions_at("tavern"), level="action")
+
+    def test_student_trajectory_runs_and_tracks_location(self, setup):
+        ed, adapter, world, model = setup
+        p = Personality(np.array([0.2, 0.2, 0.2, 0.2, 0.2]))
+        for memory in ("full", "location_only", "none"):
+            visits, acts = ed.student_trajectory(adapter, world, p, seed=0,
+                                                 rounds=4, memory=memory)
+            assert len(visits) == len(acts) == 4
+            assert adapter.current_location.id == visits[-1]
