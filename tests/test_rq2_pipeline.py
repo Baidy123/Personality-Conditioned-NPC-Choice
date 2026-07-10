@@ -241,6 +241,30 @@ class TestGeneration:
         assert not first.candidate_history_features.rep.any()
 
 
+def _held_out_checks(g) -> dict:
+    """Independent restatements of each split's held-out condition.
+
+    Used positively on test sets and NEGATED on train/val manifests — the
+    negated direction is what catches an inverted/no-op TRAIN_FILTERS entry
+    (2026-07-10 quality review, I1); validating manifests with TRAIN_FILTERS
+    itself would be circular.
+    """
+    return {
+        "G1": lambda c: c.personality[0] > 0.5 and c.personality[1] < -0.5,
+        "G2": lambda c: c.decision_type == "location" and any(
+            o.tag("risk") > 0.6 and o.tag("privacy") > 0.6 for o in c.candidates),
+        "G3": lambda c: c.decision_type == "location" and len(c.candidates) in (2, 8),
+        "G5": lambda c: g.g5_saturated_history(c),
+        "G6": lambda c: g.g6_touches_arena(c),
+    }
+
+
+TINY_SIZES = dict(n_syn_loc=140, n_syn_act=140,
+                  n_traj={"full": 1, "celebration": 1, "war_camp": 1,
+                          "market_locked": 1, "arena_locked": 2},
+                  train=60, val=15, n_test=12, rounds=10)
+
+
 class TestSplits:
     @pytest.fixture(scope="class")
     @classmethod
@@ -248,11 +272,7 @@ class TestSplits:
         """End-to-end tiny generation into a temp dir (same code path as the CLI)."""
         from experiments.rq2 import gen_controlled as g
         out = tmp_path_factory.mktemp("rq2data")
-        sizes = dict(n_syn_loc=120, n_syn_act=120,
-                     n_traj={"full": 1, "celebration": 1, "war_camp": 1,
-                             "market_locked": 1, "arena_locked": 2},
-                     train=60, val=15, n_test=12, rounds=10)
-        g.generate(sizes, out, seed=123)
+        g.generate(dict(TINY_SIZES), out, seed=123)
         return g, out
 
     def test_outputs_exist(self, tiny_dataset):
@@ -280,44 +300,92 @@ class TestSplits:
         records = common.read_pool(out / "pool.jsonl")
         by_id = {t["id"]: (c, t) for c, t in records}
         manifest = json.loads((out / "splits.json").read_text(encoding="utf-8"))
+        checks = _held_out_checks(g)
         for split in common.ALL_SPLITS:
-            for cid in manifest["splits"][split]["train"]:
-                case, tags = by_id[cid]
-                assert g.TRAIN_FILTERS[split](case, tags), f"{split}: {cid}"
+            for part in ("train", "val"):
+                for cid in manifest["splits"][split][part]:
+                    case, tags = by_id[cid]
+                    assert g.TRAIN_FILTERS[split](case, tags), f"{split}/{part}: {cid}"
+                    # independent negated held-out condition — catches an
+                    # inverted TRAIN_FILTERS entry that the line above cannot
+                    if split in checks:
+                        assert not checks[split](case), f"{split}/{part}: {cid}"
+                    if split == "G4":
+                        assert tags["world"] == "full", f"G4/{part}: {cid}"
         # arena_locked cases may appear in G6 only
         for split in common.ALL_SPLITS:
             if split == "G6":
                 continue
-            for cid in manifest["splits"][split]["train"]:
-                assert by_id[cid][1]["world"] != "arena_locked"
+            for part in ("train", "val"):
+                for cid in manifest["splits"][split][part]:
+                    assert by_id[cid][1]["world"] != "arena_locked"
 
     def test_targeted_test_sets_satisfy_conditions(self, tiny_dataset):
         g, out = tiny_dataset
-        checks = {
-            "G1": lambda c: c.personality[0] > 0.5 and c.personality[1] < -0.5,
-            "G2": lambda c: c.decision_type == "location" and any(
-                o.tag("risk") > 0.6 and o.tag("privacy") > 0.6 for o in c.candidates),
-            "G3": lambda c: c.decision_type == "location" and len(c.candidates) in (2, 8),
-            "G5": lambda c: g.g5_has_3run(c),
-            "G6": lambda c: g.g6_touches_arena(c),
-        }
+        checks = _held_out_checks(g)
         for split, ok in checks.items():
-            cases = [c for c, _ in common.read_pool(out / f"test_{split}.jsonl")]
-            assert len(cases) == 12
-            assert all(ok(c) for c in cases), split
+            recs = common.read_pool(out / f"test_{split}.jsonl")
+            assert len(recs) == 12
+            assert all(ok(c) for c, _ in recs), split
+            assert all(t["id"].startswith(f"tgt-{split}-") for _, t in recs), split
         g4 = common.read_pool(out / "test_G4.jsonl")
         assert all(t["world"] in ("celebration", "war_camp", "market_locked")
                    for _, t in g4)
+        # G5's held-out condition must exist in the model inputs: the repeated
+        # option is among the candidates (rep hits its 1.0 ceiling)
+        for c, _ in common.read_pool(out / "test_G5.jsonl"):
+            buf = (c.recent_locations if c.decision_type == "location"
+                   else c.recent_actions_same_location)
+            assert buf[0].id in [o.id for o in c.candidates]
+            assert np.max(c.candidate_history_features.rep) == pytest.approx(1.0)
 
     def test_test_labels_match_teacher(self, tiny_dataset):
         g, out = tiny_dataset
         scorer = HandAuthoredScorer()
-        for split in ("G1", "G2", "G5", "G6"):
+        for split in ("G1", "G2", "G3", "G4", "G5", "G6"):
             for c, _ in common.read_pool(out / f"test_{split}.jsonl"):
                 expect = scorer.distribution(
                     Personality(c.personality), c.candidates,
                     relations=c.candidate_history_features, level=c.decision_type)
                 np.testing.assert_allclose(c.target_distribution, expect, atol=1e-12)
+
+    def test_relations_recomputable_from_buffers(self, tiny_dataset):
+        """Stored relations must equal recomputation from the stored buffers —
+        pins wrong-K / wrong-decay bugs that label self-consistency cannot see
+        (2026-07-10 quality review, I2)."""
+        from npc_policy import DEFAULT_CONFIG, RecentBuffer
+        from npc_policy.relations import compute_relations
+        g, out = tiny_dataset
+        recs = common.read_pool(out / "pool.jsonl")[:40]
+        for split in ("G1", "G4", "G5"):
+            recs += common.read_pool(out / f"test_{split}.jsonl")[:10]
+        for c, _ in recs:
+            if c.decision_type == "location":
+                history, maxlen = c.recent_locations, DEFAULT_CONFIG.K_L
+            else:
+                history, maxlen = c.recent_actions_same_location, DEFAULT_CONFIG.K_A
+            stored = c.candidate_history_features
+            if not history:
+                assert stored is None or not stored.rep.any()
+                continue
+            buf = RecentBuffer(maxlen=maxlen)
+            for o in history:
+                buf.push(o)
+            expect = compute_relations(c.candidates, buf, DEFAULT_CONFIG)
+            np.testing.assert_allclose(stored.rep, expect.rep, atol=1e-12)
+            np.testing.assert_allclose(stored.sim, expect.sim, atol=1e-12)
+            np.testing.assert_allclose(stored.nov, expect.nov, atol=1e-12)
+
+    def test_generation_is_deterministic(self, tmp_path):
+        """Same seed → byte-identical dataset files (2026-07-10 review, I4)."""
+        from experiments.rq2 import gen_controlled as g
+        sizes = dict(TINY_SIZES, n_syn_loc=60, n_syn_act=60, train=25, val=5, n_test=6)
+        a, b = tmp_path / "a", tmp_path / "b"
+        g.generate(dict(sizes), a, seed=7)
+        g.generate(dict(sizes), b, seed=7)
+        for name in ["pool.jsonl"] + [f"test_{s}.jsonl" for s in common.ALL_SPLITS]:
+            assert (a / name).read_bytes() == (b / name).read_bytes(), name
+        assert (a / "splits.json").read_bytes() == (b / "splits.json").read_bytes()
 
     def test_predicates_on_crafted_cases(self):
         from experiments.rq2 import gen_controlled as g
@@ -327,9 +395,16 @@ class TestSplits:
         risky = _mk_case()
         risky.candidates[0] = _loc("den", risk=0.8, privacy=0.9)
         assert g.g2_combo(risky) and not g.g2_combo(_mk_case())
-        rep3 = _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("a")])
-        rep2 = _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("b")])
-        assert g.g5_has_3run(rep3) and not g.g5_has_3run(rep2)
+        # saturated history: single-family buffer of ANY length (rep = 1.0
+        # ceiling under length-normalised recency weights)
+        assert g.g5_saturated_history(
+            _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("a")]))
+        assert g.g5_saturated_history(_mk_case(recent_locs=[_loc("a")]))
+        assert g.g5_saturated_history(
+            _mk_case(recent_locs=[_loc("a"), _loc("a#p1")])), "same family counts"
+        assert not g.g5_saturated_history(
+            _mk_case(recent_locs=[_loc("a"), _loc("a"), _loc("b")]))
+        assert not g.g5_saturated_history(_mk_case()), "empty buffer stays in train"
         arena = _mk_case()
         arena.candidates[0] = _loc("arena", risk=0.8)
         assert g.g6_touches_arena(arena)

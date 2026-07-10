@@ -5,8 +5,11 @@ Outputs (``data/rq2_controlled/``; smoke mode uses ``…_smoke/``):
   pool.jsonl              master pool with ``gen`` tags (id / source / world)
   test_<split>.jsonl      held-out sets (S0's is a random pool holdout)
   splits.json             per-split train/val case-id manifests + S0 test ids
-  worlds/arena_locked.json  G6 top-up world variant
-  meta.json               sizes, seed, frozen-teacher config hash
+  meta.json               sizes, seed, frozen-teacher config hash, per-file
+                          composition, world-file hashes
+
+The G6 top-up world variant ``arena_locked.json`` is written next to the other
+variants in ``data/rq1_cases/worlds/`` (idempotent).
 
 Run from ``code/``:  python -m experiments.rq2.gen_controlled [--smoke]
 """
@@ -14,6 +17,7 @@ Run from ``code/``:  python -m experiments.rq2.gen_controlled [--smoke]
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -22,7 +26,6 @@ import numpy as np
 
 from experiments.rq1.gen_cases import build_worlds
 from npc_policy import (
-    DEFAULT_CONFIG,
     ControlledCase,
     DecisionController,
     HandAuthoredScorer,
@@ -54,14 +57,18 @@ ROUNDS_PER_TRAJ = 50            # → 100 cases per trajectory (50 location + 50
 # arena_locked was raised 300 → 500 trajectories after measuring G6 eligibility:
 # rollout location cases in arena-unlocked worlds always list arena as a
 # candidate (0% eligible), so the plan's 300 left G6 ≈ 12k short of 105k.
+# Synthetic counts were raised again (49k → 60k each) when G5 moved to the
+# saturated-history filter, which also excludes single-family buffers of
+# length 1–2 (~30% of synthetic cases); the RuntimeError guard in generate()
+# still protects any future size change.
 FULL_SIZES = dict(
-    n_syn_loc=49_000, n_syn_act=49_000,
+    n_syn_loc=60_000, n_syn_act=60_000,
     n_traj={"full": 210, "celebration": 70, "war_camp": 70, "market_locked": 70,
             "arena_locked": 500},
     train=TRAIN_SIZE, val=VAL_SIZE, n_test=TEST_SIZE, rounds=ROUNDS_PER_TRAJ,
 )
 SMOKE_SIZES = dict(
-    n_syn_loc=700, n_syn_act=700,
+    n_syn_loc=1_000, n_syn_act=1_000,
     n_traj={"full": 3, "celebration": 1, "war_camp": 1, "market_locked": 1,
             "arena_locked": 8},   # 4 → 8: same G6 shortfall at smoke scale
     train=1_200, val=200, n_test=300, rounds=ROUNDS_PER_TRAJ,
@@ -143,16 +150,20 @@ class SyntheticSampler:
     def location_case(self, personality: Personality | None = None,
                       m: int | None = None,
                       history: list[Option] | None = None,
-                      mutate=None) -> ControlledCase:
+                      mutate=None,
+                      candidates: list[Option] | None = None) -> ControlledCase:
         p = self._personality() if personality is None else personality
-        m = int(self.rng.integers(2, 9)) if m is None else m
-        cands = self.location_candidates(m)
+        if candidates is None:
+            m = int(self.rng.integers(2, 9)) if m is None else m
+            candidates = self.location_candidates(m)
+        cands = candidates
         if mutate is not None:
             cands = mutate(cands)
+        K_L = self.scorer.config.K_L
         if history is None:
-            k = int(self.rng.integers(0, DEFAULT_CONFIG.K_L + 1))
+            k = int(self.rng.integers(0, K_L + 1))
             history = [self._variant(self._random_location()) for _ in range(k)]
-        rel = self._relations(cands, history, DEFAULT_CONFIG.K_L)
+        rel = self._relations(cands, history, K_L)
         target = self.scorer.distribution(p, cands, relations=rel, level="location")
         return ControlledCase(
             personality=p.vector, decision_type="location", candidates=cands,
@@ -162,24 +173,29 @@ class SyntheticSampler:
 
     def action_case(self, personality: Personality | None = None,
                     at: Option | None = None,
-                    history: list[Option] | None = None) -> ControlledCase:
+                    history: list[Option] | None = None,
+                    candidates: list[Option] | None = None) -> ControlledCase:
         p = self._personality() if personality is None else personality
         loc = self._random_location() if at is None else at
         native = self.world.actions_at(base_id(loc.id))
-        cands = []
-        used: set[str] = set()
-        for a in native:
-            o = self._variant(a)
-            if o.id in used:
-                o = self._perturb(o)
-            used.add(o.id)
-            cands.append(o)
+        if candidates is None:
+            cands = []
+            used: set[str] = set()
+            for a in native:
+                o = self._variant(a)
+                if o.id in used:
+                    o = self._perturb(o)
+                used.add(o.id)
+                cands.append(o)
+        else:
+            cands = candidates
+        K_A = self.scorer.config.K_A
         if history is None:                        # same-location persistence: history
-            k = int(self.rng.integers(0, DEFAULT_CONFIG.K_A + 1))   # from native actions
+            k = int(self.rng.integers(0, K_A + 1))                  # from native actions
             history = [native[int(self.rng.integers(len(native)))] for _ in range(k)]
-        rel = self._relations(cands, history, DEFAULT_CONFIG.K_A)
+        rel = self._relations(cands, history, K_A)
         target = self.scorer.distribution(p, cands, relations=rel, level="action")
-        j = int(self.rng.integers(0, DEFAULT_CONFIG.K_L))           # older entries
+        j = int(self.rng.integers(0, self.scorer.config.K_L))       # older entries
         older = [self._variant(self._random_location()) for _ in range(j)]
         return ControlledCase(
             personality=p.vector, decision_type="action", candidates=cands,
@@ -240,16 +256,6 @@ def rollout_records(world_name: str, world, scorer: HandAuthoredScorer,
 
 
 # ------------------------------------------------------------- split filters --
-def _max_run(ids: list[str]) -> int:
-    best = run = 0
-    prev = None
-    for x in ids:
-        run = run + 1 if x == prev else 1
-        prev = x
-        best = max(best, run)
-    return best
-
-
 def g1_region(case: ControlledCase) -> bool:
     """Excluded personality region: O > 0.5 ∧ C < −0.5 (research spec §6)."""
     return case.personality[0] > 0.5 and case.personality[1] < -0.5
@@ -267,11 +273,19 @@ def g3_train_ok(case: ControlledCase) -> bool:
     return case.decision_type != "location" or 3 <= len(case.candidates) <= 6
 
 
-def g5_has_3run(case: ControlledCase) -> bool:
-    """Three consecutive same-family entries in the relevant same-type buffer."""
+def g5_saturated_history(case: ControlledCase) -> bool:
+    """Non-empty relevant buffer whose entries are all one option family.
+
+    The model never sees buffers, only ``(rep, sim, nov)``, and recency weights
+    normalise over buffer length — so a single-family buffer of ANY length puts
+    ``rep`` at its 1.0 ceiling, exactly like a 3-run. Excluding only 3-runs
+    would leave input-identical shorter cases in G5 train, making the split
+    vacuous (2026-07-10 quality review, Critical). Empty buffers stay in train:
+    all-zero relations are a distinct input region.
+    """
     buf = (case.recent_locations if case.decision_type == "location"
            else case.recent_actions_same_location)
-    return _max_run([base_id(o.id) for o in buf]) >= 3
+    return len(buf) > 0 and len({base_id(o.id) for o in buf}) == 1
 
 
 def g6_touches_arena(case: ControlledCase) -> bool:
@@ -291,7 +305,7 @@ TRAIN_FILTERS = {
     "G2": lambda c, t: _core(t) and not g2_combo(c),
     "G3": lambda c, t: _core(t) and g3_train_ok(c),
     "G4": lambda c, t: t.get("world") == "full",
-    "G5": lambda c, t: _core(t) and not g5_has_3run(c),
+    "G5": lambda c, t: _core(t) and not g5_saturated_history(c),
     "G6": lambda c, t: not g6_touches_arena(c),
 }
 
@@ -351,14 +365,20 @@ def targeted_records(split: str, sampler: SyntheticSampler, worlds: dict,
         out = out[:n]
 
     elif split == "G5":
+        # The repeated option must be IN the candidate set, else the rep = 1.0
+        # ceiling (the held-out condition) never appears in the test inputs.
         while len(out) < n:
             if rng.random() < 0.5:
-                x = sampler._variant(sampler._random_location())
-                out.append((sampler.location_case(history=[x, x, x]), dict(tag)))
+                cands = sampler.location_candidates(int(rng.integers(2, 9)))
+                x = cands[int(rng.integers(len(cands)))]
+                out.append((sampler.location_case(candidates=cands,
+                                                  history=[x, x, x]), dict(tag)))
             else:
                 loc = sampler._random_location()
-                a = sampler.world.actions_at(base_id(loc.id))[0]
-                out.append((sampler.action_case(at=loc, history=[a, a, a]), dict(tag)))
+                native = sampler.world.actions_at(base_id(loc.id))
+                a = native[int(rng.integers(len(native)))]
+                out.append((sampler.action_case(at=loc, candidates=list(native),
+                                                history=[a, a, a]), dict(tag)))
 
     elif split == "G6":
         arena = sampler.world.effective_location("arena")
@@ -426,15 +446,23 @@ def generate(sizes: dict, out_dir: Path, seed: int = GEN_SEED) -> dict:
 
     # -- write ----------------------------------------------------------------
     write_pool(out_dir / "pool.jsonl", records)
-    write_pool(out_dir / "test_S0.jsonl",
-               [by_id[i] for i in core_ids[: sizes["n_test"]]])
-    trng = np.random.default_rng([seed, 4])
+    s0_test_records = [by_id[i] for i in core_ids[: sizes["n_test"]]]
+    write_pool(out_dir / "test_S0.jsonl", s0_test_records)
     test_counts = {"S0": sizes["n_test"]}
-    for split in ALL_SPLITS[1:]:
-        recs = targeted_records(split, sampler, worlds, scorer,
-                                sizes["n_test"], trng, sizes["rounds"])
+    composition = {"pool": _composition(records), "test_S0": _composition(s0_test_records)}
+    for k, split in enumerate(ALL_SPLITS[1:]):
+        # fresh sampler + rng per split: pool-size or sibling-split changes
+        # cannot shift this split's test set (provenance isolation)
+        split_sampler = SyntheticSampler(base_world, scorer,
+                                         np.random.default_rng([seed, 5, k]))
+        recs = targeted_records(split, split_sampler, worlds, scorer,
+                                sizes["n_test"], np.random.default_rng([seed, 6, k]),
+                                sizes["rounds"])
+        for j, (_, t) in enumerate(recs):
+            t["id"] = f"tgt-{split}-{j:04d}"
         write_pool(out_dir / f"test_{split}.jsonl", recs)
         test_counts[split] = len(recs)
+        composition[f"test_{split}"] = _composition(recs)
     (out_dir / "splits.json").write_text(
         json.dumps({"s0_test_ids": sorted(s0_test_ids), "splits": splits}),
         encoding="utf-8",
@@ -443,13 +471,26 @@ def generate(sizes: dict, out_dir: Path, seed: int = GEN_SEED) -> dict:
         "generated": time.strftime("%Y-%m-%d %H:%M:%S"),
         "seed": seed,
         "config_hash": config_hash(),
+        "world_hashes": {name: hashlib.sha256(p.read_bytes()).hexdigest()
+                         for name, p in sorted(worlds.items())},
         "pool_cases": len(records),
         "per_split": {s: {"train": len(splits[s]["train"]), "val": len(splits[s]["val"]),
                           "test": test_counts[s]} for s in ALL_SPLITS},
+        "composition": composition,
         "elapsed_s": round(time.time() - t0, 1),
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     return meta
+
+
+def _composition(records: list[tuple[ControlledCase, dict]]) -> dict[str, int]:
+    """Counts by (source × decision type) — cross-split comparisons must account
+    for test-set composition differences (2026-07-10 quality review, I3)."""
+    out: dict[str, int] = {}
+    for case, tags in records:
+        key = f"{tags['source']}/{case.decision_type}"
+        out[key] = out.get(key, 0) + 1
+    return dict(sorted(out.items()))
 
 
 def main(argv=None) -> None:
