@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -111,6 +112,8 @@ def train_one(
         elif epoch - best_epoch >= patience:
             break
 
+    if best_state is None:      # e.g. NaN val KL from epoch 0 (diverged run)
+        raise RuntimeError(f"{spec.run_id}: no finite val KL in {epochs_run} epochs")
     result = {
         "run_id": spec.run_id,
         **asdict(spec),
@@ -139,10 +142,16 @@ def run_all(specs, load_cases, results_dir: Path, device: torch.device,
     for i, spec in enumerate(todo, 1):
         train_cases, val_cases = load_cases(spec)
         result, state = train_fn(spec, train_cases, val_cases, device, **train_kw)
-        torch.save({"model": spec.model, "state_dict": state},
-                   models_dir / f"{spec.run_id}.pt")
-        (runs_dir / f"{spec.run_id}.json").write_text(
-            json.dumps(result, indent=2), encoding="utf-8")
+        # atomic writes: a kill mid-write must not leave a truncated file that
+        # marks the run complete (same pattern as common.write_pool)
+        model_path = models_dir / f"{spec.run_id}.pt"
+        tmp = model_path.with_suffix(model_path.suffix + ".tmp")
+        torch.save({"model": spec.model, "state_dict": state}, tmp)
+        os.replace(tmp, model_path)
+        result_path = runs_dir / f"{spec.run_id}.json"
+        tmp = result_path.with_suffix(result_path.suffix + ".tmp")
+        tmp.write_text(json.dumps(result, indent=2), encoding="utf-8")
+        os.replace(tmp, result_path)
         print(f"[{i}/{len(todo)}] {spec.run_id}: val KL {result['best_val_kl']:.4g} "
               f"({result.get('epochs_run', '?')} epochs, "
               f"{result.get('wall_time_s', '?')}s)")
@@ -178,6 +187,12 @@ def main(argv=None) -> None:
     data_dir, results_dir = dirs(args.smoke)
     if not (data_dir / "pool.jsonl").exists():
         raise SystemExit(f"dataset missing: {data_dir} - run gen_controlled first")
+    gen_meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
+    if config_hash() != gen_meta["config_hash"]:
+        raise SystemExit(
+            f"scorer config drifted since dataset generation "
+            f"({config_hash()[:12]} != {gen_meta['config_hash'][:12]}); "
+            "regenerate the dataset or restore the config")
     device = pick_device(args.device)
     specs = run_matrix(smoke=args.smoke)
     if args.only:

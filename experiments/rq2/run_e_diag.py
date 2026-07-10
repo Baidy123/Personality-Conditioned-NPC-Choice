@@ -17,6 +17,7 @@ Run from ``code/``:  python -m experiments.rq2.run_e_diag [--smoke]
 from __future__ import annotations
 
 import argparse
+import json
 from types import SimpleNamespace
 
 import matplotlib
@@ -52,7 +53,7 @@ from npc_policy import (
 from npc_policy.learned import predict_distribution
 from npc_policy.relations import Relations, compute_relations
 
-from .common import DATA, dirs
+from .common import DATA, config_hash, dirs
 from .run_2a import load_student
 
 FAMILIES = ("simple", "nonlinear")
@@ -139,12 +140,20 @@ def main(argv=None) -> None:
     ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args(argv)
     setup_style()
-    _, results_dir = dirs(args.smoke)
+    data_dir, results_dir = dirs(args.smoke)
     out = results_dir / "e_diag"
     out.mkdir(parents=True, exist_ok=True)
     students = discover_students(results_dir)
     if not students:
         raise SystemExit(f"no S0 student runs under {results_dir / 'runs'} - train first")
+    # the overlay compares students against the CURRENT teacher — refuse to run
+    # if the scorer config drifted since the training data was generated
+    gen_meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
+    if config_hash() != gen_meta["config_hash"]:
+        raise SystemExit(
+            f"scorer config drifted since dataset generation "
+            f"({config_hash()[:12]} != {gen_meta['config_hash'][:12]}); "
+            "regenerate the dataset or restore the config")
     scorer = HandAuthoredScorer()
     cases = load_cases()
     sweep = cases["profiles"]["sweep"]
@@ -178,10 +187,19 @@ def main(argv=None) -> None:
         ax = axes.flat[5]
         ent_t = [entropy(scorer.distribution(sweep_p("neuroticism", v), locs,
                                              level="location")) for v in values]
-        ent_s = [entropy(_seed_mean(models, sweep_p("neuroticism", v), locs,
-                                    "location")) for v in values]
+        # per-seed entropies, THEN mean ± std: entropy(mean P) would be inflated
+        # by Jensen's inequality exactly where seeds disagree — the regime the
+        # pre-registered check cares about (final review, Important-1)
+        ent_mat = np.array([[entropy(predict_distribution(m, sweep_p("neuroticism", v),
+                                                          locs, "location"))
+                             for v in values] for m in models])
+        ent_mean = ent_mat.mean(axis=0)
+        ent_std = (ent_mat.std(axis=0, ddof=1) if len(models) > 1
+                   else np.zeros(len(values)))
         ax.plot(values, ent_t, color=TRAIT_COLORS["neuroticism"], label="teacher")
-        ax.plot(values, ent_s, color=color, linestyle=dash, label=fam)
+        ax.plot(values, ent_mean, color=color, linestyle=dash, label=fam)
+        ax.fill_between(values, ent_mean - ent_std, ent_mean + ent_std,
+                        color=color, alpha=0.2, linewidth=0)
         ax.set_title("N temperature: entropy of P (pre-registered check)")
         ax.set_xlabel("N value")
         ax.set_ylabel("entropy (nats)")
@@ -190,10 +208,12 @@ def main(argv=None) -> None:
         fig.tight_layout()
         fig.savefig(out / f"e1_overlay_{fam}.png", bbox_inches="tight")
         plt.close(fig)
-        for v, a, b in zip(values, ent_t, ent_s):
-            ent_rows.append([fam, v, f"{a:.6f}", f"{b:.6f}"])
+        for j, v in enumerate(values):
+            ent_rows.append([fam, v, f"{ent_t[j]:.6f}",
+                             f"{ent_mean[j]:.6f}", f"{ent_std[j]:.6f}"])
     write_csv(out / "e1_n_entropy.csv",
-              ["family", "N", "teacher_entropy", "student_entropy"], ent_rows)
+              ["family", "N", "teacher_entropy",
+               "student_entropy_mean", "student_entropy_std"], ent_rows)
 
     # ---- E2: profile-distinguishability correlation ----------------------------
     profiles = [personality_of(e) for e in cases["profiles"]["random"][:n_profiles]]
@@ -202,14 +222,20 @@ def main(argv=None) -> None:
     iu = np.triu_indices(len(profiles), k=1)
     e2_rows = []
     for fam, models in students.items():
-        P_s = np.stack([_seed_mean(models, p, locs, "location") for p in profiles])
-        D_s = pairwise_jsd(P_s)
-        rho, pval = mantel(D_t, D_s, n_perm=199 if args.smoke else 999)
-        e2_rows.append([fam, f"{spearman(D_t[iu], D_s[iu]):.4f}",
-                        f"{rho:.4f}", f"{pval:.4f}"])
-        print(f"E2 {fam}: mantel rho {rho:.3f} (p {pval:.3f})")
+        rhos = []
+        for si, m in enumerate(models):     # per seed, not on the seed-mean —
+            P_s = np.stack([predict_distribution(m, p, locs, "location")
+                            for p in profiles])
+            D_s = pairwise_jsd(P_s)
+            rho, pval = mantel(D_t, D_s, n_perm=199 if args.smoke else 999)
+            rhos.append(rho)
+            e2_rows.append([fam, si, f"{spearman(D_t[iu], D_s[iu]):.4f}",
+                            f"{rho:.4f}", f"{pval:.4f}"])
+        print(f"E2 {fam}: mantel rho {np.mean(rhos):.3f} "
+              f"(± {np.std(rhos, ddof=1) if len(rhos) > 1 else 0.0:.3f}, "
+              f"{len(rhos)} seeds)")
     write_csv(out / "e2_correlation.csv",
-              ["family", "spearman_upper", "mantel_rho", "mantel_p"], e2_rows)
+              ["family", "seed", "spearman_upper", "mantel_rho", "mantel_p"], e2_rows)
 
     # ---- E3/E4: trajectory statistics ------------------------------------------
     named = load_personalities(DATA / "personalities.json")

@@ -543,8 +543,20 @@ class TestRun2A:
         table = run_2a.aggregate(per_run)
         [row] = table
         assert row["kl_mean"] == pytest.approx(0.2)
-        assert row["kl_std"] == pytest.approx(np.std([0.1, 0.2, 0.3]))
+        assert row["kl_std"] == pytest.approx(np.std([0.1, 0.2, 0.3], ddof=1))
         assert row["n_seeds"] == 3
+
+    def test_eval_splits_for(self):
+        from experiments.rq2 import run_2a
+        avail = list(common.ALL_SPLITS)
+        s0_main = {"split": "S0", "ablation": "full", "n_train": None}
+        assert run_2a.eval_splits_for(s0_main, avail) == avail
+        s0_abl = {"split": "S0", "ablation": "no_context", "n_train": None}
+        assert run_2a.eval_splits_for(s0_abl, avail) == ["S0"]
+        s0_size = {"split": "S0", "ablation": "full", "n_train": 1000}
+        assert run_2a.eval_splits_for(s0_size, avail) == ["S0"]
+        g_run = {"split": "G3", "ablation": "full", "n_train": None}
+        assert run_2a.eval_splits_for(g_run, avail) == ["G3", "S0"]
 
     def test_load_student_roundtrip(self, tmp_path):
         import torch
@@ -618,3 +630,46 @@ class TestEDiag:
                                                  rounds=4, memory=memory)
             assert len(visits) == len(acts) == 4
             assert adapter.current_location.id == visits[-1]
+
+    def test_train_one_saves_best_not_last_state(self, monkeypatch):
+        """A val curve that worsens after its minimum must return the epoch-1
+        snapshot, not the final weights (final review test gap)."""
+        import torch
+        from experiments.rq2 import train as tr
+        vals = [1.0, 0.5, 0.9, 0.9, 0.9, 0.9]
+        snaps = []
+
+        def fake_val(model, batches):
+            snaps.append({k: v.detach().to("cpu", torch.float64).clone()
+                          for k, v in model.state_dict().items()})
+            return vals[len(snaps) - 1]
+
+        monkeypatch.setattr(tr, "_mean_val_kl", fake_val)
+        cases = [_mk_case(n_cand=3) for _ in range(8)]
+        result, state = tr.train_one(
+            common.RunSpec("S0", "simple", 0), cases, cases[:2],
+            device=torch.device("cpu"),
+            lr=0.1, batch_size=8, max_epochs=10, patience=3,
+        )
+        assert result["best_epoch"] == 1
+        assert result["best_val_kl"] == pytest.approx(0.5)
+        assert result["epochs_run"] == 5      # epochs 2-4 stale -> stop
+        for k, v in state.items():            # snapshot from epoch 1, not last
+            assert torch.equal(v, snaps[1][k]), k
+
+    def test_make_loader_nested_subsets(self, tmp_path):
+        from experiments.rq2 import train as tr
+        cases = [(_mk_case(), {"id": f"syn-{i:07d}", "source": "synthetic",
+                               "world": "full"}) for i in range(8)]
+        common.write_pool(tmp_path / "pool.jsonl", cases)
+        ids = [t["id"] for _, t in cases]
+        (tmp_path / "splits.json").write_text(json.dumps(
+            {"s0_test_ids": [], "splits": {"S0": {"train": ids[:6], "val": ids[6:]}}}),
+            encoding="utf-8")
+        loader = tr.make_loader(tmp_path)
+        full_train, val = loader(common.RunSpec("S0", "simple", 0))
+        sub_train, _ = loader(common.RunSpec("S0", "simple", 0, n_train=3))
+        assert len(full_train) == 6 and len(val) == 2 and len(sub_train) == 3
+        # nested prefix: the n_train subset is exactly the head of the full list
+        for a, b in zip(sub_train, full_train[:3]):
+            assert a is b

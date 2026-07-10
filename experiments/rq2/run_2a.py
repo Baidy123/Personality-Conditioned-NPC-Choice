@@ -89,8 +89,13 @@ def _summarise(rows: list[dict]) -> list[dict]:
     return out
 
 
+def _std(xs: list[float]) -> float:
+    """Sample std across seeds (ddof=1); 0.0 for a single seed."""
+    return float(np.std(xs, ddof=1)) if len(xs) > 1 else 0.0
+
+
 def aggregate(per_run: list[dict]) -> list[dict]:
-    """Mean ± std across seeds for each (split, model, ablation, n_train,
+    """Mean ± sample std across seeds for each (split, model, ablation, n_train,
     eval_split, decision_type) group."""
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in per_run:
@@ -105,13 +110,28 @@ def aggregate(per_run: list[dict]) -> list[dict]:
             "n_train": n_train, "eval_split": eval_split, "decision_type": dt,
             "n_cases": rs[0]["n_cases"], "n_seeds": len(rs),
             "kl_mean": float(np.mean([r["kl"] for r in rs])),
-            "kl_std": float(np.std([r["kl"] for r in rs])),
+            "kl_std": _std([r["kl"] for r in rs]),
             "jsd_mean": float(np.mean([r["jsd"] for r in rs])),
-            "jsd_std": float(np.std([r["jsd"] for r in rs])),
+            "jsd_std": _std([r["jsd"] for r in rs]),
             "top1_mean": float(np.mean([r["top1"] for r in rs])),
-            "top1_std": float(np.std([r["top1"] for r in rs])),
+            "top1_std": _std([r["top1"] for r in rs]),
         })
     return table
+
+
+def eval_splits_for(meta: dict, available: list[str]) -> list[str]:
+    """Which test sets a run is evaluated on (design §4, amended):
+
+    S0 main runs (full context, full data) → every test set, so each G-split
+    gets an S0-trained reference on identical cases; other S0 variants
+    (ablations, data sizes) → S0 only; G-split runs → own test set + S0.
+    """
+    if (meta["split"] == "S0" and meta["ablation"] == "full"
+            and meta["n_train"] is None):
+        return list(available)
+    if meta["split"] == "S0":
+        return ["S0"]
+    return [meta["split"], "S0"]
 
 
 def _lookup(table, **want):
@@ -138,14 +158,7 @@ def main(argv=None) -> None:
     for f in run_files:
         meta = json.loads(f.read_text(encoding="utf-8"))
         model = load_student(results_dir, meta["run_id"])
-        if (meta["split"] == "S0" and meta["ablation"] == "full"
-                and meta["n_train"] is None):
-            eval_splits = list(tests)     # S0 main runs: every test set — the
-        elif meta["split"] == "S0":       # S0-trained reference isolates each
-            eval_splits = ["S0"]          # G-split's exclusion effect from its
-        else:                             # test-set composition
-            eval_splits = [meta["split"], "S0"]
-        for split in eval_splits:
+        for split in eval_splits_for(meta, list(tests)):
             for s in _summarise(eval_cases(model, tests[split], meta["ablation"])):
                 per_run.append({**s, "split": meta["split"], "model": meta["model"],
                                 "ablation": meta["ablation"], "n_train": meta["n_train"],
@@ -171,6 +184,10 @@ def main(argv=None) -> None:
     for i, (label, fam, s0_trained) in enumerate(series):
         ys, es = [], []
         for split in mains:
+            if s0_trained and split == "S0":     # identical to the main S0 bar
+                ys.append(np.nan)
+                es.append(0.0)
+                continue
             rows = _lookup(table, split="S0" if s0_trained else split, model=fam,
                            ablation="full", n_train=None, eval_split=split,
                            decision_type="all")
@@ -217,6 +234,9 @@ def main(argv=None) -> None:
                              weights_only=False)
         key = "w" if meta["model"] == "simple" else "inner.w"
         w = payload["state_dict"][key]
+        # location row (w[0]) is identically 0.0 by construction: ctx is all-zero
+        # for location cases, so the block never gets gradient from zero init.
+        # The reportable diagnostic is the action row (w[1]).
         diag_rows.append(["w_ctx_norm", meta["run_id"],
                           float(w[0, -12:].norm()), float(w[1, -12:].norm())])
     for fam in ("simple", "nonlinear"):                # personality-information gap
