@@ -1427,7 +1427,7 @@ class TestRun2A:
         from experiments.rq2 import run_2a
         per_run = [
             {"split": "S0", "model": "simple", "ablation": "full", "n_train": None,
-             "seed": s, "eval_set": "S0", "decision_type": "all",
+             "seed": s, "eval_split": "S0", "decision_type": "all",
              "kl": v, "jsd": v / 2, "top1": 1.0, "n_cases": 10}
             for s, v in enumerate([0.1, 0.2, 0.3])
         ]
@@ -1463,9 +1463,11 @@ Run: `python -m pytest tests/test_rq2_pipeline.py::TestRun2A -q` — Expected: F
 """Study 2A metrics: main table, figures, diagnostics (design §4).
 
 Reads the run results and models written by ``train.py`` plus the test sets from
-``gen_controlled.py``; writes CSVs and figures to ``results/rq2/``. Every model is
-evaluated on its own split's test set and on the S0 test set (the
-no-general-degradation check), per decision type and combined ("all").
+``gen_controlled.py``; writes CSVs and figures to ``results/rq2/``. G-split models
+are evaluated on their own test set and on S0 (no-general-degradation check);
+the S0 main models are evaluated on EVERY test set, so each G-split's
+filtered-vs-S0-trained difference isolates the exclusion effect from the test
+set's composition. All metrics per decision type and combined ("all").
 
 Run from ``code/``:  python -m experiments.rq2.run_2a [--smoke]
 """
@@ -1551,18 +1553,18 @@ def _summarise(rows: list[dict]) -> list[dict]:
 
 def aggregate(per_run: list[dict]) -> list[dict]:
     """Mean ± std across seeds for each (split, model, ablation, n_train,
-    eval_set, decision_type) group."""
+    eval_split, decision_type) group."""
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in per_run:
         key = (r["split"], r["model"], r["ablation"], r["n_train"],
-               r["eval_set"], r["decision_type"])
+               r["eval_split"], r["decision_type"])
         groups[key].append(r)
     table = []
-    for (split, model, abl, n_train, eval_set, dt), rs in sorted(
+    for (split, model, abl, n_train, eval_split, dt), rs in sorted(
             groups.items(), key=lambda kv: [str(x) for x in kv[0]]):
         table.append({
             "split": split, "model": model, "ablation": abl,
-            "n_train": n_train, "eval_set": eval_set, "decision_type": dt,
+            "n_train": n_train, "eval_split": eval_split, "decision_type": dt,
             "n_cases": rs[0]["n_cases"], "n_seeds": len(rs),
             "kl_mean": float(np.mean([r["kl"] for r in rs])),
             "kl_std": float(np.std([r["kl"] for r in rs])),
@@ -1598,22 +1600,24 @@ def main(argv=None) -> None:
     for f in run_files:
         meta = json.loads(f.read_text(encoding="utf-8"))
         model = load_student(results_dir, meta["run_id"])
-        eval_sets = {"own": meta["split"]}
-        if meta["split"] != "S0":
-            eval_sets["S0"] = "S0"
-        for eval_name, split in eval_sets.items():
+        if (meta["split"] == "S0" and meta["ablation"] == "full"
+                and meta["n_train"] is None):
+            eval_splits = list(tests)     # S0 main runs: every test set — the
+        elif meta["split"] == "S0":       # S0-trained reference isolates each
+            eval_splits = ["S0"]          # G-split's exclusion effect from its
+        else:                             # test-set composition
+            eval_splits = [meta["split"], "S0"]
+        for split in eval_splits:
             for s in _summarise(eval_cases(model, tests[split], meta["ablation"])):
                 per_run.append({**s, "split": meta["split"], "model": meta["model"],
                                 "ablation": meta["ablation"], "n_train": meta["n_train"],
-                                "seed": meta["seed"],
-                                "eval_set": "S0" if split == "S0" else "own"})
+                                "seed": meta["seed"], "eval_split": split})
         print(f"evaluated {meta['run_id']}")
     # untrained floor, once per split
     for split, cases in tests.items():
         for s in _summarise(eval_cases(UniformBaseline(), cases)):
             per_run.append({**s, "split": split, "model": "uniform", "ablation": "full",
-                            "n_train": None, "seed": 0,
-                            "eval_set": "own" if split != "S0" else "S0"})
+                            "n_train": None, "seed": 0, "eval_split": split})
 
     table = aggregate(per_run)
     write_csv(results_dir / "main_table.csv", list(table[0].keys()),
@@ -1623,16 +1627,20 @@ def main(argv=None) -> None:
     mains = {"S0": "S0"} | {g: g for g in G_SPLITS}
     fig, ax = plt.subplots(figsize=(9, 4.5))
     x = np.arange(len(mains))
-    for i, fam in enumerate(("simple", "nonlinear")):
+    series = [("simple", "simple", False), ("nonlinear", "nonlinear", False),
+              ("simple (S0-trained)", "simple", True),
+              ("nonlinear (S0-trained)", "nonlinear", True)]
+    for i, (label, fam, s0_trained) in enumerate(series):
         ys, es = [], []
         for split in mains:
-            eval_set = "S0" if split == "S0" else "own"
-            rows = _lookup(table, split=split, model=fam, ablation="full",
-                           n_train=None, eval_set=eval_set, decision_type="all")
+            rows = _lookup(table, split="S0" if s0_trained else split, model=fam,
+                           ablation="full", n_train=None, eval_split=split,
+                           decision_type="all")
             ys.append(rows[0]["kl_mean"] if rows else np.nan)
             es.append(rows[0]["kl_std"] if rows else 0.0)
-        ax.bar(x + (i - 0.5) * 0.35, ys, width=0.32, yerr=es,
-               color=FAMILY_COLORS[fam], label=fam, capsize=2)
+        ax.bar(x + (i - 1.5) * 0.21, ys, width=0.19, yerr=es,
+               color=FAMILY_COLORS[fam], alpha=0.45 if s0_trained else 1.0,
+               label=label, capsize=2)
     ax.set_xticks(x, list(mains))
     ax.set_ylabel("KL(teacher ‖ student), nats")
     ax.set_title("2A — student fidelity per split (own test set)")
@@ -1647,7 +1655,7 @@ def main(argv=None) -> None:
         xs, ys, es = [], [], []
         for n in sizes + [None]:                      # None = the full-data S0 runs
             rows = _lookup(table, split="S0", model=fam, ablation="full",
-                           n_train=n, eval_set="S0", decision_type="all")
+                           n_train=n, eval_split="S0", decision_type="all")
             if rows:
                 xs.append(100_000 if n is None else n)   # None = the 100k S0 main runs
                 ys.append(rows[0]["kl_mean"])
@@ -1675,15 +1683,15 @@ def main(argv=None) -> None:
                           float(w[0, -12:].norm()), float(w[1, -12:].norm())])
     for fam in ("simple", "nonlinear"):                # personality-information gap
         main = _lookup(table, split="S0", model=fam, ablation="full", n_train=None,
-                       eval_set="S0", decision_type="all")
+                       eval_split="S0", decision_type="all")
         agn = _lookup(table, split="S0", model=f"agnostic_{fam}", ablation="full",
-                      n_train=None, eval_set="S0", decision_type="all")
+                      n_train=None, eval_split="S0", decision_type="all")
         if main and agn:
             diag_rows.append(["agnostic_gap", fam,
                               agn[0]["kl_mean"] - main[0]["kl_mean"], ""])
         for abl in ("no_context", "location_only"):    # ablation deltas
             row = _lookup(table, split="S0", model=fam, ablation=abl, n_train=None,
-                          eval_set="S0", decision_type="all")
+                          eval_split="S0", decision_type="all")
             if main and row:
                 diag_rows.append([f"ablation_delta_{abl}", fam,
                                   row[0]["kl_mean"] - main[0]["kl_mean"], ""])
@@ -2221,6 +2229,29 @@ git commit -m "rq2 2a: Chinese runbook for the four-step pipeline"
 ## Post-review amendments (as-executed deviations)
 
 - **Ablation renamed `"none"` → `"no_context"`** (Task 1 quality review): `"none"` read as "no ablation" while actually meaning "no recent-choice context", and the string is baked into resumable run ids. `ABLATIONS = ("no_context", "location_only")`; `case_to_inputs` accepts `("full", "no_context", "location_only")`. Task 5's diagnostics loop updated above; any other literal `"none"` for ablations in this plan should be read as `"no_context"`. (The trajectory **memory conditions** in Task 6 — `"full"/"location_only"/"none"` — follow the RQ1 convention and are NOT renamed.)
+- **G5 redefined: saturated history** (Task 2/3 quality review, Critical): recency
+  weights normalise over buffer length, so a single-family buffer of ANY length
+  yields the same model-visible relations as a 3-run (`rep = 1.0` ceiling) — the
+  original "no 3-runs in train" filter left input-identical shorter cases in
+  train, making G5 vacuous. As-built: the train filter excludes every case whose
+  relevant non-empty buffer is single-family (`g5_saturated_history`); train max
+  `rep` ≈ 0.82, test `rep = 1.0` is genuinely unseen. Targeted G5 test cases
+  additionally guarantee the repeated option IS one of the candidates (else the
+  rep ceiling never appears in the test inputs).
+- **run_2a eval scheme extended** (same review, I3): per-run rows carry
+  `eval_split` (the actual test set evaluated on) instead of the own/S0 binary;
+  S0 main runs are evaluated on every test set; the gap figure gains
+  S0-trained reference bars. Task 5 code blocks above already reflect this.
+- **Generation hardening** (same review): targeted records get traceable ids
+  (`tgt-<split>-NNNN`); each targeted split uses a fresh sampler on stream
+  `[seed, 5, k]` (pool-size changes no longer shift test sets); sampler buffer
+  lengths read `self.scorer.config.K_L/K_A` instead of `DEFAULT_CONFIG`;
+  G5 action-test buffers use a random native action, not always the first;
+  `meta.json` records per-test-file composition (source × decision type) and
+  world-file hashes; tests strengthened: independent negated held-out checks on
+  every split's train+val manifests (anti-inverted-filter), stored relations
+  recomputable from stored buffers, two-run byte-identity determinism check,
+  G3/G4 included in the label-match loop.
 - **Generation sizes raised** (Task 2/3 implementer, measured): the sizes above under-fill G6 — rollout location cases in arena-unlocked worlds always contain `arena`, so only ~35% of synthetic location cases survive the G6 filter and the plan's pool leaves G6 at ~93k < 105k. As-built: `arena_locked` trajectories 300 → 500 full (pool ≈ 190k), 4 → 8 smoke; the `RuntimeError` guard in `generate()` still protects any future size change.
 - **Fixture style** (pytest 9 deprecation): class-scoped fixtures are declared as plain functions with `@pytest.fixture(scope="class")`, not instance methods, to keep the suite at 0 warnings.
 - **Task 1 hardening** (quality review): atomic `write_pool` (tmp + `os.replace`); `read_pool` requires the `gen` tag; `case_to_inputs` also rejects a location case carrying a `selected_location`, and copies `p`/`target` arrays; `kl_np` floors `q` at `np.finfo(float).tiny`; JSD pinned at nonzero values and a maximal-case pool round-trip test added; docstrings clarified (buffer order oldest→newest on disk, `config_hash` pins config values not scorer code, `build_model` seeds the global torch RNG, `top1_agree` tie-breaking).

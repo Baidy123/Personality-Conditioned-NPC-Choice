@@ -106,7 +106,7 @@ held-out set plus the iid set S0 (to confirm no general degradation).
 | G2 | unseen feature combinations | exclude candidates with `risk > 0.6 ∧ privacy > 0.6` from training; test cases contain ≥ 1 such candidate |
 | G3 | unseen set sizes | train on location sets of 3–6; test on 2 and 8 |
 | G4 | unseen event-induced changes | train on the base world only; test on buffed/locked variants (`celebration`, `war_camp`, `market_locked`) |
-| G5 | unseen history patterns | train with ≤ 2 consecutive same-location repeats in buffers; test with 3 |
+| G5 | unseen history patterns | train excludes cases whose relevant non-empty buffer is single-family (any length — revised 2026-07-10: recency weights normalise over buffer length, so short single-family buffers are input-identical to 3-runs at the model interface); test uses 3-run buffers whose repeated option is among the candidates |
 | G6 | leave-one-family-out | exclude `arena` and its actions from training; test cases include it |
 
 Threshold values in G1/G2/G5 are provisional; fix them before generation and do not
