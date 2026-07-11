@@ -112,3 +112,87 @@ class TestCaseInputDict:
         assert "target" not in d_input
         for k in ("p", "d", "ctx", "cand", "rel"):
             np.testing.assert_array_equal(d_full[k], d_input[k])
+
+
+def _raw_case(**over) -> dict:
+    base = {
+        "personality": {"O": 0.2, "C": -0.1, "E": 0.5, "A": 0.0, "N": -0.3},
+        "decision_type": "location",
+        "recent_locations": ["market", "tavern"],
+        "candidates": ["tavern", "library", "forest"],
+        "choice": "library",
+        "reason": "quiet after the bustle",
+    }
+    base.update(over)
+    return base
+
+
+def _raw_action_case(**over) -> dict:
+    base = {
+        "personality": {"O": -0.5, "C": 0.8, "E": -0.2, "A": 0.4, "N": 0.1},
+        "decision_type": "action",
+        "selected_location": "library",
+        "recent_locations": ["chapel", "library"],
+        "recent_actions_same_location": ["read"],
+        "candidates": ["read", "research", "discuss"],
+        "choice": "read",
+    }
+    base.update(over)
+    return base
+
+
+class TestValidate:
+    def _validate(self, case):
+        from experiments.rq2.independent import load_base_world, validate_case
+        return validate_case(case, load_base_world())
+
+    def test_valid_location_case(self):
+        assert self._validate(_raw_case()) is None
+
+    def test_valid_action_case(self):
+        assert self._validate(_raw_action_case()) is None
+
+    @pytest.mark.parametrize("case,reason", [
+        (_raw_case(candidates=["tavern", "netbar"]), "unknown_location"),
+        (_raw_case(recent_locations=["enemy_camp"]), "unknown_location"),
+        (_raw_case(personality={"O": 1.5, "C": 0, "E": 0, "A": 0, "N": 0}), "trait_range"),
+        (_raw_case(personality={"O": 0.1}), "traits_missing"),
+        (_raw_case(recent_locations=["market"] * 4), "history_too_long"),
+        (_raw_case(candidates=["tavern"]), "candidate_count"),
+        (_raw_case(candidates=["tavern", "tavern", "library"]), "duplicate_candidates"),
+        (_raw_case(choice="arena"), "choice_not_in_candidates"),
+        (_raw_case(decision_type="teleport"), "bad_decision_type"),
+        (_raw_case(selected_location="tavern"), "location_case_has_selected"),
+        (_raw_action_case(candidates=["read", "research"]), "not_full_action_set"),
+        (_raw_action_case(recent_locations=["chapel"]), "selected_location_mismatch"),
+        (_raw_action_case(recent_actions_same_location=["pray"]), "action_not_native"),
+        (_raw_action_case(selected_location=None), "missing_selected_location"),
+    ])
+    def test_rejections(self, case, reason):
+        assert self._validate(case) == reason
+
+    def test_empty_recent_locations_ok_for_action(self):
+        # enrich later auto-fills [selected_location]; validation accepts it
+        assert self._validate(_raw_action_case(recent_locations=[])) is None
+
+
+class TestParseRawFile:
+    def test_meta_header_and_user_rejection(self, tmp_path):
+        from experiments.rq2.independent import parse_raw_file
+        payload = [
+            {"_meta": {"source": "gpt-5.5"}},
+            _raw_case(),
+            {**_raw_case(choice="tavern"), "review_status": "rejected"},
+        ]
+        f = tmp_path / "batch_01.json"
+        f.write_text(json.dumps(payload), encoding="utf-8")
+        source, cases, user_rejected = parse_raw_file(f)
+        assert source == "gpt-5.5"
+        assert len(cases) == 1 and len(user_rejected) == 1
+
+    def test_missing_meta_defaults_unknown(self, tmp_path):
+        from experiments.rq2.independent import parse_raw_file
+        f = tmp_path / "b.json"
+        f.write_text(json.dumps([_raw_case()]), encoding="utf-8")
+        source, cases, _ = parse_raw_file(f)
+        assert source == "unknown" and len(cases) == 1
