@@ -162,3 +162,18 @@ Still open (do not block implementation): final accepted-case count (target
 ~800, actual depends on review yield — splits scale proportionally); nonlinear
 weight-decay grid values; whether `reason` strings are quoted in the
 dissertation (kept in data either way).
+
+## 9. Amendment (2026-07-12)
+
+- **Scale raised**: general-pool split targets are now 1200 train / 150 val /
+  75 iid test (was 550/100/75; the old numbers were a review-throughput guess,
+  and the user judged them too small). Structured test targets unchanged.
+  Proportional scaling below target still applies.
+- **Data-size curve added**: simple and nonlinear (weight decay pinned to
+  1e-3) additionally train at 150/400/800 cases × 5 seeds (run matrix 40 → 70
+  runs); `run_2b.py` writes `data_size_curve.csv/.png` with the fixed scorer
+  as a reference line. Purpose: decide with evidence whether further scaling
+  (or the shelved training-only location expansion) is worth its review cost.
+- **Review protocol stratified**: the 150 test cases are reviewed one by one;
+  train/val batches get outlier deletion plus a ~20% spot check. Label noise
+  in training is tolerable; test labels are load-bearing.

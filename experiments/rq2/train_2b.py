@@ -18,7 +18,13 @@ from pathlib import Path
 from npc_policy import IndependentCase
 
 from .common import SEEDS, RunSpec, config_hash, read_pool
-from .independent import IND_DATA, IND_RESULTS, WD_GRID, independent_case_to_inputs
+from .independent import (
+    DATA_SIZES_2B,
+    IND_DATA,
+    IND_RESULTS,
+    WD_GRID,
+    independent_case_to_inputs,
+)
 from .train import pick_device, run_all, train_one
 
 SIMPLE_MODELS = ("simple", "agnostic_simple")
@@ -29,6 +35,12 @@ def run_matrix_2b() -> list[RunSpec]:
     runs = [RunSpec("IND", m, s) for m in SIMPLE_MODELS for s in SEEDS]        # 10
     runs += [RunSpec("IND", m, s, tag=f"wd{wd:g}")
              for m in NONLINEAR_MODELS for wd in WD_GRID for s in SEEDS]       # 30
+    # data-size curve (amendment 2026-07-12); nonlinear pinned to the middle
+    # weight decay rather than sweeping per size
+    runs += [RunSpec("IND", "simple", s, n_train=n)
+             for n in DATA_SIZES_2B for s in SEEDS]                            # 15
+    runs += [RunSpec("IND", "nonlinear", s, n_train=n, tag="wd0.001")
+             for n in DATA_SIZES_2B for s in SEEDS]                            # 15
     return runs
 
 
@@ -54,7 +66,10 @@ def make_loader_2b(data_dir: Path):
             state["splits"] = json.loads(
                 (data_dir / "splits.json").read_text(encoding="utf-8"))["splits"]
         by_id, splits = state["by_id"], state["splits"]
-        return ([by_id[i] for i in splits["train"]],
+        train_ids = splits["train"]
+        if spec.n_train is not None:
+            train_ids = train_ids[: spec.n_train]   # nested subsets by construction
+        return ([by_id[i] for i in train_ids],
                 [by_id[i] for i in splits["val"]])
 
     return load_cases

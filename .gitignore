@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+data/rq2_controlled_smoke/
+data/rq2_controlled/pool.jsonl
+docs/*.pdf
+results/rq2_smoke_local_backup/

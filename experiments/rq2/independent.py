@@ -27,12 +27,15 @@ TRAITS = ("O", "C", "E", "A", "N")
 _TRAIT_KW = {"O": "openness", "C": "conscientiousness", "E": "extraversion",
              "A": "agreeableness", "N": "neuroticism"}
 
-# split targets (spec §4); general pool scales proportionally to these
-GENERAL_TARGETS = {"train": 550, "val": 100, "test_iid": 75}
+# split targets (spec §4; train/val raised 2026-07-12, spec amendment — the
+# 2026-07-09 550/100 was a review-throughput guess, not a scientific target);
+# general pool scales proportionally to these
+GENERAL_TARGETS = {"train": 1200, "val": 150, "test_iid": 75}
 STRUCT_TARGETS = {"test_pers": 38, "test_arena": 37}
 TEST_GROUPS = ("test_iid", "test_pers", "test_arena")
 
 WD_GRID = (1e-4, 1e-3, 1e-2)        # nonlinear-family sweep, chosen on val NLL
+DATA_SIZES_2B = (150, 400, 800)     # data-size curve; full-data point reuses main runs
 
 
 @lru_cache(maxsize=1)

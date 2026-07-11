@@ -163,6 +163,57 @@ def eval_main(argv=None) -> None:
               ["system", "seed", "case_id", "group", "decision_type", "top1", "nll"],
               diag_rows)
 
+    # data-size curve (amendment 2026-07-12): test top-1 vs training size;
+    # full-data points reuse the main-table "all/all" per-seed rows
+    curve: list[dict] = []
+    for f in (args.results / "runs").glob("IND__*__n*.json"):
+        meta = json.loads(f.read_text(encoding="utf-8"))
+        if meta.get("n_train") is None:
+            continue
+        model = load_student(args.results, meta["run_id"])
+        per = [case_metrics(q, c) for q, c in zip(model_probs(model, cases), cases)]
+        curve.append({"model": meta["model"], "n_train": meta["n_train"],
+                      "top1": float(np.mean([m["top1"] for m in per])),
+                      "nll": float(np.mean([m["nll"] for m in per]))})
+    n_full = len(json.loads((args.data / "splits.json")
+                            .read_text(encoding="utf-8"))["splits"]["train"])
+    for r in per_seed_rows:
+        if (r["system"] in ("simple", "nonlinear") and r["group"] == "all"
+                and r["decision_type"] == "all"):
+            curve.append({"model": r["system"], "n_train": n_full,
+                          "top1": r["top1"], "nll": r["nll"]})
+    if curve:
+        cgroups: dict[tuple, list[dict]] = defaultdict(list)
+        for r in curve:
+            cgroups[(r["model"], r["n_train"])].append(r)
+        crows = [{"model": m, "n_train": n, "n_seeds": len(rs),
+                  "top1_mean": float(np.mean([r["top1"] for r in rs])),
+                  "top1_std": _std([r["top1"] for r in rs]),
+                  "nll_mean": float(np.mean([r["nll"] for r in rs])),
+                  "nll_std": _std([r["nll"] for r in rs])}
+                 for (m, n), rs in sorted(cgroups.items())]
+        write_csv(args.results / "data_size_curve.csv", list(crows[0].keys()),
+                  [list(r.values()) for r in crows])
+        fig, ax = plt.subplots(figsize=(6.5, 4.5))
+        for fam in ("simple", "nonlinear"):
+            pts = [r for r in crows if r["model"] == fam]
+            ax.errorbar([r["n_train"] for r in pts],
+                        [r["top1_mean"] for r in pts],
+                        yerr=[r["top1_std"] for r in pts],
+                        marker="o", color=SYSTEM_COLORS[fam], label=fam)
+        sco_all = [r for r in per_seed_rows if r["system"] == "scorer"
+                   and r["group"] == "all" and r["decision_type"] == "all"]
+        if sco_all:
+            ax.axhline(sco_all[0]["top1"], ls="--", color=SYSTEM_COLORS["scorer"],
+                       label="scorer (fixed)")
+        ax.set_xscale("log")
+        ax.set_xlabel("training cases")
+        ax.set_ylabel("top-1 accuracy (all test groups)")
+        ax.set_title("2B — does more independent data help?")
+        ax.legend(frameon=False)
+        fig.savefig(args.results / "data_size_curve.png", bbox_inches="tight")
+        plt.close(fig)
+
     # figure: top-1 per system × group
     fig, ax = plt.subplots(figsize=(9, 4.5))
     plot_groups = ("all",) + TEST_GROUPS

@@ -217,10 +217,12 @@ class TestImport:
         raw = _write_raw_dir(tmp_path)
         meta = run_import(raw_dir=raw, out_dir=tmp_path / "out")
         splits = json.loads((tmp_path / "out" / "splits.json").read_text(encoding="utf-8"))["splits"]
-        # proportional scaling: general pool of 40 → 550:100:75 ratios
+        # proportional scaling: general pool of 40 → GENERAL_TARGETS ratios
+        from experiments.rq2.independent import GENERAL_TARGETS
+        total = sum(GENERAL_TARGETS.values())
         n = sum(len(splits[k]) for k in ("train", "val", "test_iid"))
         assert n == 40
-        assert len(splits["test_iid"]) == round(40 * 75 / 725)
+        assert len(splits["test_iid"]) == round(40 * GENERAL_TARGETS["test_iid"] / total)
         assert len(splits["test_pers"]) == 6 and len(splits["test_arena"]) == 6
         assert (tmp_path / "out" / "report.txt").exists()
         assert meta["accepted"] == 52
@@ -341,8 +343,9 @@ class TestTrain2B:
     def test_run_matrix_shape(self):
         from experiments.rq2.train_2b import run_matrix_2b
         specs = run_matrix_2b()
-        assert len(specs) == 40                     # 2×5 simple + 2×5×3 nonlinear
-        assert len({s.run_id for s in specs}) == 40
+        # 10 simple + 30 nonlinear-wd + 30 data-size curve (amendment 2026-07-12)
+        assert len(specs) == 70
+        assert len({s.run_id for s in specs}) == 70
         assert all(s.split == "IND" for s in specs)
 
     def test_wd_of_spec(self):
@@ -361,9 +364,9 @@ class TestTrain2B:
         run_import(raw_dir=raw, out_dir=tmp_path / "data")
         train_main(["--data", str(tmp_path / "data"),
                     "--results", str(tmp_path / "res"),
-                    "--only", "IND__simple", "--max-epochs", "2"])
+                    "--only", "IND__simple__s", "--max-epochs", "2"])
         runs = list((tmp_path / "res" / "runs").glob("*.json"))
-        assert len(runs) == 5                       # simple × 5 seeds
+        assert len(runs) == 5                       # simple main runs × 5 seeds
         meta = json.loads(runs[0].read_text(encoding="utf-8"))
         assert np.isfinite(meta["best_val_kl"])
 
@@ -379,7 +382,7 @@ class TestRun2B:
         run_import(raw_dir=raw, out_dir=tmp_path / "data")
         train_main(["--data", str(tmp_path / "data"),
                     "--results", str(tmp_path / "res"),
-                    "--only", "IND__simple", "--max-epochs", "2"])
+                    "--only", "IND__simple__s", "--max-epochs", "2"])
         eval_main(["--data", str(tmp_path / "data"),
                    "--results", str(tmp_path / "res")])
         with open(tmp_path / "res" / "main_table.csv", encoding="utf-8") as f:
