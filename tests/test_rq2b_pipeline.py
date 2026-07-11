@@ -176,6 +176,93 @@ class TestValidate:
         assert self._validate(_raw_action_case(recent_locations=[])) is None
 
 
+def _write_raw_dir(tmp_path, n_general=40, n_pers=6, n_arena=6) -> Path:
+    """Synthesise a small raw/ directory covering all three batch types."""
+    import random
+    rng = random.Random(0)
+    locs = ["tavern", "library", "chapel", "market", "forest"]
+
+    def general(i):
+        pool = rng.sample(locs, 3)
+        return _raw_case(
+            personality={"O": rng.uniform(-1, 0.5), "C": rng.uniform(-0.5, 1),
+                         "E": rng.uniform(-1, 1), "A": 0.0, "N": 0.0},
+            recent_locations=rng.sample(locs, rng.randint(0, 3)),
+            candidates=pool, choice=pool[i % 3])
+
+    def pers(i):
+        pool = rng.sample(locs, 3)
+        return _raw_case(
+            personality={"O": 0.8, "C": -0.8, "E": 0.1, "A": 0.0, "N": 0.0},
+            candidates=pool, choice=pool[i % 3])
+
+    def arena(i):
+        pool = ["arena"] + rng.sample(locs, 2)
+        return _raw_case(candidates=pool, choice="arena")
+
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    for name, gen, n in [("general.json", general, n_general),
+                         ("pers.json", pers, n_pers),
+                         ("arena.json", arena, n_arena)]:
+        payload = [{"_meta": {"source": "test-llm"}}] + [gen(i) for i in range(n)]
+        (raw / name).write_text(json.dumps(payload), encoding="utf-8")
+    return raw
+
+
+class TestImport:
+    def test_end_to_end_import(self, tmp_path):
+        from experiments.rq2.import_independent import run_import
+        raw = _write_raw_dir(tmp_path)
+        meta = run_import(raw_dir=raw, out_dir=tmp_path / "out")
+        splits = json.loads((tmp_path / "out" / "splits.json").read_text(encoding="utf-8"))["splits"]
+        # proportional scaling: general pool of 40 → 550:100:75 ratios
+        n = sum(len(splits[k]) for k in ("train", "val", "test_iid"))
+        assert n == 40
+        assert len(splits["test_iid"]) == round(40 * 75 / 725)
+        assert len(splits["test_pers"]) == 6 and len(splits["test_arena"]) == 6
+        assert (tmp_path / "out" / "report.txt").exists()
+        assert meta["accepted"] == 52
+
+    def test_isolation_no_structured_content_in_train_val(self, tmp_path):
+        from experiments.rq2.import_independent import run_import
+        from experiments.rq2.independent import in_pers_region, touches_arena
+        raw = _write_raw_dir(tmp_path)
+        run_import(raw_dir=raw, out_dir=tmp_path / "out")
+        pool = read_pool(tmp_path / "out" / "cases.jsonl", case_cls=IndependentCase)
+        splits = json.loads((tmp_path / "out" / "splits.json").read_text(encoding="utf-8"))["splits"]
+        trainval = set(splits["train"]) | set(splits["val"])
+        for case, tags in pool:
+            if tags["id"] in trainval:
+                assert not in_pers_region(case) and not touches_arena(case)
+
+    def test_rejects_recorded_and_duplicates_dropped(self, tmp_path):
+        from experiments.rq2.import_independent import run_import
+        raw = tmp_path / "raw"
+        raw.mkdir()
+        bad = _raw_case(choice="arena")                  # invalid: not a candidate
+        dup = _raw_case()
+        payload = [{"_meta": {"source": "m"}}, dup, dup, bad,
+                   {**_raw_case(candidates=["tavern", "library"], choice="tavern"),
+                    "review_status": "rejected"}]
+        (raw / "b.json").write_text(json.dumps(payload), encoding="utf-8")
+        meta = run_import(raw_dir=raw, out_dir=tmp_path / "out")
+        rejected = [json.loads(l) for l in
+                    (tmp_path / "out" / "rejected.jsonl").read_text(encoding="utf-8").splitlines()]
+        reasons = sorted(r["reason"] for r in rejected)
+        assert reasons == ["choice_not_in_candidates", "duplicate", "user_rejected"]
+        assert meta["accepted"] == 1
+
+    def test_deterministic_splits(self, tmp_path):
+        from experiments.rq2.import_independent import run_import
+        raw = _write_raw_dir(tmp_path)
+        run_import(raw_dir=raw, out_dir=tmp_path / "o1")
+        run_import(raw_dir=raw, out_dir=tmp_path / "o2")
+        s1 = (tmp_path / "o1" / "splits.json").read_text(encoding="utf-8")
+        s2 = (tmp_path / "o2" / "splits.json").read_text(encoding="utf-8")
+        assert s1 == s2
+
+
 class TestEnrich:
     def test_location_features_match_world(self):
         from experiments.rq2.independent import enrich_case, load_base_world
