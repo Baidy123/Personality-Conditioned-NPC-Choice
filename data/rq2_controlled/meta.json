@@ -1,0 +1,87 @@
+{
+  "generated": "2026-07-11 17:42:13",
+  "seed": 20260709,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01",
+  "world_hashes": {
+    "arena_locked": "f7bbce75da4769ddec06b7ee25a51b383b19c3e4663c3202444f4718d4a5abd2",
+    "celebration": "ed3a333e69d0d6d26ec17be57063c86fd3ff8621618d45b58df4f198893061b2",
+    "full": "5d708c48d1f399c6259b3eb6aba851727eb132449a6de988213fb44d7ee214d8",
+    "market_locked": "9b56b9390ad74a0ededb7e2cc72bbb81b75b553a638daf3527396aa5a908131b",
+    "war_camp": "a62e1c3c74fc15bb8c53ad898c1eb1469bcaefcd94a4c8d446d5ff1f2f49d427"
+  },
+  "pool_cases": 212000,
+  "per_split": {
+    "S0": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G1": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G2": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G3": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G4": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G5": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    },
+    "G6": {
+      "train": 100000,
+      "val": 5000,
+      "test": 5000
+    }
+  },
+  "composition": {
+    "pool": {
+      "rollout/action": 46000,
+      "rollout/location": 46000,
+      "synthetic/action": 60000,
+      "synthetic/location": 60000
+    },
+    "test_S0": {
+      "rollout/action": 659,
+      "rollout/location": 656,
+      "synthetic/action": 1820,
+      "synthetic/location": 1865
+    },
+    "test_G1": {
+      "targeted/action": 2482,
+      "targeted/location": 2518
+    },
+    "test_G2": {
+      "targeted/location": 5000
+    },
+    "test_G3": {
+      "targeted/location": 5000
+    },
+    "test_G4": {
+      "targeted/action": 2500,
+      "targeted/location": 2500
+    },
+    "test_G5": {
+      "targeted/action": 2462,
+      "targeted/location": 2538
+    },
+    "test_G6": {
+      "targeted/action": 2457,
+      "targeted/location": 2543
+    }
+  },
+  "elapsed_s": 98.1
+}

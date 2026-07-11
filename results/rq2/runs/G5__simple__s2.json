@@ -1,0 +1,17 @@
+{
+  "run_id": "G5__simple__s2",
+  "split": "G5",
+  "model": "simple",
+  "seed": 2,
+  "ablation": "full",
+  "n_train": null,
+  "tag": "",
+  "best_val_kl": 0.04685094072818756,
+  "best_epoch": 47,
+  "epochs_run": 58,
+  "wall_time_s": 77.2,
+  "device": "cuda",
+  "dtype": "float32",
+  "n_train_cases": 100000,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01"
+}

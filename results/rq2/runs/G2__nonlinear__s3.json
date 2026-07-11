@@ -1,0 +1,17 @@
+{
+  "run_id": "G2__nonlinear__s3",
+  "split": "G2",
+  "model": "nonlinear",
+  "seed": 3,
+  "ablation": "full",
+  "n_train": null,
+  "tag": "",
+  "best_val_kl": 0.0025350433863699437,
+  "best_epoch": 25,
+  "epochs_run": 36,
+  "wall_time_s": 91.5,
+  "device": "cuda",
+  "dtype": "float32",
+  "n_train_cases": 100000,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01"
+}

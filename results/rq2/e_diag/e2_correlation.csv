@@ -1,0 +1,11 @@
+family,seed,spearman_upper,mantel_rho,mantel_p
+simple,0,0.5326,0.5326,0.0010
+simple,1,0.5353,0.5353,0.0010
+simple,2,0.5351,0.5351,0.0010
+simple,3,0.5317,0.5317,0.0010
+simple,4,0.5354,0.5354,0.0010
+nonlinear,0,0.9977,0.9977,0.0010
+nonlinear,1,0.9970,0.9970,0.0010
+nonlinear,2,0.9975,0.9975,0.0010
+nonlinear,3,0.9980,0.9980,0.0010
+nonlinear,4,0.9973,0.9973,0.0010
