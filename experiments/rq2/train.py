@@ -75,18 +75,26 @@ def train_one(
     batch_size: int = 256,
     max_epochs: int = 150,
     patience: int = 10,
+    to_inputs=case_to_inputs,
+    weight_decay: float | None = None,   # None → 2A rule (1e-4 nonlinear, else 0)
 ) -> tuple[dict, dict]:
-    """Train one run; returns (result dict, best float64-CPU state_dict)."""
+    """Train one run; returns (result dict, best float64-CPU state_dict).
+
+    ``to_inputs`` builds the input dicts (2B passes a one-hot-target builder:
+    a one-hot target makes ``kl_loss`` compute exactly ``-log q[choice]``, i.e.
+    cross-entropy, so hard labels train through this unchanged loop).
+    """
     dtype = torch.float32 if device.type == "cuda" else torch.float64
-    inputs = [case_to_inputs(c, spec.ablation) for c in train_cases]
-    val_inputs = [case_to_inputs(c, spec.ablation) for c in val_cases]
+    inputs = [to_inputs(c, spec.ablation) for c in train_cases]
+    val_inputs = [to_inputs(c, spec.ablation) for c in val_cases]
     val_batches = [
         batch_to(PolicyBatch.from_cases(val_inputs[i:i + 512]), device, dtype)
         for i in range(0, len(val_inputs), 512)
     ]
 
     model = build_model(spec.model, spec.seed).to(device=device, dtype=dtype)
-    weight_decay = 1e-4 if "nonlinear" in spec.model else 0.0
+    if weight_decay is None:
+        weight_decay = 1e-4 if "nonlinear" in spec.model else 0.0
     opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     shuffle_rng = np.random.default_rng(spec.seed)
 

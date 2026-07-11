@@ -73,6 +73,29 @@ class TestRunSpecTag:
             "G1__simple__abl_no_context__s0"
 
 
+class TestTrainOneInjection:
+    def test_to_inputs_and_weight_decay_params(self):
+        """train_one accepts to_inputs and weight_decay and trains on one-hot targets."""
+        from experiments.rq2.train import train_one
+
+        def onehot_inputs(case, ablation="full"):
+            d = case_input_dict(case, ablation)
+            t = np.zeros(len(case.candidates))
+            t[case.target_choice] = 1.0
+            d["target"] = t
+            return d
+
+        cases = [_mini_independent_case() for _ in range(8)]
+        result, state = train_one(
+            RunSpec("IND", "simple", 0), cases, cases[:4],
+            torch.device("cpu"), to_inputs=onehot_inputs, weight_decay=0.0,
+            max_epochs=2, batch_size=4,
+        )
+        assert result["epochs_run"] <= 2
+        assert np.isfinite(result["best_val_kl"])   # one-hot KL == NLL of the choice
+        assert any(k == "w" for k in state)
+
+
 class TestCaseInputDict:
     def test_matches_case_to_inputs_minus_target(self):
         from experiments.rq2.common import case_to_inputs
