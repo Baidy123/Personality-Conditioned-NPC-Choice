@@ -1,0 +1,188 @@
+"""Study 2B / Study 3 automated comparison on the independent test set.
+
+Every system predicts the same test cases; metrics are top-1 accuracy and
+NLL of the labelled choice. Learned families aggregate over seeds (mean ± sd);
+per (family, seed) the nonlinear weight-decay variant with the best val NLL is
+selected. The hand-authored scorer appears here strictly as an evaluated
+system — it took no part in labels or training.
+
+Run from ``code/``:  python -m experiments.rq2.run_2b
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from collections import defaultdict
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+from experiments.rq1.common import setup_style, write_csv
+from npc_policy import HandAuthoredScorer, IndependentCase
+from npc_policy.learned import PolicyBatch, UniformBaseline
+from npc_policy.representation import Personality
+
+from .common import SEEDS, read_pool
+from .independent import IND_DATA, IND_RESULTS, TEST_GROUPS, independent_case_to_inputs
+from .run_2a import load_student
+from .train_2b import NONLINEAR_MODELS, SIMPLE_MODELS
+
+SYSTEM_COLORS = {"uniform": "#CCCCCC", "agnostic_simple": "#999999",
+                 "agnostic_nonlinear": "#CC79A7", "scorer": "#009E73",
+                 "simple": "#0072B2", "nonlinear": "#E69F00"}
+_TINY = np.finfo(float).tiny
+
+
+def scorer_probs(case: IndependentCase) -> np.ndarray:
+    scorer = HandAuthoredScorer()
+    return scorer.distribution(
+        Personality(np.array(case.personality, dtype=float)),
+        case.candidates, relations=case.candidate_history_features,
+        level=case.decision_type)
+
+
+def model_probs(model: torch.nn.Module, cases: list[IndependentCase],
+                chunk: int = 512) -> list[np.ndarray]:
+    out = []
+    model.eval()
+    for lo in range(0, len(cases), chunk):
+        part = cases[lo:lo + chunk]
+        batch = PolicyBatch.from_cases(
+            [independent_case_to_inputs(c) for c in part])
+        with torch.no_grad():
+            probs = model(batch).exp().numpy()
+        out.extend(probs[i, : len(c.candidates)] for i, c in enumerate(part))
+    return out
+
+
+def case_metrics(q: np.ndarray, case: IndependentCase) -> dict:
+    y = case.target_choice
+    return {"top1": int(int(np.argmax(q)) == y),
+            "nll": float(-np.log(max(q[y], _TINY))),
+            "decision_type": case.decision_type}
+
+
+def best_nonlinear_runs(results_dir: Path, family: str) -> list[str]:
+    """Per seed, the weight-decay variant with the lowest val NLL."""
+    best: dict[int, tuple[float, str]] = {}
+    for f in (results_dir / "runs").glob(f"IND__{family}__wd*.json"):
+        meta = json.loads(f.read_text(encoding="utf-8"))
+        seed, val = meta["seed"], meta["best_val_kl"]
+        if seed not in best or val < best[seed][0]:
+            best[seed] = (val, meta["run_id"])
+    return [run_id for _, run_id in sorted(best.values(), key=lambda t: t[1])]
+
+
+def _rows_for(system: str, seed, per_case: list[dict],
+              groups: dict[str, str], ids: list[str]) -> list[dict]:
+    """Aggregate one prediction set to (group × decision_type) means."""
+    rows = []
+    for grp in ("all",) + TEST_GROUPS:
+        sel = [m for m, cid in zip(per_case, ids)
+               if grp == "all" or groups[cid] == grp]
+        if not sel:
+            continue
+        for dt in ("location", "action", "all"):
+            part = sel if dt == "all" else [m for m in sel if m["decision_type"] == dt]
+            if not part:
+                continue
+            rows.append({"system": system, "seed": seed, "group": grp,
+                         "decision_type": dt, "n_cases": len(part),
+                         "top1": float(np.mean([m["top1"] for m in part])),
+                         "nll": float(np.mean([m["nll"] for m in part]))})
+    return rows
+
+
+def _std(xs):
+    return float(np.std(xs, ddof=1)) if len(xs) > 1 else 0.0
+
+
+def eval_main(argv=None) -> None:
+    ap = argparse.ArgumentParser(description="Study 2B comparative evaluation")
+    ap.add_argument("--data", type=Path, default=IND_DATA)
+    ap.add_argument("--results", type=Path, default=IND_RESULTS)
+    args = ap.parse_args(argv)
+    setup_style()
+
+    pool = read_pool(args.data / "cases.jsonl", case_cls=IndependentCase)
+    by_id = {t["id"]: c for c, t in pool}
+    groups = {t["id"]: t["group"] for _, t in pool}
+    ids = [t["id"] for _, t in pool if t["group"] in TEST_GROUPS]
+    cases = [by_id[i] for i in ids]
+    if not cases:
+        raise SystemExit("no test cases in the pool - run import_independent first")
+
+    per_seed_rows: list[dict] = []
+    # fixed systems (no seeds)
+    uni = [case_metrics(q, c) for q, c in
+           zip(model_probs(UniformBaseline(), cases), cases)]
+    per_seed_rows += _rows_for("uniform", 0, uni, groups, ids)
+    sco = [case_metrics(scorer_probs(c), c) for c in cases]
+    per_seed_rows += _rows_for("scorer", 0, sco, groups, ids)
+    # learned systems
+    run_ids = {m: [f"IND__{m}__s{s}" for s in SEEDS] for m in SIMPLE_MODELS}
+    run_ids |= {m: best_nonlinear_runs(args.results, m) for m in NONLINEAR_MODELS}
+    for system, rids in run_ids.items():
+        for rid in rids:
+            if not (args.results / "runs" / f"{rid}.json").exists():
+                continue
+            model = load_student(args.results, rid)
+            per = [case_metrics(q, c) for q, c in
+                   zip(model_probs(model, cases), cases)]
+            seed = json.loads((args.results / "runs" / f"{rid}.json")
+                              .read_text(encoding="utf-8"))["seed"]
+            per_seed_rows += _rows_for(system, seed, per, groups, ids)
+
+    # aggregate over seeds
+    grouped: dict[tuple, list[dict]] = defaultdict(list)
+    for r in per_seed_rows:
+        grouped[(r["system"], r["group"], r["decision_type"])].append(r)
+    table = [{"system": sys_, "group": grp, "decision_type": dt,
+              "n_cases": rs[0]["n_cases"], "n_seeds": len(rs),
+              "top1_mean": float(np.mean([r["top1"] for r in rs])),
+              "top1_std": _std([r["top1"] for r in rs]),
+              "nll_mean": float(np.mean([r["nll"] for r in rs])),
+              "nll_std": _std([r["nll"] for r in rs])}
+             for (sys_, grp, dt), rs in sorted(grouped.items())]
+    write_csv(args.results / "main_table.csv", list(table[0].keys()),
+              [list(r.values()) for r in table])
+
+    # compact per-group summary for error analysis
+    diag = [[r["system"], r["group"], r["decision_type"], r["n_cases"],
+             round(r["top1_mean"], 4), round(r["nll_mean"], 4)]
+            for r in table]
+    write_csv(args.results / "diagnostics.csv",
+              ["system", "group", "decision_type", "n_cases", "top1", "nll"], diag)
+
+    # figure: top-1 per system × group
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    plot_groups = ("all",) + TEST_GROUPS
+    x = np.arange(len(plot_groups))
+    systems = [s for s in SYSTEM_COLORS if any(r["system"] == s for r in table)]
+    for i, sys_ in enumerate(systems):
+        ys, es = [], []
+        for grp in plot_groups:
+            rows = [r for r in table if r["system"] == sys_ and r["group"] == grp
+                    and r["decision_type"] == "all"]
+            ys.append(rows[0]["top1_mean"] if rows else np.nan)
+            es.append(rows[0]["top1_std"] if rows else 0.0)
+        off = (i - (len(systems) - 1) / 2) * 0.8 / len(systems)
+        ax.bar(x + off, ys, width=0.75 / len(systems), yerr=es,
+               color=SYSTEM_COLORS[sys_], label=sys_, capsize=2)
+    ax.set_xticks(x, plot_groups)
+    ax.set_ylabel("top-1 accuracy")
+    ax.set_title("2B — agreement with independent labels per test group")
+    ax.legend(frameon=False, fontsize=8)
+    fig.savefig(args.results / "group_bars.png", bbox_inches="tight")
+    plt.close(fig)
+    print(f"written: {args.results / 'main_table.csv'}, group_bars.png, diagnostics.csv")
+
+
+if __name__ == "__main__":
+    eval_main()

@@ -333,6 +333,40 @@ class TestTrain2B:
         assert np.isfinite(meta["best_val_kl"])
 
 
+class TestRun2B:
+    def test_scorer_and_uniform_rows(self, tmp_path):
+        """Full mini-pipeline: import → train simple → evaluate all systems."""
+        import csv
+        from experiments.rq2.import_independent import run_import
+        from experiments.rq2.run_2b import eval_main
+        from experiments.rq2.train_2b import train_main
+        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_arena=4)
+        run_import(raw_dir=raw, out_dir=tmp_path / "data")
+        train_main(["--data", str(tmp_path / "data"),
+                    "--results", str(tmp_path / "res"),
+                    "--only", "IND__simple", "--max-epochs", "2"])
+        eval_main(["--data", str(tmp_path / "data"),
+                   "--results", str(tmp_path / "res")])
+        with open(tmp_path / "res" / "main_table.csv", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        systems = {r["system"] for r in rows}
+        assert {"uniform", "scorer", "simple"} <= systems
+        groups = {r["group"] for r in rows}
+        assert {"all", "test_iid", "test_pers", "test_arena"} <= groups
+        for r in rows:
+            assert 0.0 <= float(r["top1_mean"]) <= 1.0
+            assert float(r["nll_mean"]) >= 0.0
+        assert (tmp_path / "res" / "group_bars.png").exists()
+
+    def test_scorer_predictions_scored_like_models(self):
+        """Scorer NLL/top-1 computed from its distribution on the labelled choice."""
+        from experiments.rq2.run_2b import scorer_probs
+        from experiments.rq2.independent import enrich_case, load_base_world
+        case = enrich_case(_raw_case(), load_base_world(), "m")
+        q = scorer_probs(case)
+        assert q.shape == (3,) and abs(q.sum() - 1.0) < 1e-9
+
+
 class TestParseRawFile:
     def test_meta_header_and_user_rejection(self, tmp_path):
         from experiments.rq2.independent import parse_raw_file
