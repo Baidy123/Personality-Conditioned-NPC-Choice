@@ -70,23 +70,25 @@ def write_pool(path: Path, records: list[tuple[ControlledCase, dict]]) -> None:
     os.replace(tmp, path)
 
 
-def read_pool(path: Path) -> list[tuple[ControlledCase, dict]]:
+def read_pool(path: Path, case_cls=ControlledCase) -> list[tuple]:
     """Read a JSONL pool; buffer lists are stored oldest→newest.
 
-    A record without ``"gen"`` tags is corruption and raises ``KeyError``.
+    ``case_cls`` is any class with ``from_dict`` (``ControlledCase`` default,
+    ``IndependentCase`` for the 2B pool). A record without ``"gen"`` tags is
+    corruption and raises ``KeyError``.
     """
     records = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
             tags = d.pop("gen")
-            records.append((ControlledCase.from_dict(d), tags))
+            records.append((case_cls.from_dict(d), tags))
     return records
 
 
 # ------------------------------------------------------- model input assembly --
-def case_to_inputs(case: ControlledCase, ablation: str = "full") -> dict:
-    """``ControlledCase`` → ``features.case_inputs`` dict plus ``"target"``.
+def case_input_dict(case, ablation: str = "full") -> dict:
+    """Case → ``features.case_inputs`` dict (no target; both case classes).
 
     Action cases take the selected location's features from the newest
     ``recent_locations`` entry — the controller pushes the chosen location into
@@ -114,11 +116,16 @@ def case_to_inputs(case: ControlledCase, ablation: str = "full") -> dict:
     relations = case.candidate_history_features
     if ablation == "no_context" or (ablation == "location_only" and case.decision_type == "action"):
         relations = None
-    d = case_inputs(
+    return case_inputs(
         Personality(np.array(case.personality, dtype=float)),   # copy: no aliasing
         case.candidates, case.decision_type,
         relations=relations, selected_location=selected,
     )
+
+
+def case_to_inputs(case: ControlledCase, ablation: str = "full") -> dict:
+    """``ControlledCase`` → inputs dict plus the soft ``"target"`` (2A)."""
+    d = case_input_dict(case, ablation)
     d["target"] = np.array(case.target_distribution, dtype=float)   # copy: no aliasing
     return d
 
@@ -147,13 +154,14 @@ def top1_agree(t: np.ndarray, q: np.ndarray) -> bool:
 # ----------------------------------------------------------------- run matrix --
 @dataclass(frozen=True)
 class RunSpec:
-    """One training run: split × model × seed (+ ablation / data-size variants)."""
+    """One training run: split × model × seed (+ ablation / data-size / tag)."""
 
     split: str
     model: str
     seed: int
     ablation: str = "full"
     n_train: int | None = None      # None → the split's full train manifest
+    tag: str = ""                   # free-form variant marker (2B weight-decay grid)
 
     @property
     def run_id(self) -> str:
@@ -162,6 +170,8 @@ class RunSpec:
             parts.append(f"abl_{self.ablation}")
         if self.n_train is not None:
             parts.append(f"n{self.n_train}")
+        if self.tag:
+            parts.append(self.tag)
         parts.append(f"s{self.seed}")
         return "__".join(parts)
 
