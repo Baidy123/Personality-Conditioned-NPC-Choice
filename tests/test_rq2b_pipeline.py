@@ -302,6 +302,37 @@ class TestEnrich:
         assert d["cand"].shape == (3, 12) and d["d"] == 1
 
 
+class TestTrain2B:
+    def test_run_matrix_shape(self):
+        from experiments.rq2.train_2b import run_matrix_2b
+        specs = run_matrix_2b()
+        assert len(specs) == 40                     # 2×5 simple + 2×5×3 nonlinear
+        assert len({s.run_id for s in specs}) == 40
+        assert all(s.split == "IND" for s in specs)
+
+    def test_wd_of_spec(self):
+        from experiments.rq2.train_2b import run_matrix_2b, wd_of
+        for s in run_matrix_2b():
+            if "nonlinear" in s.model:
+                assert wd_of(s) in (1e-4, 1e-3, 1e-2) and s.tag.startswith("wd")
+            else:
+                assert wd_of(s) == 0.0 and s.tag == ""
+
+    def test_end_to_end_smoke(self, tmp_path):
+        """import → train 2 runs, 2 epochs → resumable artefacts on disk."""
+        from experiments.rq2.import_independent import run_import
+        from experiments.rq2.train_2b import train_main
+        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_arena=4)
+        run_import(raw_dir=raw, out_dir=tmp_path / "data")
+        train_main(["--data", str(tmp_path / "data"),
+                    "--results", str(tmp_path / "res"),
+                    "--only", "IND__simple", "--max-epochs", "2"])
+        runs = list((tmp_path / "res" / "runs").glob("*.json"))
+        assert len(runs) == 5                       # simple × 5 seeds
+        meta = json.loads(runs[0].read_text(encoding="utf-8"))
+        assert np.isfinite(meta["best_val_kl"])
+
+
 class TestParseRawFile:
     def test_meta_header_and_user_rejection(self, tmp_path):
         from experiments.rq2.independent import parse_raw_file
