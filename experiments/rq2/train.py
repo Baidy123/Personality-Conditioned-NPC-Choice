@@ -55,6 +55,29 @@ def batch_to(b: PolicyBatch, device: torch.device, dtype: torch.dtype) -> Policy
     )
 
 
+def _device_batch_source(input_dicts: list[dict], device: torch.device,
+                         dtype: torch.dtype):
+    """One padded on-device tensor set; ``take(idx)`` slices out a ``PolicyBatch``.
+
+    Per-step ``PolicyBatch.from_cases`` + host→device copies dominate wall time
+    for these tiny models (the accelerator math is trivial); assembling once and
+    indexing on-device removes that bottleneck. Batch composition and numerics
+    are unchanged: the global padding width only adds mask-excluded columns,
+    which contribute exact zeros through the masked softmax.
+    """
+    full = batch_to(PolicyBatch.from_cases(input_dicts), device, dtype)
+
+    def take(idx) -> PolicyBatch:
+        t = torch.as_tensor(np.asarray(idx), dtype=torch.long, device=device)
+        return replace(
+            full, p=full.p[t], d=full.d[t], ctx=full.ctx[t], cand=full.cand[t],
+            rel=full.rel[t], mask=full.mask[t],
+            target=None if full.target is None else full.target[t],
+        )
+
+    return take, full.mask.shape[0]
+
+
 def _mean_val_kl(model: torch.nn.Module, val_batches: list[PolicyBatch]) -> float:
     model.eval()
     tot = n = 0
@@ -85,12 +108,12 @@ def train_one(
     cross-entropy, so hard labels train through this unchanged loop).
     """
     dtype = torch.float32 if device.type == "cuda" else torch.float64
-    inputs = [to_inputs(c, spec.ablation) for c in train_cases]
-    val_inputs = [to_inputs(c, spec.ablation) for c in val_cases]
-    val_batches = [
-        batch_to(PolicyBatch.from_cases(val_inputs[i:i + 512]), device, dtype)
-        for i in range(0, len(val_inputs), 512)
-    ]
+    take_train, n_train = _device_batch_source(
+        [to_inputs(c, spec.ablation) for c in train_cases], device, dtype)
+    take_val, n_val = _device_batch_source(
+        [to_inputs(c, spec.ablation) for c in val_cases], device, dtype)
+    val_batches = [take_val(np.arange(i, min(i + 512, n_val)))
+                   for i in range(0, n_val, 512)]
 
     model = build_model(spec.model, spec.seed).to(device=device, dtype=dtype)
     if weight_decay is None:
@@ -104,10 +127,9 @@ def train_one(
     for epoch in range(max_epochs):
         epochs_run = epoch + 1
         model.train()
-        order = shuffle_rng.permutation(len(inputs))
+        order = shuffle_rng.permutation(n_train)
         for lo in range(0, len(order), batch_size):
-            chunk = [inputs[int(j)] for j in order[lo:lo + batch_size]]
-            batch = batch_to(PolicyBatch.from_cases(chunk), device, dtype)
+            batch = take_train(order[lo:lo + batch_size])
             opt.zero_grad()
             loss = kl_loss(model(batch), batch.target, batch.mask)
             loss.backward()
