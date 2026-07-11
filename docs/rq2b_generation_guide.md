@@ -75,8 +75,9 @@ Actions per location (an action case's `candidates` must be this full list):
    `recent_locations` = 0–3 names, oldest first (the NPC's last visits);
    no `selected_location`, no `recent_actions_same_location`.
 3. Action cases: `selected_location` = where the NPC is; `candidates` = that
-   location's full action list; the last entry of `recent_locations` must equal
-   `selected_location`; `recent_actions_same_location` = 0–3 action names of
+   location's full action list; `recent_locations` = 0–3 names, oldest first,
+   and its last entry must equal `selected_location` (it may be just that one
+   name, or empty); `recent_actions_same_location` = 0–3 action names of
    that same location (what it just did there — empty if it only just arrived).
 4. `choice` must be one of `candidates`. Numbers only in `personality`; never
    output feature values or probabilities.

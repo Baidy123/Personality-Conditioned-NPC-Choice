@@ -95,28 +95,41 @@ def validate_case(raw: dict, world: World) -> str | None:
 
 
 # --------------------------------------------------------------------- parse --
-def parse_raw_file(path: Path) -> tuple[str, list[dict], list[dict]]:
-    """One raw batch file → (source, candidate cases, user-rejected cases).
+def parse_raw_file(path: Path) -> tuple[str, list[tuple[int, dict]], list[dict]]:
+    """One raw batch file → (source, [(array position, case)], user-rejected).
 
     The optional ``{"_meta": {"source": …}}`` header names the labelling model;
     elements carrying ``"review_status": "rejected"`` are the user's manual
-    rejections (kept for the audit trail, never imported).
+    rejections (kept for the audit trail, never imported). Cases keep their raw
+    array position so ids stay stable when the user later rejects an earlier
+    element in the same file (review finding, 2026-07-11).
     """
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
         raise ValueError(f"{path.name}: expected a JSON array")
     source = "unknown"
     cases, user_rejected = [], []
-    for item in payload:
+    for pos, item in enumerate(payload):
         if not isinstance(item, dict):
             raise ValueError(f"{path.name}: non-object array element")
         if "_meta" in item:
-            source = str(item["_meta"].get("source", "unknown"))
+            meta = item["_meta"]
+            if isinstance(meta, dict):
+                source = str(meta.get("source", "unknown"))
+            else:
+                source = str(meta)
         elif item.get("review_status") == "rejected":
             user_rejected.append(item)
         else:
-            cases.append(item)
+            cases.append((pos, item))
     return source, cases, user_rejected
+
+
+# raw-format keys; anything else (e.g. hallucinated feature numbers) is ignored
+# with a warning at import (spec §2)
+KNOWN_KEYS = {"personality", "decision_type", "selected_location",
+              "recent_locations", "recent_actions_same_location",
+              "candidates", "choice", "reason", "review_status"}
 
 
 # -------------------------------------------------------------------- enrich --
@@ -173,9 +186,12 @@ def in_pers_region(case: IndependentCase) -> bool:
 
 
 def touches_arena(case: IndependentCase) -> bool:
-    if case.decision_type == "action":
-        return case.selected_location == "arena"
-    return any(o.id == "arena" for o in case.candidates + case.recent_locations)
+    """Matches 2A's ``g6_touches_arena``: selected location, candidates, or any
+    recent-locations entry (an action case elsewhere with arena in its history
+    still counts — review finding B1, 2026-07-11)."""
+    return (case.selected_location == "arena"
+            or any(o.id == "arena"
+                   for o in case.candidates + case.recent_locations))
 
 
 def dedupe_key(raw: dict) -> str:

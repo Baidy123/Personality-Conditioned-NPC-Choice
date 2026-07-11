@@ -119,12 +119,18 @@ def eval_main(argv=None) -> None:
         raise SystemExit("no test cases in the pool - run import_independent first")
 
     per_seed_rows: list[dict] = []
+    diag_rows: list[list] = []          # per-case records for error analysis
+
+    def record(system: str, seed, per_case: list[dict]) -> None:
+        per_seed_rows.extend(_rows_for(system, seed, per_case, groups, ids))
+        diag_rows.extend([system, seed, cid, groups[cid], m["decision_type"],
+                          m["top1"], round(m["nll"], 4)]
+                         for m, cid in zip(per_case, ids))
+
     # fixed systems (no seeds)
-    uni = [case_metrics(q, c) for q, c in
-           zip(model_probs(UniformBaseline(), cases), cases)]
-    per_seed_rows += _rows_for("uniform", 0, uni, groups, ids)
-    sco = [case_metrics(scorer_probs(c), c) for c in cases]
-    per_seed_rows += _rows_for("scorer", 0, sco, groups, ids)
+    record("uniform", 0, [case_metrics(q, c) for q, c in
+                          zip(model_probs(UniformBaseline(), cases), cases)])
+    record("scorer", 0, [case_metrics(scorer_probs(c), c) for c in cases])
     # learned systems
     run_ids = {m: [f"IND__{m}__s{s}" for s in SEEDS] for m in SIMPLE_MODELS}
     run_ids |= {m: best_nonlinear_runs(args.results, m) for m in NONLINEAR_MODELS}
@@ -133,11 +139,10 @@ def eval_main(argv=None) -> None:
             if not (args.results / "runs" / f"{rid}.json").exists():
                 continue
             model = load_student(args.results, rid)
-            per = [case_metrics(q, c) for q, c in
-                   zip(model_probs(model, cases), cases)]
             seed = json.loads((args.results / "runs" / f"{rid}.json")
                               .read_text(encoding="utf-8"))["seed"]
-            per_seed_rows += _rows_for(system, seed, per, groups, ids)
+            record(system, seed, [case_metrics(q, c) for q, c in
+                                  zip(model_probs(model, cases), cases)])
 
     # aggregate over seeds
     grouped: dict[tuple, list[dict]] = defaultdict(list)
@@ -153,12 +158,10 @@ def eval_main(argv=None) -> None:
     write_csv(args.results / "main_table.csv", list(table[0].keys()),
               [list(r.values()) for r in table])
 
-    # compact per-group summary for error analysis
-    diag = [[r["system"], r["group"], r["decision_type"], r["n_cases"],
-             round(r["top1_mean"], 4), round(r["nll_mean"], 4)]
-            for r in table]
+    # per-case records (spec §6): which cases each system gets wrong
     write_csv(args.results / "diagnostics.csv",
-              ["system", "group", "decision_type", "n_cases", "top1", "nll"], diag)
+              ["system", "seed", "case_id", "group", "decision_type", "top1", "nll"],
+              diag_rows)
 
     # figure: top-1 per system × group
     fig, ax = plt.subplots(figsize=(9, 4.5))

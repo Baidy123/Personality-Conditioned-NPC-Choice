@@ -163,6 +163,7 @@ class TestValidate:
         (_raw_case(choice="arena"), "choice_not_in_candidates"),
         (_raw_case(decision_type="teleport"), "bad_decision_type"),
         (_raw_case(selected_location="tavern"), "location_case_has_selected"),
+        (_raw_case(recent_actions_same_location=["chat"]), "location_case_has_actions"),
         (_raw_action_case(candidates=["read", "research"]), "not_full_action_set"),
         (_raw_action_case(recent_locations=["chapel"]), "selected_location_mismatch"),
         (_raw_action_case(recent_actions_same_location=["pray"]), "action_not_native"),
@@ -252,6 +253,40 @@ class TestImport:
         reasons = sorted(r["reason"] for r in rejected)
         assert reasons == ["choice_not_in_candidates", "duplicate", "user_rejected"]
         assert meta["accepted"] == 1
+
+    def test_arena_in_action_history_never_trains(self, tmp_path):
+        """Review finding B1: an action case elsewhere with arena in its
+        recent_locations must count as arena-family (checked by id, not by
+        the filter function itself — non-circular)."""
+        from experiments.rq2.import_independent import run_import
+        raw = _write_raw_dir(tmp_path, n_general=20, n_pers=2, n_arena=2)
+        sneaky = _raw_action_case(
+            selected_location="tavern",
+            recent_locations=["arena", "tavern"],
+            recent_actions_same_location=["chat"],
+            candidates=["chat", "drink", "brawl"], choice="chat")
+        (tmp_path / "raw" / "sneaky.json").write_text(
+            json.dumps([{"_meta": {"source": "m"}}, sneaky]), encoding="utf-8")
+        run_import(raw_dir=tmp_path / "raw", out_dir=tmp_path / "out")
+        splits = json.loads((tmp_path / "out" / "splits.json")
+                            .read_text(encoding="utf-8"))["splits"]
+        assert "sneaky#1" not in set(splits["train"]) | set(splits["val"])
+        assert "sneaky#1" in set(splits["test_arena"])
+
+    def test_ids_stable_under_user_rejection(self, tmp_path):
+        """Rejecting an earlier case must not shift later cases' ids."""
+        from experiments.rq2.independent import parse_raw_file
+        a, b = _raw_case(), _raw_case(choice="tavern")
+        f = tmp_path / "b.json"
+        f.write_text(json.dumps([{"_meta": {"source": "m"}}, a, b]),
+                     encoding="utf-8")
+        _, cases, _ = parse_raw_file(f)
+        pos_of_b = cases[1][0]
+        f.write_text(json.dumps(
+            [{"_meta": {"source": "m"}}, {**a, "review_status": "rejected"}, b]),
+            encoding="utf-8")
+        _, cases2, _ = parse_raw_file(f)
+        assert cases2[0][0] == pos_of_b        # b keeps position 2
 
     def test_deterministic_splits(self, tmp_path):
         from experiments.rq2.import_independent import run_import

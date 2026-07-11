@@ -26,6 +26,7 @@ from .independent import (
     GENERAL_TARGETS,
     IMPORT_SEED,
     IND_DATA,
+    KNOWN_KEYS,
     STRUCT_TARGETS,
     TRAITS,
     dedupe_key,
@@ -101,7 +102,10 @@ def run_import(raw_dir: Path = IND_DATA / "raw",
         source, cases, user_rejected = parse_raw_file(f)
         for item in user_rejected:
             rejected.append({"file": f.name, "reason": "user_rejected", "case": item})
-        for idx, raw in enumerate(cases):
+        for idx, raw in cases:               # idx = raw array position (stable ids)
+            extra = set(raw) - KNOWN_KEYS
+            if extra:
+                print(f"warning: {f.name}#{idx}: ignoring fields {sorted(extra)}")
             reason = validate_case(raw, world)
             if reason is None:
                 key = dedupe_key(raw)
