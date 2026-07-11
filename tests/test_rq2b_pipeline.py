@@ -176,6 +176,45 @@ class TestValidate:
         assert self._validate(_raw_action_case(recent_locations=[])) is None
 
 
+class TestEnrich:
+    def test_location_features_match_world(self):
+        from experiments.rq2.independent import enrich_case, load_base_world
+        w = load_base_world()
+        case = enrich_case(_raw_case(), w, source="m1")
+        np.testing.assert_array_equal(
+            case.candidates[0].features, w.effective_location("tavern").features)
+        assert case.target_choice == 1          # "library" at index 1
+        assert case.source == "m1" and case.review_status == "accepted"
+
+    def test_relations_match_reference(self):
+        from experiments.rq2.independent import enrich_case, load_base_world
+        w = load_base_world()
+        case = enrich_case(_raw_case(), w, source="m1")
+        history = [w.effective_location("market"), w.effective_location("tavern")]
+        ref = compute_relations(case.candidates, _buf(history, DEFAULT_CONFIG.K_L))
+        np.testing.assert_allclose(case.candidate_history_features.rep, ref.rep)
+        np.testing.assert_allclose(case.candidate_history_features.sim, ref.sim)
+
+    def test_empty_history_gives_none_relations(self):
+        from experiments.rq2.independent import enrich_case, load_base_world
+        case = enrich_case(_raw_case(recent_locations=[]), load_base_world(), "m")
+        assert case.candidate_history_features is None
+
+    def test_action_case_autofills_recent_location(self):
+        from experiments.rq2.independent import enrich_case, load_base_world
+        case = enrich_case(_raw_action_case(recent_locations=[]),
+                           load_base_world(), "m")
+        assert [o.id for o in case.recent_locations] == ["library"]
+
+    def test_enriched_case_feeds_model_inputs(self):
+        from experiments.rq2.independent import (
+            enrich_case, independent_case_to_inputs, load_base_world)
+        case = enrich_case(_raw_action_case(), load_base_world(), "m")
+        d = independent_case_to_inputs(case)
+        assert d["target"].tolist() == [1.0, 0.0, 0.0]      # choice "read" = index 0
+        assert d["cand"].shape == (3, 12) and d["d"] == 1
+
+
 class TestParseRawFile:
     def test_meta_header_and_user_rejection(self, tmp_path):
         from experiments.rq2.independent import parse_raw_file
