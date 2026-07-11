@@ -113,3 +113,25 @@ python -m experiments.rq2.run_e_diag --smoke
 - **第 4 步提示缺 `data/rq1_cases/cases.json`**：先跑一次
   `python -m experiments.rq1.gen_cases`。
 - **内存**：第 2 步会把主数据池整个读进内存，需要约 3–5 GB 空闲内存。
+
+## 6. Study 2B 流程（独立数据集）
+
+前置：与 2A 相互独立，可并行；2B 全程零 API 成本，本地分钟级。
+
+1. **生成数据（手工）**：把 `docs/rq2b_generation_guide.md` 全文贴给
+   GPT/Claude，按批索要（如 "General batch, 50 cases"）。三种批次都要：
+   General 约 1000 条、Personality batch 约 60 条、Arena batch 约 60 条。
+   每批回复存成一个 `.json` 文件放进 `data/rq2_independent/raw/`
+   （如 `general_01.json`）。审核：删掉离谱的 case，或给它加
+   `"review_status": "rejected"`。
+2. **导入**：`python -m experiments.rq2.import_independent`
+   看 `data/rq2_independent/report.txt`——有 SHORTFALL 行就按提示再要数据，
+   重跑导入（全量重建，随时可重跑）。
+3. **训练**：`python -m experiments.rq2.train_2b`
+   40 个 run，CPU 上约几分钟；中断后重跑同命令自动续。
+4. **评估**：`python -m experiments.rq2.run_2b`
+   产出 `results/rq2b/main_table.csv`（论文 2B 主表）、`group_bars.png`、
+   `diagnostics.csv`。
+
+校验：任何时候 `python -m pytest tests/test_rq2b_pipeline.py -q` 全绿说明
+管线本身没问题。设计：`docs/specs/2026-07-11-rq2-2b-pipeline-design.md`。

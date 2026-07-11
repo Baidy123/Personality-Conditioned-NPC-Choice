@@ -119,3 +119,17 @@ entropy(mean P) ≥ mean entropy(P)，种子间分歧越大熵越被抬高——
   （`meta.json` 的 composition 字段记录了各文件成分）。
 - RQ1 的消融词表是 `none/location_only/full`，RQ2 改叫 `no_context`；
   论文里两处都出现时需要一句映射说明。
+
+## 2026-07-11 — Study 2B 管线实现
+
+- 按 `docs/specs/2026-07-11-rq2-2b-pipeline-design.md` /
+  `docs/plans/2026-07-11-rq2-2b-pipeline.md` 完成 2B 全链路：生成说明书
+  （`docs/rq2b_generation_guide.md`，聊天窗口手工路线，无 API 依赖）、
+  `import_independent`（校验/配数/切分/覆盖率报告）、`train_2b`（40 run）、
+  `run_2b`（含 scorer 与 uniform 的对比主表，即 Study 3 自动化对比）。
+- 关键复用：one-hot 目标下 `kl_loss` 数学上等于交叉熵，2A 训练循环零改动
+  复用（`train_one` 仅加 `to_inputs` / `weight_decay` 两个注入参数）。
+- 隔离由导入脚本强制：G1 区人格（O>0.5∧C<−0.5）与 arena 家族只进结构化
+  测试组，超额者丢弃留档（`structured_surplus`），不依赖 AI 遵守说明书。
+- 测试：`tests/test_rq2b_pipeline.py` 39 项（校验规则逐条、数值与
+  `npc_policy` 参考实现对拍、切分隔离性、端到端冒烟），2A 套件回归通过。
