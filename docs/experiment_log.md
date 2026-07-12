@@ -367,6 +367,20 @@ O−1 0.20，其余 ≈0——动作层的粘性也分档了。
   `99cd9ae` 拉回本地）。种子间方差极小（nonlinear 五种子 val KL 全部落在
   0.0027–0.0028），mean±std 误差棒可以放心报。
 
+> 图表（`results/rq2/`）：
+> - `gap_by_split.png` — 主图：7 个划分 × 4 根柱（simple/nonlinear 各配
+>   "被排除训练"与"S0 全量参照"两版），柱高 = KL。看 G6 那组柱子比别处
+>   高多少 = 泛化边界；看每组内深浅两根的差 = 排除效应。
+> - `data_size_curve.png` — 横轴训练量（log），纵轴 KL。simple 那条 5k 后
+>   走平 = 表示上限；nonlinear 持续下降到 2 万后收敛。
+> - `e_diag/e1_overlay_simple.png` / `e1_overlay_nonlinear.png` — 学生塞回
+>   RQ1 E1 管线后与教师曲线的叠画（含 N 熵面板）。看 simple 版 N 面板
+>   两条线张开的口子、nonlinear 版几乎重合——预注册预测的可视化。
+> - `e_diag/e3_visit_entropy.png` — 学生跑 50 轮轨迹的多样性熵对教师的
+>   复现程度（E3 结构诊断）。
+> - 数字版：`main_table.csv`（194 行全量）、`diagnostics.csv`、
+>   `e_diag/e1_n_entropy.csv`、`e2_correlation.csv`、`e3_e4_traj_stats.csv`。
+
 ### 主结果（S0 同分布测试，KL 越小越好 / top-1 越高越好）
 
 | 模型 | KL(teacher‖student) | top-1 一致率 |
