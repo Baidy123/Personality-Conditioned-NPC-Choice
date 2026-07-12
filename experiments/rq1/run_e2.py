@@ -115,7 +115,7 @@ def main() -> None:
             label="binned mean")
     ax.set_xlabel("personality distance (Euclidean, OCEAN space)")
     ax.set_ylabel("behavioural distance (mean JSD over matched contexts)")
-    ax.set_title(f"E2 — distinguishability: {n} random profiles, "
+    ax.set_title(f"Distinguishability: {n} random profiles, "
                  f"{n * (n - 1) // 2} pairs, {n_ctx} contexts")
     ax.text(0.02, 0.95, f"Spearman rho = {rho:.3f}\nMantel p = {p_m:.3f} "
             f"({MANTEL_PERMS} perms)", transform=ax.transAxes, va="top",

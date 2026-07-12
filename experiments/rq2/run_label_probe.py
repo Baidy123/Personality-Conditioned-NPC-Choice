@@ -134,7 +134,7 @@ def main(argv=None) -> None:
         ax.set_title(title)
     axes[0].set_ylabel("Spearman ρ (trait vs Δ of chosen option)\n+ clings   −  avoids")
     axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("2B — do the independent labels follow the designed memory channels?")
+    fig.suptitle("Do the independent labels follow the designed memory channels?")
     fig.savefig(args.results / "label_probe.png", bbox_inches="tight")
     plt.close(fig)
 

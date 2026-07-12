@@ -88,7 +88,7 @@ def main() -> None:
         ax.set_xlabel("trait value (others 0)")
     handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=5, frameon=False)
-    fig.suptitle(f"E3 — trajectory patterns, 50 rounds x {len(TRAJ_SEEDS)} seeds "
+    fig.suptitle(f"Trajectory patterns, 50 rounds x {len(TRAJ_SEEDS)} seeds "
                  "(band = ±1 sd over seeds)", y=1.0)
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     RESULTS.mkdir(parents=True, exist_ok=True)

@@ -84,7 +84,7 @@ def main() -> None:
         ax.set_title(title)
         ax.set_xticks(x, sys_ids)
     axes[0].legend(frameon=False, ncol=3, title="memory condition")
-    fig.suptitle("E4 — what the bounded recent-choice context contributes "
+    fig.suptitle("What the bounded recent-choice context contributes "
                  f"(50 rounds x {len(TRAJ_SEEDS)} seeds)", y=0.995)
     fig.tight_layout()
     RESULTS.mkdir(parents=True, exist_ok=True)

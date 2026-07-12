@@ -218,8 +218,11 @@ def eval_main(argv=None) -> None:
         ax.set_xscale("log")
         ax.set_xlabel("training cases")
         ax.set_ylabel("top-1 accuracy (all test groups)")
-        ax.set_title("2B — does more independent data help?")
-        ax.legend(frameon=False)
+        ax.set_title("Does more independently labelled data help?")
+        lo, hi = ax.get_ylim()                  # headroom so the legend clears the curves
+        ax.set_ylim(lo, hi + 0.22 * (hi - lo))
+        ax.legend(frameon=False, loc="upper right", fontsize=7,
+                  handlelength=1.4, labelspacing=0.3, borderaxespad=0.2)
         fig.savefig(args.results / "data_size_curve.png", bbox_inches="tight")
         plt.close(fig)
 
@@ -240,8 +243,11 @@ def eval_main(argv=None) -> None:
                color=SYSTEM_COLORS[sys_], label=sys_, capsize=2)
     ax.set_xticks(x, plot_groups)
     ax.set_ylabel("top-1 accuracy")
-    ax.set_title("2B — agreement with independent labels per test group")
-    ax.legend(frameon=False, fontsize=8)
+    ax.set_title("Agreement with independent labels, per test group")
+    ax.set_ylim(0, ax.get_ylim()[1] * 1.18)     # headroom so the legend clears the bars
+    ax.legend(frameon=False, loc="upper right", fontsize=7, ncol=2,
+              handlelength=1.2, labelspacing=0.3, columnspacing=1.0,
+              borderaxespad=0.2)
     fig.savefig(args.results / "group_bars.png", bbox_inches="tight")
     plt.close(fig)
     print(f"written: {args.results / 'main_table.csv'}, group_bars.png, diagnostics.csv")

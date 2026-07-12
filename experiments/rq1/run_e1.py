@@ -60,13 +60,13 @@ def main() -> None:
     ent = [entropy(scorer.distribution(personality_of(sweep_entry("neuroticism", v)),
                                        locs, level="location")) for v in values]
     ax.plot(values, ent, color=TRAIT_COLORS["neuroticism"])
-    ax.set_title("N temperature: entropy of P_rule")
+    ax.set_title("Neuroticism temperature: choice entropy")
     ax.set_ylabel("entropy (nats)")
     ax.set_xlabel("N value")
 
     handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=len(ids), frameon=False)
-    fig.suptitle("E1 — location-choice sensitivity to single traits (empty memory)", y=1.0)
+    fig.suptitle("Location-choice sensitivity to single traits (empty memory)", y=1.0)
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e1_curves.png", bbox_inches="tight")
@@ -102,7 +102,7 @@ def main() -> None:
         ax.set_ylabel("P_rule")
         ax.set_xlabel(f"{TRAIT_SHORT[trait]} value")
         ax.legend(frameon=False, fontsize=8)
-    fig.suptitle("E1 — action-choice sensitivity at diagnostic locations "
+    fig.suptitle("Action-choice sensitivity at diagnostic locations "
                  "(empty action memory)", y=1.0)
     fig.tight_layout()
     fig.savefig(RESULTS / "e1_action_curves.png", bbox_inches="tight")
@@ -165,7 +165,7 @@ def main() -> None:
     ax.text(len(TRAITS) - 0.5, 0.155, "B1 floor (0.15)", fontsize=8, color="0.4")
     ax.set_xticks(x, [TRAIT_SHORT[t] for t in TRAITS])
     ax.set_ylabel("endpoint TVD (trait -1 vs +1)")
-    ax.set_title("E1 — expression strength per trait channel")
+    ax.set_title("Expression strength per trait channel")
     ax.legend(frameon=False)
     fig.savefig(RESULTS / "e1_strength.png", bbox_inches="tight")
     plt.close(fig)

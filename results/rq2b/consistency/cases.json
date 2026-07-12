@@ -1,0 +1,167 @@
+{
+  "general_01#75": [
+    "chapel",
+    "market",
+    "forest"
+  ],
+  "general_01#93": [
+    "pray",
+    "meditate",
+    "confess"
+  ],
+  "general_01#94": [
+    "fight",
+    "spar",
+    "drill",
+    "coach",
+    "spectate",
+    "bet"
+  ],
+  "general_02#32": [
+    "haggle",
+    "browse",
+    "trade"
+  ],
+  "general_02#35": [
+    "tavern",
+    "chapel",
+    "forest",
+    "library",
+    "market",
+    "arena"
+  ],
+  "general_05#94": [
+    "arena",
+    "forest"
+  ],
+  "general_06#50": [
+    "forest",
+    "tavern",
+    "market",
+    "arena",
+    "library"
+  ],
+  "general_06#67": [
+    "chapel",
+    "tavern"
+  ],
+  "general_07#80": [
+    "arena",
+    "tavern",
+    "chapel",
+    "library",
+    "market",
+    "forest"
+  ],
+  "general_09#47": [
+    "forest",
+    "library",
+    "tavern",
+    "market"
+  ],
+  "general_09#84": [
+    "arena",
+    "library"
+  ],
+  "general_09#100": [
+    "chapel",
+    "library",
+    "market",
+    "arena",
+    "forest",
+    "tavern"
+  ],
+  "general_10#88": [
+    "tavern",
+    "forest",
+    "market",
+    "chapel",
+    "library"
+  ],
+  "general_11#6": [
+    "chat",
+    "drink",
+    "brawl"
+  ],
+  "general_11#68": [
+    "haggle",
+    "browse",
+    "trade"
+  ],
+  "general_11#93": [
+    "tavern",
+    "chapel",
+    "library",
+    "forest",
+    "market"
+  ],
+  "general_12#61": [
+    "chat",
+    "drink",
+    "brawl"
+  ],
+  "general_12#75": [
+    "chapel",
+    "forest"
+  ],
+  "general_13#48": [
+    "chat",
+    "drink",
+    "brawl"
+  ],
+  "general_14#53": [
+    "market",
+    "library",
+    "chapel"
+  ],
+  "general_14#86": [
+    "chat",
+    "drink",
+    "brawl"
+  ],
+  "heldout_location_01#9": [
+    "infirmary",
+    "forest",
+    "tavern"
+  ],
+  "heldout_location_01#17": [
+    "infirmary",
+    "tavern",
+    "arena"
+  ],
+  "heldout_location_01#22": [
+    "tend",
+    "assist",
+    "vigil"
+  ],
+  "heldout_location_01#35": [
+    "tend",
+    "assist",
+    "vigil"
+  ],
+  "personality_01#12": [
+    "tavern",
+    "arena",
+    "library"
+  ],
+  "personality_01#14": [
+    "tavern",
+    "forest",
+    "library"
+  ],
+  "personality_01#30": [
+    "explore",
+    "forage",
+    "rest"
+  ],
+  "personality_01#35": [
+    "haggle",
+    "browse",
+    "trade"
+  ],
+  "personality_01#36": [
+    "explore",
+    "forage",
+    "rest"
+  ]
+}
