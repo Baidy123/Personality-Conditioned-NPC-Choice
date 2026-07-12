@@ -1,0 +1,17 @@
+{
+  "run_id": "IND__simple__n400__s0",
+  "split": "IND",
+  "model": "simple",
+  "seed": 0,
+  "ablation": "full",
+  "n_train": 400,
+  "tag": "",
+  "best_val_kl": 0.7251525505815362,
+  "best_epoch": 499,
+  "epochs_run": 500,
+  "wall_time_s": 6.8,
+  "device": "cpu",
+  "dtype": "float64",
+  "n_train_cases": 400,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01"
+}

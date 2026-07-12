@@ -1,0 +1,17 @@
+{
+  "run_id": "IND__nonlinear__wd0.001__s2",
+  "split": "IND",
+  "model": "nonlinear",
+  "seed": 2,
+  "ablation": "full",
+  "n_train": null,
+  "tag": "wd0.001",
+  "best_val_kl": 0.44313283188598496,
+  "best_epoch": 129,
+  "epochs_run": 160,
+  "wall_time_s": 17.9,
+  "device": "cpu",
+  "dtype": "float64",
+  "n_train_cases": 1263,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01"
+}
