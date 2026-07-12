@@ -36,6 +36,14 @@ from .train_2b import NONLINEAR_MODELS, SIMPLE_MODELS
 SYSTEM_COLORS = {"uniform": "#CCCCCC", "agnostic_simple": "#999999",
                  "agnostic_nonlinear": "#CC79A7", "scorer": "#009E73",
                  "simple": "#0072B2", "nonlinear": "#E69F00"}
+# RQ2 asks about acquisition and generalisation, not about which policy is better.
+# The scorer is fit to the author's intuitions and the learned models to these
+# labels, so a horse race between them is confounded (revised 2026-07-12; policy
+# comparison belongs to the human study). Its per-case rows stay in main_table.csv
+# and diagnostics.csv as a representation diagnostic, but it is kept out of the
+# figures, which are RQ2 evidence.
+PLOT_SYSTEMS = ("uniform", "agnostic_simple", "agnostic_nonlinear",
+                "simple", "nonlinear")
 _TINY = np.finfo(float).tiny
 
 
@@ -201,11 +209,12 @@ def eval_main(argv=None) -> None:
                         [r["top1_mean"] for r in pts],
                         yerr=[r["top1_std"] for r in pts],
                         marker="o", color=SYSTEM_COLORS[fam], label=fam)
-        sco_all = [r for r in per_seed_rows if r["system"] == "scorer"
-                   and r["group"] == "all" and r["decision_type"] == "all"]
-        if sco_all:
-            ax.axhline(sco_all[0]["top1"], ls="--", color=SYSTEM_COLORS["scorer"],
-                       label="scorer (fixed)")
+        agn = [r for r in table if r["system"] == "agnostic_nonlinear"
+               and r["group"] == "all" and r["decision_type"] == "all"]
+        if agn:
+            ax.axhline(agn[0]["top1_mean"], ls="--",
+                       color=SYSTEM_COLORS["agnostic_nonlinear"],
+                       label="personality-agnostic control")
         ax.set_xscale("log")
         ax.set_xlabel("training cases")
         ax.set_ylabel("top-1 accuracy (all test groups)")
@@ -218,7 +227,7 @@ def eval_main(argv=None) -> None:
     fig, ax = plt.subplots(figsize=(9, 4.5))
     plot_groups = ("all",) + TEST_GROUPS
     x = np.arange(len(plot_groups))
-    systems = [s for s in SYSTEM_COLORS if any(r["system"] == s for r in table)]
+    systems = [s for s in PLOT_SYSTEMS if any(r["system"] == s for r in table)]
     for i, sys_ in enumerate(systems):
         ys, es = [], []
         for grp in plot_groups:
