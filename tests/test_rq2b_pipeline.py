@@ -143,8 +143,8 @@ def _raw_action_case(**over) -> dict:
 
 class TestValidate:
     def _validate(self, case):
-        from experiments.rq2.independent import load_base_world, validate_case
-        return validate_case(case, load_base_world())
+        from experiments.rq2.independent import load_2b_world, validate_case
+        return validate_case(case, load_2b_world())
 
     def test_valid_location_case(self):
         assert self._validate(_raw_case()) is None
@@ -177,11 +177,11 @@ class TestValidate:
         assert self._validate(_raw_action_case(recent_locations=[])) is None
 
 
-def _write_raw_dir(tmp_path, n_general=40, n_pers=6, n_arena=6) -> Path:
+def _write_raw_dir(tmp_path, n_general=40, n_pers=6, n_family=6) -> Path:
     """Synthesise a small raw/ directory covering all three batch types."""
     import random
     rng = random.Random(0)
-    locs = ["tavern", "library", "chapel", "market", "forest"]
+    locs = ["tavern", "library", "chapel", "market", "forest", "arena"]
 
     def general(i):
         pool = rng.sample(locs, 3)
@@ -197,15 +197,15 @@ def _write_raw_dir(tmp_path, n_general=40, n_pers=6, n_arena=6) -> Path:
             personality={"O": 0.8, "C": -0.8, "E": 0.1, "A": 0.0, "N": 0.0},
             candidates=pool, choice=pool[i % 3])
 
-    def arena(i):
-        pool = ["arena"] + rng.sample(locs, 2)
-        return _raw_case(candidates=pool, choice="arena")
+    def family(i):
+        pool = ["infirmary"] + rng.sample(locs[:5], 2)
+        return _raw_case(candidates=pool, choice="infirmary")
 
     raw = tmp_path / "raw"
     raw.mkdir()
     for name, gen, n in [("general.json", general, n_general),
                          ("pers.json", pers, n_pers),
-                         ("arena.json", arena, n_arena)]:
+                         ("family.json", family, n_family)]:
         payload = [{"_meta": {"source": "test-llm"}}] + [gen(i) for i in range(n)]
         (raw / name).write_text(json.dumps(payload), encoding="utf-8")
     return raw
@@ -223,13 +223,13 @@ class TestImport:
         n = sum(len(splits[k]) for k in ("train", "val", "test_iid"))
         assert n == 40
         assert len(splits["test_iid"]) == round(40 * GENERAL_TARGETS["test_iid"] / total)
-        assert len(splits["test_pers"]) == 6 and len(splits["test_arena"]) == 6
+        assert len(splits["test_pers"]) == 6 and len(splits["test_family"]) == 6
         assert (tmp_path / "out" / "report.txt").exists()
         assert meta["accepted"] == 52
 
     def test_isolation_no_structured_content_in_train_val(self, tmp_path):
         from experiments.rq2.import_independent import run_import
-        from experiments.rq2.independent import in_pers_region, touches_arena
+        from experiments.rq2.independent import in_pers_region, touches_held_out
         raw = _write_raw_dir(tmp_path)
         run_import(raw_dir=raw, out_dir=tmp_path / "out")
         pool = read_pool(tmp_path / "out" / "cases.jsonl", case_cls=IndependentCase)
@@ -237,7 +237,7 @@ class TestImport:
         trainval = set(splits["train"]) | set(splits["val"])
         for case, tags in pool:
             if tags["id"] in trainval:
-                assert not in_pers_region(case) and not touches_arena(case)
+                assert not in_pers_region(case) and not touches_held_out(case)
 
     def test_rejects_recorded_and_duplicates_dropped(self, tmp_path):
         from experiments.rq2.import_independent import run_import
@@ -256,15 +256,15 @@ class TestImport:
         assert reasons == ["choice_not_in_candidates", "duplicate", "user_rejected"]
         assert meta["accepted"] == 1
 
-    def test_arena_in_action_history_never_trains(self, tmp_path):
-        """Review finding B1: an action case elsewhere with arena in its
-        recent_locations must count as arena-family (checked by id, not by
+    def test_held_out_in_action_history_never_trains(self, tmp_path):
+        """Review finding B1: an action case elsewhere with the held-out location in its
+        recent_locations must count as held-out family (checked by id, not by
         the filter function itself — non-circular)."""
         from experiments.rq2.import_independent import run_import
-        raw = _write_raw_dir(tmp_path, n_general=20, n_pers=2, n_arena=2)
+        raw = _write_raw_dir(tmp_path, n_general=20, n_pers=2, n_family=2)
         sneaky = _raw_action_case(
             selected_location="tavern",
-            recent_locations=["arena", "tavern"],
+            recent_locations=["infirmary", "tavern"],
             recent_actions_same_location=["chat"],
             candidates=["chat", "drink", "brawl"], choice="chat")
         (tmp_path / "raw" / "sneaky.json").write_text(
@@ -273,7 +273,7 @@ class TestImport:
         splits = json.loads((tmp_path / "out" / "splits.json")
                             .read_text(encoding="utf-8"))["splits"]
         assert "sneaky#1" not in set(splits["train"]) | set(splits["val"])
-        assert "sneaky#1" in set(splits["test_arena"])
+        assert "sneaky#1" in set(splits["test_family"])
 
     def test_ids_stable_under_user_rejection(self, tmp_path):
         """Rejecting an earlier case must not shift later cases' ids."""
@@ -302,8 +302,8 @@ class TestImport:
 
 class TestEnrich:
     def test_location_features_match_world(self):
-        from experiments.rq2.independent import enrich_case, load_base_world
-        w = load_base_world()
+        from experiments.rq2.independent import enrich_case, load_2b_world
+        w = load_2b_world()
         case = enrich_case(_raw_case(), w, source="m1")
         np.testing.assert_array_equal(
             case.candidates[0].features, w.effective_location("tavern").features)
@@ -311,8 +311,8 @@ class TestEnrich:
         assert case.source == "m1" and case.review_status == "accepted"
 
     def test_relations_match_reference(self):
-        from experiments.rq2.independent import enrich_case, load_base_world
-        w = load_base_world()
+        from experiments.rq2.independent import enrich_case, load_2b_world
+        w = load_2b_world()
         case = enrich_case(_raw_case(), w, source="m1")
         history = [w.effective_location("market"), w.effective_location("tavern")]
         ref = compute_relations(case.candidates, _buf(history, DEFAULT_CONFIG.K_L))
@@ -320,20 +320,20 @@ class TestEnrich:
         np.testing.assert_allclose(case.candidate_history_features.sim, ref.sim)
 
     def test_empty_history_gives_none_relations(self):
-        from experiments.rq2.independent import enrich_case, load_base_world
-        case = enrich_case(_raw_case(recent_locations=[]), load_base_world(), "m")
+        from experiments.rq2.independent import enrich_case, load_2b_world
+        case = enrich_case(_raw_case(recent_locations=[]), load_2b_world(), "m")
         assert case.candidate_history_features is None
 
     def test_action_case_autofills_recent_location(self):
-        from experiments.rq2.independent import enrich_case, load_base_world
+        from experiments.rq2.independent import enrich_case, load_2b_world
         case = enrich_case(_raw_action_case(recent_locations=[]),
-                           load_base_world(), "m")
+                           load_2b_world(), "m")
         assert [o.id for o in case.recent_locations] == ["library"]
 
     def test_enriched_case_feeds_model_inputs(self):
         from experiments.rq2.independent import (
-            enrich_case, independent_case_to_inputs, load_base_world)
-        case = enrich_case(_raw_action_case(), load_base_world(), "m")
+            enrich_case, independent_case_to_inputs, load_2b_world)
+        case = enrich_case(_raw_action_case(), load_2b_world(), "m")
         d = independent_case_to_inputs(case)
         assert d["target"].tolist() == [1.0, 0.0, 0.0]      # choice "read" = index 0
         assert d["cand"].shape == (3, 12) and d["d"] == 1
@@ -360,7 +360,7 @@ class TestTrain2B:
         """import → train 2 runs, 2 epochs → resumable artefacts on disk."""
         from experiments.rq2.import_independent import run_import
         from experiments.rq2.train_2b import train_main
-        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_arena=4)
+        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_family=4)
         run_import(raw_dir=raw, out_dir=tmp_path / "data")
         train_main(["--data", str(tmp_path / "data"),
                     "--results", str(tmp_path / "res"),
@@ -378,7 +378,7 @@ class TestRun2B:
         from experiments.rq2.import_independent import run_import
         from experiments.rq2.run_2b import eval_main
         from experiments.rq2.train_2b import train_main
-        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_arena=4)
+        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_family=4)
         run_import(raw_dir=raw, out_dir=tmp_path / "data")
         train_main(["--data", str(tmp_path / "data"),
                     "--results", str(tmp_path / "res"),
@@ -390,7 +390,7 @@ class TestRun2B:
         systems = {r["system"] for r in rows}
         assert {"uniform", "scorer", "simple"} <= systems
         groups = {r["group"] for r in rows}
-        assert {"all", "test_iid", "test_pers", "test_arena"} <= groups
+        assert {"all", "test_iid", "test_pers", "test_family"} <= groups
         for r in rows:
             assert 0.0 <= float(r["top1_mean"]) <= 1.0
             assert float(r["nll_mean"]) >= 0.0
@@ -399,8 +399,8 @@ class TestRun2B:
     def test_scorer_predictions_scored_like_models(self):
         """Scorer NLL/top-1 computed from its distribution on the labelled choice."""
         from experiments.rq2.run_2b import scorer_probs
-        from experiments.rq2.independent import enrich_case, load_base_world
-        case = enrich_case(_raw_case(), load_base_world(), "m")
+        from experiments.rq2.independent import enrich_case, load_2b_world
+        case = enrich_case(_raw_case(), load_2b_world(), "m")
         q = scorer_probs(case)
         assert q.shape == (3,) and abs(q.sum() - 1.0) < 1e-9
 

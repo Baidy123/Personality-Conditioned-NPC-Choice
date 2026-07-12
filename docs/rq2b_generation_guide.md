@@ -52,6 +52,8 @@ Locations:
 - `market` — a bustling trade square: haggling, browsing, deal-making
 - `forest` — wild ground beyond the walls: roaming, foraging, solitude
 - `arena` — a fighting ground: combat bouts, training, spectacle, betting
+- `infirmary` — the village healing house: sickbeds, herbs, quiet duty
+  **(test-only: appears ONLY in Held-out location batches)**
 
 Actions per location (an action case's `candidates` must be this full list):
 - tavern: `chat` (friendly talk), `drink` (loosen up alone or in company),
@@ -67,6 +69,8 @@ Actions per location (an action case's `candidates` must be this full list):
 - arena: `fight` (real bout), `spar` (practice bout), `drill` (disciplined
   training), `coach` (train someone else), `spectate` (watch the bouts),
   `bet` (wager on outcomes)
+- infirmary: `tend` (care for the sick), `assist` (help the healer with tasks),
+  `vigil` (keep quiet night watch at a bedside)
 
 ## Rules
 
@@ -90,11 +94,13 @@ Actions per location (an action case's `candidates` must be this full list):
 
 ## Batch types (the requester tells you which one)
 
-- **General batch**: rules above, plus: never use `arena` (or its actions) and
-  never give personalities with O > 0.5 together with C < -0.5.
+- **General batch**: rules above, plus: never use `infirmary` (or its actions)
+  and never give personalities with O > 0.5 together with C < -0.5. All six
+  other locations, including `arena`, are fine.
 - **Personality batch (test)**: every case's personality has O > 0.5 AND
-  C < -0.5; no arena content.
-- **Arena batch (test)**: every case involves `arena` — as an action case at
-  arena, or a location case with `arena` among the candidates.
+  C < -0.5; no infirmary content.
+- **Held-out location batch (test)**: every case involves `infirmary` — as an
+  action case at the infirmary, or a location case with `infirmary` among the
+  candidates.
 
 Produce the number of cases the requester asks for (default 50).

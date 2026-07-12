@@ -32,9 +32,9 @@ from .independent import (
     dedupe_key,
     enrich_case,
     in_pers_region,
-    load_base_world,
+    load_2b_world,
     parse_raw_file,
-    touches_arena,
+    touches_held_out,
     validate_case,
 )
 
@@ -50,18 +50,18 @@ def _assign_splits(records: list[tuple[IndependentCase, dict]],
     """Spec §4: structured filters first (isolation enforced here, not by the
     AI following instructions), then proportional general-pool splitting."""
     pers = [t["id"] for c, t in records if in_pers_region(c)]
-    arena = [t["id"] for c, t in records
-             if touches_arena(c) and not in_pers_region(c)]
+    family = [t["id"] for c, t in records
+              if touches_held_out(c) and not in_pers_region(c)]
     general = [t["id"] for c, t in records
-               if not in_pers_region(c) and not touches_arena(c)]
-    for ids in (pers, arena, general):
+               if not in_pers_region(c) and not touches_held_out(c)]
+    for ids in (pers, family, general):
         rng.shuffle(ids)
 
     splits = {"test_pers": pers[: STRUCT_TARGETS["test_pers"]],
-              "test_arena": arena[: STRUCT_TARGETS["test_arena"]]}
+              "test_family": family[: STRUCT_TARGETS["test_family"]]}
     # structured surplus is dropped (never train/val — isolation), recorded in meta
     splits["dropped_structured"] = (pers[STRUCT_TARGETS["test_pers"]:]
-                                    + arena[STRUCT_TARGETS["test_arena"]:])
+                                    + family[STRUCT_TARGETS["test_family"]:])
 
     total = sum(GENERAL_TARGETS.values())               # 725
     n = len(general)
@@ -90,7 +90,7 @@ def _coverage(records: list[tuple[IndependentCase, dict]]) -> list[str]:
 
 def run_import(raw_dir: Path = IND_DATA / "raw",
                out_dir: Path = IND_DATA) -> dict:
-    world = load_base_world()
+    world = load_2b_world()
     files = sorted(raw_dir.glob("*.json"))
     if not files:
         raise SystemExit(f"no raw batches in {raw_dir}")
@@ -128,7 +128,7 @@ def run_import(raw_dir: Path = IND_DATA / "raw",
             rejected.append({"file": tags["source_file"], "reason": "structured_surplus",
                              "case": {"id": tags["id"]}})
             continue
-        case.split = ("test" if g in ("test_iid", "test_pers", "test_arena") else g)
+        case.split = ("test" if g in ("test_iid", "test_pers", "test_family") else g)
         kept.append((case, {**tags, "group": g}))
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -158,11 +158,12 @@ def run_import(raw_dir: Path = IND_DATA / "raw",
              "split sizes: " + json.dumps(meta["split_sizes"]), "",
              "-- coverage (train+val pool only) --", *_coverage(trainval), ""]
     for grp, target in [("test_pers", STRUCT_TARGETS["test_pers"]),
-                        ("test_arena", STRUCT_TARGETS["test_arena"]),
+                        ("test_family", STRUCT_TARGETS["test_family"]),
                         ("test_iid", GENERAL_TARGETS["test_iid"])]:
         got = meta["split_sizes"].get(grp, 0)
         if got < target:
-            kind = {"test_pers": "personality-batch", "test_arena": "arena-batch",
+            kind = {"test_pers": "personality-batch",
+                    "test_family": "held-out-location-batch",
                     "test_iid": "general-batch"}[grp]
             lines.append(f"SHORTFALL {grp}: {got}/{target} — request "
                          f"{target - got} more {kind} cases")

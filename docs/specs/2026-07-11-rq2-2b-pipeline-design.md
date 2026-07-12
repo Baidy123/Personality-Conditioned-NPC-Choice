@@ -177,3 +177,24 @@ dissertation (kept in data either way).
 - **Review protocol stratified**: the 150 test cases are reviewed one by one;
   train/val batches get outlier deletion plus a ~20% spot check. Label noise
   in training is tolerable; test labels are load-bearing.
+
+## 10. Amendment (2026-07-12b): test-only held-out location
+
+The unseen-family test group no longer uses arena. A test-only location —
+`infirmary` (tend / assist / vigil; a helping-heavy family absent from the
+deployment world) — is authored in `data/rq2b_test_world.json` and merged into
+the 2B world at import; `data/world.json` is untouched, so RQ1/2A hashes are
+unaffected.
+
+Rationale (user decision): excluding arena cost the learned models one sixth of
+the deployment world's training coverage, handicapping exactly the property the
+comparison is about (data-driven coverage). Now training keeps all six
+deployment locations; family-level extrapolation is tested on a location that
+is genuinely unseen by every trained model. The scorer needs no training, so
+the comparison stays fair. Trade-off accepted: the direct 2A-G6 alignment
+(same held-out family in both studies) becomes a qualitative comparison.
+
+Mechanics: split group `test_arena` renamed `test_family`; the isolation
+filter applies the same family rule (selected location, candidates, or any
+recent-locations entry) to `infirmary`; General batches now allow arena and
+forbid infirmary; the third batch type is "Held-out location batch".

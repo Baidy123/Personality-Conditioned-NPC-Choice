@@ -31,16 +31,24 @@ _TRAIT_KW = {"O": "openness", "C": "conscientiousness", "E": "extraversion",
 # 2026-07-09 550/100 was a review-throughput guess, not a scientific target);
 # general pool scales proportionally to these
 GENERAL_TARGETS = {"train": 1200, "val": 150, "test_iid": 75}
-STRUCT_TARGETS = {"test_pers": 38, "test_arena": 37}
-TEST_GROUPS = ("test_iid", "test_pers", "test_arena")
+STRUCT_TARGETS = {"test_pers": 38, "test_family": 37}
+TEST_GROUPS = ("test_iid", "test_pers", "test_family")
+
+# held-out family (amendment 2026-07-12): a test-only location replaces the
+# arena holdout, so training keeps all six deployment locations. Authored in
+# data/rq2b_test_world.json; never in world.json (2A/RQ1 hashes untouched).
+TEST_LOCATION = "infirmary"
 
 WD_GRID = (1e-4, 1e-3, 1e-2)        # nonlinear-family sweep, chosen on val NLL
 DATA_SIZES_2B = (150, 400, 800)     # data-size curve; full-data point reuses main runs
 
 
 @lru_cache(maxsize=1)
-def load_base_world() -> World:
-    return load_world(DATA / "world.json")
+def load_2b_world() -> World:
+    """Base deployment world plus the test-only location extension."""
+    base = load_world(DATA / "world.json")
+    ext = load_world(DATA / "rq2b_test_world.json")
+    return World(entries={**base.entries, **ext.entries})
 
 
 # ------------------------------------------------------------------ validate --
@@ -188,12 +196,13 @@ def in_pers_region(case: IndependentCase) -> bool:
     return case.personality[0] > 0.5 and case.personality[1] < -0.5
 
 
-def touches_arena(case: IndependentCase) -> bool:
-    """Matches 2A's ``g6_touches_arena``: selected location, candidates, or any
-    recent-locations entry (an action case elsewhere with arena in its history
-    still counts — review finding B1, 2026-07-11)."""
-    return (case.selected_location == "arena"
-            or any(o.id == "arena"
+def touches_held_out(case: IndependentCase) -> bool:
+    """Same family rule as 2A's ``g6_touches_arena`` (selected location,
+    candidates, or any recent-locations entry — review finding B1, 2026-07-11)
+    applied to ``TEST_LOCATION`` (amendment 2026-07-12: arena trains, the
+    test-only infirmary is the held-out family)."""
+    return (case.selected_location == TEST_LOCATION
+            or any(o.id == TEST_LOCATION
                    for o in case.candidates + case.recent_locations))
 
 

@@ -121,7 +121,7 @@ python -m experiments.rq2.run_e_diag --smoke
 1. **生成数据（手工）**：把 `docs/rq2b_generation_guide.md` 全文贴给
    GPT/Claude，按批索要（如 "General batch, 50 cases"，一批要 50–100 条都行，
    条数太多 AI 质量会下降）。三种批次都要：General 约 2200 条（2026-07-12 扩容：
-   目标 1200 训练 / 150 验证）、Personality batch 约 60 条、Arena batch 约 60 条。
+   目标 1200 训练 / 150 验证）、Personality batch 约 60 条、Held-out location batch（医馆 infirmary，测试专用地点）约 60 条。arena 已回归训练数据（2026-07-12 修正案）。
    审核分层：训练/验证批删明显离谱的再抽查两成即可，测试相关批（Personality/
    Arena/首批 General）逐条看。
    每批回复存成一个 `.json` 文件放进 `data/rq2_independent/raw/`

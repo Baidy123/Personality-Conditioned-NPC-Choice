@@ -1,0 +1,15 @@
+{
+  "locations": [
+    {
+      "id": "infirmary",
+      "features": {"social": 0.5, "stimulation": 0.15, "structure": 0.7, "cognitive": 0.5, "physical": 0.3, "risk": 0.1, "exploration": 0.05, "privacy": 0.4, "conflict": 0.05},
+      "unlocked": true,
+      "actions": [
+        {"id": "tend",   "features": {"social": 0.5, "stimulation": 0.1, "structure": 0.6, "cognitive": 0.5, "physical": 0.4, "risk": 0.1, "exploration": 0.05, "cooperation": 0.4, "helping": 0.9, "control": 0.3}},
+        {"id": "assist", "features": {"social": 0.4, "stimulation": 0.15, "structure": 0.5, "cognitive": 0.3, "physical": 0.5, "risk": 0.05, "exploration": 0.1, "cooperation": 0.8, "helping": 0.6}},
+        {"id": "vigil",  "features": {"social": 0.1, "stimulation": 0.05, "structure": 0.7, "cognitive": 0.3, "physical": 0.2, "risk": 0.1, "exploration": 0.05, "cooperation": 0.1, "helping": 0.5, "control": 0.2}}
+      ],
+      "events": []
+    }
+  ]
+}
