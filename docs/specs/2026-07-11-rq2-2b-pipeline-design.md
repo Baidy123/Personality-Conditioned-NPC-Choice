@@ -212,20 +212,35 @@ measurement is applied to the hand-authored scorer's argmax on identical cases.
 The scorer is a *measured system* here, never a label source — 2B isolation
 holds. Outputs: `results/rq2b/label_probe.csv`, `label_probe.png`.
 
-### Pilot reading (n = 276 buffered cases of the first 400; to be re-run on the
-final dataset)
+### Reading on the final dataset (1122 buffered cases of 1575 accepted, 2026-07-12)
 
-| channel | independent labels | scorer | designed sign | status |
-|---|---|---|---|---|
-| O novelty-seeking | ρ(rep) **−0.181** | −0.075 | − | reproduced (stronger than the scorer's) |
-| C routine preference | ρ(rep) **+0.003** | +0.185 | + | **absent** |
-| N anxious clinging | ρ(rep) **+0.085** | +0.237 | + | weak (≈⅓) |
-| E, A (no channel) | ≈0 | ≈0 | . | agree |
+Spearman ρ between trait value and the chosen option's Δ against that case's
+candidate mean (+ = clings to the familiar/repeated, − = avoids it):
 
-Mean Δrep: labels −0.036, scorer −0.141 — the labels are *less* repetition-averse
-overall; what they lack is the C/N modulation, not memory sensitivity as such.
-The clearly reproduced O channel rules out "the annotator cannot express a
-personality × memory interaction" as an explanation for the C/N absence.
+| channel | labels ρ(rep) | scorer ρ(rep) | labels ρ(sim) | scorer ρ(sim) | designed | status |
+|---|---|---|---|---|---|---|
+| O novelty-seeking | **−0.255** | −0.151 | −0.167 | −0.245 | − | reproduced, stronger than the scorer's |
+| C routine preference | **+0.017** | +0.228 | +0.056 | +0.264 | + | **absent** |
+| N anxious clinging | **+0.032** | +0.208 | −0.016 | +0.343 | + | **absent** |
+| E (no channel) | −0.015 | +0.055 | +0.053 | +0.094 | . | agree |
+| A (no channel) | −0.014 | +0.015 | −0.042 | −0.027 | . | agree |
+
+Mean Δrep: labels −0.013 (essentially neutral), scorer −0.118.
+
+The independent labels carry **exactly one** memory channel — O — and it is the
+intuitive one. Both hand-authored channels are absent, not merely weak.
+
+Two methodological notes:
+
+- The 400-case pilot put N at ρ(rep) = +0.085; at 1122 cases it is +0.032. The
+  pilot signal was noise — channel claims require the full dataset.
+- The reproduced O channel rules out "the annotator cannot express a personality
+  × memory interaction" as the explanation for the C/N absence. Its *route*
+  differs: the scorer's O acts mainly through semantic familiarity
+  (ρ(sim) −0.245 vs ρ(rep) −0.151), the labels' O mainly through exact repetition
+  (ρ(rep) −0.255 vs ρ(sim) −0.167) — the annotator's "curiosity" reads as "don't
+  do the identical thing again", the scorer's as "avoid what resembles it".
+  `sim` and `rep` are correlated, so do not over-read the split.
 
 ### Pre-registered prediction (written before 2B training; verify in `run_2b`)
 

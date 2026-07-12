@@ -1,0 +1,847 @@
+[
+  {
+    "_meta": {
+      "source": "GPT-5.5 Thinking"
+    }
+  },
+  {
+    "personality": {
+      "O": -0.8,
+      "C": 0.8,
+      "E": -0.7,
+      "A": 0.8,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library",
+      "chapel"
+    ],
+    "candidates": [
+      "infirmary",
+      "arena",
+      "market",
+      "forest"
+    ],
+    "choice": "infirmary",
+    "reason": "Quiet duty and a clear helping role suit this conscientious, agreeable, and reserved character."
+  },
+  {
+    "personality": {
+      "O": 0.8,
+      "C": 0.0,
+      "E": 0.7,
+      "A": 0.1,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "market",
+      "tavern"
+    ],
+    "candidates": [
+      "infirmary",
+      "forest",
+      "arena"
+    ],
+    "choice": "forest",
+    "reason": "After repeated social bustle, the forest offers the freer and more novel change this open character is likely to seek."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.1,
+      "E": 0.0,
+      "A": 0.7,
+      "N": 0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "infirmary",
+      "tavern",
+      "arena"
+    ],
+    "choice": "infirmary",
+    "reason": "The infirmary offers a calm, prosocial setting that feels safer than the noisy or confrontational alternatives."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.7,
+      "E": 0.8,
+      "A": -0.7,
+      "N": -0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena"
+    ],
+    "candidates": [
+      "library",
+      "infirmary",
+      "arena",
+      "market"
+    ],
+    "choice": "arena",
+    "reason": "Returning to the arena fits this low-openness, outgoing, risk-tolerant character better than quiet duty."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.0,
+      "E": -0.8,
+      "A": -0.6,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "library"
+    ],
+    "candidates": [
+      "chapel",
+      "infirmary",
+      "market"
+    ],
+    "choice": "market",
+    "reason": "The market offers the richest stream of new sights while avoiding the intimate helping demands of the infirmary."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.8,
+      "E": 0.8,
+      "A": 0.9,
+      "N": -0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "market"
+    ],
+    "candidates": [
+      "infirmary",
+      "tavern",
+      "forest",
+      "chapel"
+    ],
+    "choice": "tavern",
+    "reason": "The tavern gives this warm, outgoing character a lively social change after two market visits."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.9,
+      "E": -0.9,
+      "A": 0.0,
+      "N": 0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "arena"
+    ],
+    "candidates": [
+      "infirmary",
+      "library",
+      "forest"
+    ],
+    "choice": "infirmary",
+    "reason": "Structured quiet and predictable duty make the infirmary reassuring to this anxious, highly conscientious introvert."
+  },
+  {
+    "personality": {
+      "O": 0.7,
+      "C": 0.6,
+      "E": 0.2,
+      "A": 0.8,
+      "N": -0.1
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "infirmary",
+      "library",
+      "market",
+      "forest",
+      "arena"
+    ],
+    "choice": "infirmary",
+    "reason": "The unfamiliar healing house combines meaningful responsibility with enough novelty for this open and agreeable character."
+  },
+  {
+    "personality": {
+      "O": 0.1,
+      "C": -0.7,
+      "E": -0.8,
+      "A": -0.8,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel",
+      "library",
+      "chapel"
+    ],
+    "candidates": [
+      "infirmary",
+      "forest",
+      "tavern"
+    ],
+    "choice": "forest",
+    "reason": "The forest provides solitude and freedom from both social closeness and imposed duty."
+  },
+  {
+    "personality": {
+      "O": -0.6,
+      "C": 0.1,
+      "E": 0.9,
+      "A": 0.7,
+      "N": 0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "market",
+      "infirmary"
+    ],
+    "choice": "market",
+    "reason": "The familiar bustle of the market better fits this highly social character than the infirmary's restrained atmosphere."
+  },
+  {
+    "personality": {
+      "O": -0.4,
+      "C": -0.8,
+      "E": 0.5,
+      "A": 0.2,
+      "N": -0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "chapel",
+      "market"
+    ],
+    "candidates": [
+      "infirmary",
+      "forest",
+      "arena",
+      "library",
+      "tavern"
+    ],
+    "choice": "tavern",
+    "reason": "After returning to the market twice, the tavern offers a livelier and less structured social change for this outgoing character."
+  },
+  {
+    "personality": {
+      "O": -0.1,
+      "C": 0.8,
+      "E": 0.6,
+      "A": -0.8,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "arena",
+      "market"
+    ],
+    "candidates": [
+      "infirmary",
+      "arena",
+      "library"
+    ],
+    "choice": "arena",
+    "reason": "The arena's active challenge is more attractive to this outgoing, emotionally steady character than quiet caregiving."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.7,
+      "E": -0.7,
+      "A": 0.9,
+      "N": 0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "forest"
+    ],
+    "candidates": [
+      "infirmary",
+      "chapel",
+      "market",
+      "tavern"
+    ],
+    "choice": "infirmary",
+    "reason": "After repeated solitude, useful quiet service offers this conscientious and compassionate character a controlled change."
+  },
+  {
+    "personality": {
+      "O": -0.8,
+      "C": -0.6,
+      "E": 0.1,
+      "A": -0.7,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "infirmary",
+      "forest",
+      "chapel"
+    ],
+    "choice": "forest",
+    "reason": "The forest asks less cooperation or disciplined duty and better suits this independent, loosely structured character."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.9,
+      "E": 0.8,
+      "A": 0.8,
+      "N": 0.1
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library",
+      "market"
+    ],
+    "candidates": [
+      "tavern",
+      "infirmary",
+      "arena",
+      "chapel"
+    ],
+    "choice": "infirmary",
+    "reason": "Purposeful service and direct contact with people fit this conscientious, outgoing, and agreeable character."
+  },
+  {
+    "personality": {
+      "O": 0.5,
+      "C": 0.2,
+      "E": -0.5,
+      "A": 0.0,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "forest"
+    ],
+    "candidates": [
+      "infirmary",
+      "chapel",
+      "library"
+    ],
+    "choice": "chapel",
+    "reason": "The chapel offers the calmest retreat for this anxious and reserved character after two more demanding settings."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.6,
+      "E": -0.2,
+      "A": 0.6,
+      "N": 0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel",
+      "infirmary",
+      "chapel"
+    ],
+    "candidates": [
+      "infirmary",
+      "tavern",
+      "arena"
+    ],
+    "choice": "infirmary",
+    "reason": "A familiar return to quiet, useful duty is more reassuring than the two noisy alternatives for this anxious character."
+  },
+  {
+    "personality": {
+      "O": 0.7,
+      "C": 0.0,
+      "E": -0.9,
+      "A": 0.1,
+      "N": -0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library"
+    ],
+    "candidates": [
+      "infirmary",
+      "forest",
+      "market",
+      "arena",
+      "chapel",
+      "tavern"
+    ],
+    "choice": "forest",
+    "reason": "The forest offers solitary novelty and exploration without requiring sustained social contact."
+  },
+  {
+    "personality": {
+      "O": 0.1,
+      "C": -0.8,
+      "E": 0.7,
+      "A": 0.6,
+      "N": 0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "infirmary",
+      "chapel",
+      "library"
+    ],
+    "choice": "infirmary",
+    "reason": "Despite low discipline, this anxious and agreeable character is likely to favour the infirmary's supportive human presence over solitary study."
+  },
+  {
+    "personality": {
+      "O": -0.8,
+      "C": 0.9,
+      "E": -0.7,
+      "A": 0.9,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "chapel",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Direct patient care best fits this conscientious, compassionate character's preference for useful familiar duty."
+  },
+  {
+    "personality": {
+      "O": -0.6,
+      "C": -0.4,
+      "E": 0.7,
+      "A": 0.2,
+      "N": -0.6
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "tavern",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "assist",
+    "reason": "Assisting the healer offers this outgoing and emotionally steady character a more active interpersonal role after tending."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "A": -0.8,
+      "N": 0.8
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Quiet watch minimizes interpersonal demands and offers the least pressured role for this anxious, disagreeable character."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.8,
+      "E": 0.7,
+      "A": 0.1,
+      "N": -0.6
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "library",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist",
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "assist",
+    "reason": "Assisting the healer offers structured, active teamwork that suits this conscientious and outgoing character."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": 0.0,
+      "E": -0.7,
+      "A": -0.5,
+      "N": 0.7
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "chapel",
+      "infirmary",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "vigil",
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Quiet watch best suits this anxious introvert after the closer interpersonal demands of tending."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.7,
+      "E": 0.9,
+      "A": 0.8,
+      "N": 0.6
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "tavern",
+      "market",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "vigil"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Direct care gives this sociable and warm character the interpersonal reassurance and contact they are likely to seek."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.7,
+      "E": -0.9,
+      "A": -0.7,
+      "N": 0.7
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "infirmary",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "vigil",
+      "vigil",
+      "vigil"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Repeating the quiet watch is comforting rather than boring to this low-openness, anxious, highly reserved character."
+  },
+  {
+    "personality": {
+      "O": 0.7,
+      "C": 0.7,
+      "E": 0.1,
+      "A": 0.9,
+      "N": -0.1
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Hands-on care combines meaningful responsibility with compassionate contact for this open and conscientious character."
+  },
+  {
+    "personality": {
+      "O": 0.1,
+      "C": -0.8,
+      "E": -0.8,
+      "A": -0.9,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "forest",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist",
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Quiet watch offers distance from both patients and the healer, fitting this strongly introverted and disagreeable character."
+  },
+  {
+    "personality": {
+      "O": -0.6,
+      "C": 0.1,
+      "E": 0.8,
+      "A": 0.8,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "chapel",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Returning to direct care is plausible because this anxious, agreeable extravert may keep seeking reassuring human connection."
+  },
+  {
+    "personality": {
+      "O": -0.1,
+      "C": 0.5,
+      "E": 0.6,
+      "A": 0.1,
+      "N": 0.0
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "assist",
+    "reason": "Structured teamwork with the healer gives this conscientious and sociable character a clear, active role."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.9,
+      "E": 0.7,
+      "A": -0.8,
+      "N": -0.8
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "arena",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "vigil"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "assist",
+    "reason": "A structured working role beside the healer suits this conscientious, active character better than passive watch or intimate care."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.6,
+      "E": -0.7,
+      "A": 0.8,
+      "N": 0.7
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "library",
+      "chapel",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist",
+      "vigil"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Direct care gives this compassionate, conscientious introvert a purposeful role despite some anxiety."
+  },
+  {
+    "personality": {
+      "O": -0.8,
+      "C": -0.7,
+      "E": 0.1,
+      "A": -0.8,
+      "N": 0.1
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Vigil demands the least cooperation and organized task work, making it the easiest fit for this character."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.8,
+      "E": 0.9,
+      "A": 0.7,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "market",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist",
+      "assist",
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "assist",
+    "reason": "Assisting remains attractive because structured teamwork fits this outgoing and conscientious character even after recent repetition."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.4,
+      "E": 0.1,
+      "A": -0.2,
+      "N": -0.8
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "market",
+      "library",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "assist",
+      "assist",
+      "vigil"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "After supporting the healer and keeping watch, direct patient care offers this curious, steady character a distinct purposeful task."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.7,
+      "E": -0.1,
+      "A": 0.7,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [
+      "chapel",
+      "infirmary"
+    ],
+    "recent_actions_same_location": [
+      "tend",
+      "tend"
+    ],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "tend",
+    "reason": "Repeated tending feels familiar and reassuring to this low-openness, anxious, caring character."
+  },
+  {
+    "personality": {
+      "O": 0.7,
+      "C": 0.0,
+      "E": -0.9,
+      "A": 0.0,
+      "N": -0.7
+    },
+    "decision_type": "action",
+    "selected_location": "infirmary",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "tend",
+      "assist",
+      "vigil"
+    ],
+    "choice": "vigil",
+    "reason": "Quiet watch provides a distinct infirmary experience while preserving the solitude preferred by this highly introverted character."
+  }
+]
