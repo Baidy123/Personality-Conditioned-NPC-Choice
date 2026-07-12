@@ -1,0 +1,21 @@
+{
+  "generated": "2026-07-12 16:41:48",
+  "seed": 20260711,
+  "config_hash": "0b9b02762ed03ffe934af8d50ab7fd8a527b28158df42a27f411d71287b65e01",
+  "world_hash": "f7160091fc0f8128bf6a3f833c44741f20d909a2f07bb1a31cf21cd6a1273e3f",
+  "raw_files": [
+    "general_01.json",
+    "general_02.json",
+    "general_03.json",
+    "general_04.json"
+  ],
+  "accepted": 400,
+  "rejected": 0,
+  "split_sizes": {
+    "test_pers": 0,
+    "test_family": 0,
+    "test_iid": 21,
+    "val": 42,
+    "train": 337
+  }
+}

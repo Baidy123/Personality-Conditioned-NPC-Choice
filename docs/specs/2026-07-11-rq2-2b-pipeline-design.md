@@ -198,3 +198,59 @@ Mechanics: split group `test_arena` renamed `test_family`; the isolation
 filter applies the same family rule (selected location, candidates, or any
 recent-locations entry) to `infirmary`; General batches now allow arena and
 forbid infirmary; the third batch type is "Held-out location batch".
+
+## 11. Label-property probe and pre-registered prediction (2026-07-12c)
+
+### The probe
+
+`experiments/rq2/run_label_probe.py` runs on the imported dataset **before any
+2B training** and describes the *labels*, not a model. For every case with a
+non-empty buffer it centres the chosen option's `sim`/`rep` against that case's
+candidate mean (so the number reads "chose something more (+) or less (−)
+familiar than what was on offer") and correlates that with each trait. The same
+measurement is applied to the hand-authored scorer's argmax on identical cases.
+The scorer is a *measured system* here, never a label source — 2B isolation
+holds. Outputs: `results/rq2b/label_probe.csv`, `label_probe.png`.
+
+### Pilot reading (n = 276 buffered cases of the first 400; to be re-run on the
+final dataset)
+
+| channel | independent labels | scorer | designed sign | status |
+|---|---|---|---|---|
+| O novelty-seeking | ρ(rep) **−0.181** | −0.075 | − | reproduced (stronger than the scorer's) |
+| C routine preference | ρ(rep) **+0.003** | +0.185 | + | **absent** |
+| N anxious clinging | ρ(rep) **+0.085** | +0.237 | + | weak (≈⅓) |
+| E, A (no channel) | ≈0 | ≈0 | . | agree |
+
+Mean Δrep: labels −0.036, scorer −0.141 — the labels are *less* repetition-averse
+overall; what they lack is the C/N modulation, not memory sensitivity as such.
+The clearly reproduced O channel rules out "the annotator cannot express a
+personality × memory interaction" as an explanation for the C/N absence.
+
+### Pre-registered prediction (written before 2B training; verify in `run_2b`)
+
+1. The scorer loses top-1 accuracy relative to the trained nonlinear model
+   **specifically on buffered test cases with high C or high N**, and the gap is
+   smaller or absent on empty-buffer cases and on high-O cases.
+2. The trained models reproduce the labels' channel profile (O present, C absent,
+   N weak) rather than the scorer's.
+3. This is *not* evidence that the learned models are "better" — it is evidence
+   that two judgement sources disagree about two hand-authored memory channels.
+
+### Interpretation rule (binding on the write-up)
+
+Do **not** attribute the divergence to a cause. Two explanations remain open —
+(a) a limitation of the LLM annotator, (b) the C/N clinging hypotheses lack
+general validity — and 2B cannot separate them. State both; name RQ3 (human
+recovery of intended personality) as the arbiter. Under no circumstance may the
+generation guide be tuned until the labels reproduce the scorer's channels: that
+would inject the scorer's hypothesis into the "independent" labels and make
+Study 3 circular. The guide's memory rule already names both directions
+neutrally ("bored of it… or, if it loves routine, comforted by it"), and the
+channels were still not reproduced.
+
+Context: the N clinging channel was added in equation v1.3 (round 7) in direct
+response to supervisor feedback that memory acted as a personality-free
+anti-repetition force. The independent labels do not corroborate it. Reporting
+this honestly, with RQ3 as the arbiter, is the intended contribution — not a
+defect to be patched.

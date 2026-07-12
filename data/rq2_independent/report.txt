@@ -1,0 +1,16 @@
+accepted 400 / raw 400
+rejections: {}
+split sizes: {"test_pers": 0, "test_family": 0, "test_iid": 21, "val": 42, "train": 337}
+
+-- coverage (train+val pool only) --
+decision types: {'location': 188, 'action': 191}
+trait O: high(>0.3) 124, mid 127, low(<-0.3) 128
+trait C: high(>0.3) 123, mid 126, low(<-0.3) 130
+trait E: high(>0.3) 126, mid 122, low(<-0.3) 131
+trait A: high(>0.3) 129, mid 127, low(<-0.3) 123
+trait N: high(>0.3) 126, mid 126, low(<-0.3) 127
+empty-history cases: 118 (31%)
+
+SHORTFALL test_pers: 0/38 — request 38 more personality-batch cases
+SHORTFALL test_family: 0/37 — request 37 more held-out-location-batch cases
+SHORTFALL test_iid: 21/75 — request 54 more general-batch cases

@@ -371,6 +371,53 @@ class TestTrain2B:
         assert np.isfinite(meta["best_val_kl"])
 
 
+class TestLabelProbe:
+    def test_delta_sign_conventions(self):
+        """Δ is centred within the case: + = chose more familiar than on offer."""
+        from experiments.rq2.run_label_probe import chosen_deltas
+        from npc_policy import Relations
+        c = _mini_independent_case()
+        c.candidate_history_features = Relations(
+            rep=np.array([1.0, 0.0]), sim=np.array([0.9, 0.1]),
+            nov=np.array([0.1, 0.9]))
+        d_sim, d_rep = chosen_deltas(c, 0)          # the familiar/repeated one
+        assert d_sim > 0 and d_rep > 0
+        d_sim, d_rep = chosen_deltas(c, 1)          # the novel one
+        assert d_sim < 0 and d_rep < 0
+
+    def test_probe_recovers_a_planted_channel(self):
+        """A labeller that always picks the most familiar option must show
+        positive rho on the trait it is keyed to."""
+        from experiments.rq2.independent import enrich_case, load_2b_world
+        from experiments.rq2.run_label_probe import probe
+        w = load_2b_world()
+        cases = []
+        for i in range(40):
+            hi = i % 2 == 0                          # half high-C, half low-C
+            raw = _raw_case(
+                personality={"O": 0.0, "C": 0.8 if hi else -0.8,
+                             "E": 0.0, "A": 0.0, "N": 0.0},
+                recent_locations=["tavern", "tavern"],
+                candidates=["tavern", "library", "forest"],
+                choice="tavern" if hi else "forest")   # high C clings, low C flees
+            cases.append(enrich_case(raw, w, "planted"))
+        _, table = probe(cases)
+        c_row = next(r for r in table if r["trait"] == "C")
+        assert c_row["ai_rep_rho"] > 0.5             # planted channel recovered
+        e_row = next(r for r in table if r["trait"] == "E")
+        assert abs(e_row["ai_rep_rho"]) < 0.2        # no spurious channel
+
+    def test_writes_artifacts(self, tmp_path):
+        from experiments.rq2.import_independent import run_import
+        from experiments.rq2.run_label_probe import main as probe_main
+        raw = _write_raw_dir(tmp_path, n_general=30, n_pers=4, n_family=4)
+        run_import(raw_dir=raw, out_dir=tmp_path / "data")
+        probe_main(["--data", str(tmp_path / "data"),
+                    "--results", str(tmp_path / "res")])
+        assert (tmp_path / "res" / "label_probe.csv").exists()
+        assert (tmp_path / "res" / "label_probe.png").exists()
+
+
 class TestRun2B:
     def test_scorer_and_uniform_rows(self, tmp_path):
         """Full mini-pipeline: import → train simple → evaluate all systems."""

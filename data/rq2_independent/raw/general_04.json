@@ -1,0 +1,2315 @@
+[
+  {
+    "_meta": {
+      "source": "GPT-5.5 Thinking"
+    }
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.6,
+      "E": 0.2,
+      "A": -0.2,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library",
+      "tavern",
+      "forest"
+    ],
+    "candidates": [
+      "chapel",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "Curiosity and conscientiousness make the library more appealing than the chapel despite some anxiety."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.5,
+      "E": 0.0,
+      "A": 0.9,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "market",
+      "arena",
+      "tavern",
+      "forest",
+      "chapel",
+      "library"
+    ],
+    "choice": "tavern",
+    "reason": "A warm and emotionally steady character is likely to favour the tavern's easy social atmosphere."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.0,
+      "E": -0.2,
+      "A": -0.2,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [
+      "tavern",
+      "library",
+      "market"
+    ],
+    "recent_actions_same_location": [
+      "trade",
+      "haggle",
+      "browse"
+    ],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "browse",
+    "reason": "Having just cycled through all three market activities, browsing is the least demanding choice to return to."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": -0.5,
+      "E": 0.0,
+      "A": -0.9,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel"
+    ],
+    "candidates": [
+      "chapel",
+      "library",
+      "market"
+    ],
+    "choice": "market",
+    "reason": "Strong openness and low routine preference make the varied market more attractive than another quiet setting."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.7,
+      "E": -0.2,
+      "A": -0.7,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "market",
+      "forest",
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "meditate"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "meditate",
+    "reason": "Low conscientiousness and low agreeableness make solitary meditation more plausible than ritual or confession."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": -0.2,
+      "E": 0.2,
+      "A": -0.9,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "chapel",
+      "library"
+    ],
+    "recent_actions_same_location": [
+      "discuss",
+      "discuss",
+      "research"
+    ],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "With little appetite for novelty or cooperation, quiet reading is more plausible than further discussion or research."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.0,
+      "E": 0.0,
+      "A": 0.6,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "library",
+      "chapel",
+      "forest"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "rest",
+    "reason": "High anxiety makes resting in the forest more appealing than exploration or a practical task."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.2,
+      "E": 0.6,
+      "A": 0.0,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [
+      "chapel",
+      "library",
+      "tavern"
+    ],
+    "recent_actions_same_location": [
+      "drink"
+    ],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "chat",
+    "reason": "This outgoing character is more likely to seek conversation after already having a drink."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": 0.0,
+      "E": -0.2,
+      "A": -0.5,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "forest"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "rest",
+    "reason": "Marked anxiety makes recovery and stillness more plausible than pushing deeper into the forest."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.0,
+      "E": -0.2,
+      "A": 0.9,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "tavern",
+      "tavern"
+    ],
+    "candidates": [
+      "chapel",
+      "forest",
+      "library",
+      "market"
+    ],
+    "choice": "chapel",
+    "reason": "After two tavern visits, the chapel offers a quiet and reassuring change without demanding novelty."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.8,
+      "E": -0.2,
+      "A": 0.2,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "chapel",
+      "tavern"
+    ],
+    "choice": "chapel",
+    "reason": "A highly conscientious and somewhat reserved character is more likely to choose the structured calm of the chapel."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": -0.9,
+      "E": 0.2,
+      "A": -0.7,
+      "N": -0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena"
+    ],
+    "candidates": [
+      "chapel",
+      "market",
+      "library",
+      "arena"
+    ],
+    "choice": "market",
+    "reason": "Low conscientiousness and low agreeableness make the active, loosely structured market the most plausible option."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.9,
+      "E": 0.9,
+      "A": 0.2,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "forest",
+      "arena"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "spar",
+    "reason": "High extraversion and conscientiousness favour an active but structured bout of sparring."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.4,
+      "E": -0.9,
+      "A": 0.2,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "arena",
+      "library",
+      "library"
+    ],
+    "recent_actions_same_location": [
+      "read"
+    ],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "research",
+    "reason": "High openness, good conscientiousness, and strong introversion make focused research the clearest fit."
+  },
+  {
+    "personality": {
+      "O": 0.8,
+      "C": 0.8,
+      "E": 0.6,
+      "A": -0.5,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "chapel",
+      "library",
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "fight",
+      "spar"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "drill",
+    "reason": "After fighting and sparring, disciplined training gives this curious but conscientious character a purposeful change."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.2,
+      "E": 0.6,
+      "A": -0.7,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel",
+      "arena",
+      "library"
+    ],
+    "candidates": [
+      "chapel",
+      "arena"
+    ],
+    "choice": "arena",
+    "reason": "The arena better fits this outgoing and confrontational character than another quiet chapel visit."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.0,
+      "E": -0.9,
+      "A": -0.7,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "market",
+      "arena",
+      "chapel"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "meditate",
+    "reason": "Extreme introversion and anxiety make silent meditation more plausible than prayer or interpersonal confession."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.5,
+      "E": 0.8,
+      "A": 0.2,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "forest"
+    ],
+    "recent_actions_same_location": [
+      "forage",
+      "explore",
+      "explore"
+    ],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "rest",
+    "reason": "After exploring twice, a character with little novelty seeking is plausibly ready to stop and recover."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": -0.7,
+      "E": -0.7,
+      "A": 0.2,
+      "N": 0.6
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "spectate",
+      "bet",
+      "bet"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "spectate",
+    "reason": "High anxiety and introversion make watching the arena safer and more comfortable than direct involvement."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": 0.6,
+      "E": -0.5,
+      "A": 0.9,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "market",
+      "market",
+      "arena"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "drill",
+    "reason": "Conscientiousness and low extraversion favour disciplined individual training over social or risky arena roles."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.7,
+      "E": -0.7,
+      "A": 0.4,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "chapel",
+      "chapel"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "meditate",
+    "reason": "A reserved character with little attachment to ritual is most likely to choose quiet meditation."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.7,
+      "E": -0.9,
+      "A": -0.7,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "forest",
+      "arena"
+    ],
+    "candidates": [
+      "tavern",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "Strong introversion and anxiety make the library much more comfortable than the tavern."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.7,
+      "E": -0.2,
+      "A": 0.6,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "market",
+      "chapel"
+    ],
+    "choice": "market",
+    "reason": "Moderate curiosity and low routine preference make the market's variety more appealing than the chapel."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.9,
+      "E": -0.7,
+      "A": -0.9,
+      "N": 0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "arena",
+      "market"
+    ],
+    "candidates": [
+      "forest",
+      "chapel",
+      "market",
+      "arena",
+      "library",
+      "tavern"
+    ],
+    "choice": "chapel",
+    "reason": "Severe anxiety and introversion make the chapel's calm sanctuary the most plausible destination."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.0,
+      "E": 0.8,
+      "A": 0.0,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "arena",
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "drill",
+      "bet",
+      "fight"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "fight",
+    "reason": "High extraversion and emotional steadiness make direct competition attractive after several different arena activities."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.0,
+      "E": -0.5,
+      "A": 0.4,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "tavern",
+      "forest"
+    ],
+    "recent_actions_same_location": [
+      "rest",
+      "forage",
+      "explore"
+    ],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "rest",
+    "reason": "After trying rest, forage, and explore, this reserved character is most likely to settle back into rest."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.4,
+      "E": -0.9,
+      "A": -0.5,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "chapel",
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "confess"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "pray",
+    "reason": "High conscientiousness and low openness favour the chapel's most formal and familiar ritual."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.8,
+      "E": 0.8,
+      "A": 0.2,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel",
+      "market",
+      "library"
+    ],
+    "candidates": [
+      "library",
+      "arena",
+      "forest",
+      "market",
+      "tavern",
+      "chapel"
+    ],
+    "choice": "market",
+    "reason": "The market combines stimulation, variety, and practical activity for this open, outgoing, conscientious character."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.2,
+      "E": 0.4,
+      "A": -0.9,
+      "N": 0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "library"
+    ],
+    "candidates": [
+      "tavern",
+      "chapel",
+      "library",
+      "market",
+      "forest"
+    ],
+    "choice": "chapel",
+    "reason": "High anxiety makes the chapel's calm atmosphere more appealing than the busier alternatives."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.6,
+      "E": 0.2,
+      "A": 0.6,
+      "N": 0.6
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "Low openness and high conscientiousness favour straightforward, familiar reading over deeper inquiry or debate."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.0,
+      "E": -0.9,
+      "A": 0.6,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [
+      "market",
+      "arena",
+      "tavern"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "drink",
+    "reason": "Strong introversion makes a quiet drink more plausible than conversation or a brawl despite the friendly disposition."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": 0.0,
+      "E": 0.0,
+      "A": -0.2,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "confess",
+      "meditate"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "pray",
+    "reason": "After confessing and meditating, formal prayer offers a balanced and distinct chapel activity."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.0,
+      "E": 0.0,
+      "A": 0.6,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "research",
+    "reason": "Strong curiosity makes independent research more compelling than ordinary reading or discussion."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.4,
+      "E": -0.7,
+      "A": -0.7,
+      "N": -0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library"
+    ],
+    "candidates": [
+      "tavern",
+      "chapel",
+      "forest",
+      "library",
+      "market",
+      "arena"
+    ],
+    "choice": "forest",
+    "reason": "A very reserved and disagreeable character is likely to prefer the forest's solitude over crowded locations."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.7,
+      "E": -0.7,
+      "A": 0.6,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest"
+    ],
+    "candidates": [
+      "forest",
+      "arena",
+      "tavern",
+      "library",
+      "chapel",
+      "market"
+    ],
+    "choice": "chapel",
+    "reason": "Anxious introversion makes the chapel more reassuring than the forest or socially intense alternatives."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.6,
+      "E": -0.7,
+      "A": 0.6,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "market",
+      "library"
+    ],
+    "candidates": [
+      "market",
+      "chapel",
+      "tavern",
+      "arena",
+      "library",
+      "forest"
+    ],
+    "choice": "library",
+    "reason": "Low openness and high conscientiousness make returning to the library feel comfortable rather than repetitive."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.7,
+      "E": 0.9,
+      "A": 0.9,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "tavern"
+    ],
+    "candidates": [
+      "chapel",
+      "market"
+    ],
+    "choice": "market",
+    "reason": "An outgoing and agreeable character is likely to prefer the market's social bustle to the quiet chapel."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.6,
+      "E": 0.6,
+      "A": -0.7,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "arena",
+      "library"
+    ],
+    "choice": "arena",
+    "reason": "High openness and extraversion, together with low agreeableness, make the arena more attractive than the library."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.9,
+      "E": -0.9,
+      "A": 0.2,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [
+      "market"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "browse",
+    "reason": "Extreme introversion makes browsing the least socially demanding way to spend time at the market."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.2,
+      "E": -0.2,
+      "A": 0.9,
+      "N": 0.2
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "rest",
+    "reason": "A mildly reserved, low-novelty character is more likely to rest than explore or take on a task."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.0,
+      "E": 0.6,
+      "A": -0.9,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "library"
+    ],
+    "candidates": [
+      "chapel",
+      "forest",
+      "tavern",
+      "market",
+      "library"
+    ],
+    "choice": "market",
+    "reason": "The market provides novelty and stimulation without requiring the cooperation this disagreeable character is unlikely to seek."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.9,
+      "E": 0.2,
+      "A": 0.8,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "market"
+    ],
+    "candidates": [
+      "forest",
+      "arena"
+    ],
+    "choice": "forest",
+    "reason": "The forest offers a freer and less confrontational alternative to returning to the arena."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.6,
+      "E": -0.9,
+      "A": 0.0,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "library"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "Low openness and extreme introversion make quiet reading the most natural library activity."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.8,
+      "E": 0.8,
+      "A": 0.2,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "spar",
+    "reason": "High conscientiousness and extraversion favour controlled, active competition rather than passive spectating or a real fight."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.2,
+      "E": 0.4,
+      "A": 0.2,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "spar",
+      "drill"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "fight",
+    "reason": "Emotional steadiness and moderate competitiveness make a real bout plausible after recent sparring and drills."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.9,
+      "E": 0.9,
+      "A": -0.2,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "chat",
+    "reason": "Strong extraversion makes conversation the most plausible tavern activity, while anxiety reduces the appeal of a brawl."
+  },
+  {
+    "personality": {
+      "O": 0.8,
+      "C": 0.6,
+      "E": -0.5,
+      "A": 0.6,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "market"
+    ],
+    "candidates": [
+      "tavern",
+      "library",
+      "market"
+    ],
+    "choice": "library",
+    "reason": "Curiosity, conscientiousness, and introversion point strongly toward the library."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.9,
+      "E": -0.5,
+      "A": 0.4,
+      "N": 0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "tavern",
+      "chapel"
+    ],
+    "candidates": [
+      "chapel",
+      "forest",
+      "library",
+      "arena",
+      "tavern"
+    ],
+    "choice": "chapel",
+    "reason": "The familiar chapel is reassuring for a highly anxious, routine-oriented character who has just been there."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": 0.0,
+      "E": -0.5,
+      "A": -0.7,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena"
+    ],
+    "candidates": [
+      "market",
+      "tavern",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "A reserved and disagreeable character is more likely to choose solitary study than the social market or tavern."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.2,
+      "E": 0.4,
+      "A": 0.2,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "library"
+    ],
+    "candidates": [
+      "market",
+      "forest",
+      "tavern",
+      "arena",
+      "library",
+      "chapel"
+    ],
+    "choice": "chapel",
+    "reason": "Anxiety makes the chapel's quiet reassurance more appealing than the livelier or riskier options."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": -0.5,
+      "E": -0.7,
+      "A": 0.8,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "bet",
+      "drill"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "spectate",
+    "reason": "Low openness and introversion make passive observation more comfortable than another active arena role."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.4,
+      "E": -0.9,
+      "A": -0.2,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "market",
+      "library"
+    ],
+    "candidates": [
+      "library",
+      "market"
+    ],
+    "choice": "library",
+    "reason": "The library clearly fits this curious, conscientious, and strongly introverted character better than the market."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": 0.2,
+      "E": 0.2,
+      "A": -0.5,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "library",
+      "arena"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "fight",
+    "reason": "Low agreeableness and emotional steadiness make direct competition the most plausible arena choice."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.0,
+      "E": -0.2,
+      "A": 0.6,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "forest",
+      "library"
+    ],
+    "recent_actions_same_location": [
+      "discuss"
+    ],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "After a discussion, low openness and mild introversion make familiar solitary reading the likeliest next activity."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": -0.9,
+      "E": 0.0,
+      "A": 0.2,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena"
+    ],
+    "candidates": [
+      "forest",
+      "market",
+      "arena",
+      "library",
+      "chapel",
+      "tavern"
+    ],
+    "choice": "chapel",
+    "reason": "With little need for stimulation and some anxiety, the chapel offers the most comfortable setting."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": -0.2,
+      "E": -0.2,
+      "A": 0.0,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "forest"
+    ],
+    "recent_actions_same_location": [
+      "rest",
+      "forage",
+      "forage"
+    ],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "explore",
+    "reason": "Strong openness makes exploration attractive, especially after foraging has just been repeated."
+  },
+  {
+    "personality": {
+      "O": 0.8,
+      "C": 0.4,
+      "E": 0.4,
+      "A": -0.7,
+      "N": 0.8
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "browse",
+    "reason": "High curiosity favours browsing, while anxiety and low agreeableness make direct bargaining less appealing."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.2,
+      "E": 0.0,
+      "A": 0.9,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "coach"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "coach",
+    "reason": "Strong agreeableness makes returning to the cooperative role of coaching the most natural choice."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.7,
+      "E": 0.4,
+      "A": 0.8,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "chapel",
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "meditate",
+      "confess"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "confess",
+    "reason": "This agreeable character is likely to prefer the interpersonal relief of confession over formal ritual."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.4,
+      "E": 0.4,
+      "A": 0.2,
+      "N": 0.9
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "chapel",
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "spar",
+      "spar",
+      "spar"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "drill",
+    "reason": "After repeating sparring three times, a conscientious but anxious character is likely to switch to safer disciplined training."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.2,
+      "E": -0.5,
+      "A": 0.6,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "drink",
+    "reason": "High openness is tempered by introversion and anxiety, making a relaxed drink more plausible than chat or conflict."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.9,
+      "E": 0.0,
+      "A": -0.2,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "market"
+    ],
+    "candidates": [
+      "tavern",
+      "forest",
+      "library",
+      "arena",
+      "market"
+    ],
+    "choice": "tavern",
+    "reason": "Low openness makes a return to the familiar tavern more plausible than seeking a new kind of destination."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.5,
+      "E": -0.5,
+      "A": -0.2,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "market",
+      "tavern"
+    ],
+    "choice": "tavern",
+    "reason": "Between two social locations, low openness favours returning to the recently familiar tavern."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.6,
+      "E": -0.2,
+      "A": 0.0,
+      "N": 0.0
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "library",
+      "library"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "High conscientiousness and low openness make quiet reading the most comfortable library activity."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.0,
+      "E": -0.5,
+      "A": -0.2,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "forest",
+      "library",
+      "arena"
+    ],
+    "choice": "library",
+    "reason": "A reserved and somewhat anxious character is more likely to choose the predictable quiet of the library than the arena or forest."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.2,
+      "E": -0.7,
+      "A": 0.0,
+      "N": 0.8
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [
+      "market"
+    ],
+    "recent_actions_same_location": [
+      "browse",
+      "trade",
+      "trade"
+    ],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "browse",
+    "reason": "After repeated trading, an anxious introvert is likely to step back into the lower-pressure activity of browsing."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": 0.4,
+      "E": -0.9,
+      "A": 0.0,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern",
+      "library"
+    ],
+    "candidates": [
+      "arena",
+      "chapel",
+      "forest",
+      "market",
+      "library",
+      "tavern"
+    ],
+    "choice": "forest",
+    "reason": "Curiosity and extreme introversion make the forest a more appealing change than another crowded or social setting."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": 0.4,
+      "E": 0.2,
+      "A": -0.5,
+      "N": -0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena"
+    ],
+    "candidates": [
+      "market",
+      "chapel"
+    ],
+    "choice": "chapel",
+    "reason": "Conscientiousness and low agreeableness make the chapel's structured solitude more appealing than the market."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.2,
+      "E": -0.7,
+      "A": 0.9,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "market",
+      "forest"
+    ],
+    "choice": "forest",
+    "reason": "Strong introversion makes the forest preferable to the social demands of the market."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": -0.5,
+      "E": -0.5,
+      "A": -0.9,
+      "N": -0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "tavern",
+      "forest",
+      "arena",
+      "library"
+    ],
+    "choice": "forest",
+    "reason": "High openness, emotional steadiness, and low extraversion make the forest the strongest fit among these choices."
+  },
+  {
+    "personality": {
+      "O": 0.8,
+      "C": -0.5,
+      "E": -0.5,
+      "A": -0.5,
+      "N": -0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest"
+    ],
+    "candidates": [
+      "tavern",
+      "market",
+      "arena",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "With the forest unavailable, the library offers the best combination of novelty and solitude for this open introvert."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.9,
+      "E": -0.5,
+      "A": -0.7,
+      "N": 0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "chapel",
+      "library",
+      "forest",
+      "arena",
+      "market"
+    ],
+    "choice": "chapel",
+    "reason": "High conscientiousness, anxiety, and low openness strongly favour the chapel's familiar calm."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": -0.2,
+      "E": -0.2,
+      "A": -0.9,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "chapel",
+      "forest"
+    ],
+    "candidates": [
+      "tavern",
+      "library",
+      "chapel",
+      "forest"
+    ],
+    "choice": "library",
+    "reason": "A reserved and disagreeable character is more likely to seek private reading space than social tavern activity."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.2,
+      "E": 0.4,
+      "A": 0.2,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "pray",
+      "pray",
+      "meditate"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "confess",
+    "reason": "After repeated prayer and a meditation, confession offers a distinct interpersonal change that this moderately social character can tolerate."
+  },
+  {
+    "personality": {
+      "O": 0.6,
+      "C": -0.5,
+      "E": 0.9,
+      "A": -0.9,
+      "N": 0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market"
+    ],
+    "candidates": [
+      "forest",
+      "arena",
+      "market",
+      "library",
+      "chapel",
+      "tavern"
+    ],
+    "choice": "market",
+    "reason": "The market preserves stimulation and variety while avoiding the greater risk of the arena for this anxious extravert."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.7,
+      "E": 0.9,
+      "A": 0.6,
+      "N": -0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "tavern",
+      "chapel"
+    ],
+    "choice": "tavern",
+    "reason": "Strong extraversion and agreeableness make the tavern the obvious choice over the quiet chapel."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.9,
+      "E": 0.9,
+      "A": 0.4,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel"
+    ],
+    "candidates": [
+      "library",
+      "tavern"
+    ],
+    "choice": "tavern",
+    "reason": "The tavern better matches this outgoing character's desire for social stimulation than the library."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.6,
+      "E": 0.9,
+      "A": -0.9,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "haggle",
+    "reason": "High extraversion, low agreeableness, and emotional steadiness make assertive haggling especially plausible."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": -0.7,
+      "E": 0.8,
+      "A": 0.0,
+      "N": -0.7
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [
+      "library",
+      "tavern",
+      "tavern"
+    ],
+    "recent_actions_same_location": [
+      "drink"
+    ],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "chat",
+    "reason": "After already drinking, this outgoing and emotionally steady character is likely to turn toward conversation."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": 0.6,
+      "E": -0.2,
+      "A": -0.2,
+      "N": 0.0
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "chapel",
+      "market"
+    ],
+    "candidates": [
+      "arena",
+      "chapel"
+    ],
+    "choice": "chapel",
+    "reason": "The chapel is the familiar, structured alternative to the arena for this conscientious character."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.5,
+      "E": 0.9,
+      "A": -0.5,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "chapel",
+    "recent_locations": [
+      "tavern",
+      "chapel"
+    ],
+    "recent_actions_same_location": [
+      "meditate",
+      "confess",
+      "confess"
+    ],
+    "candidates": [
+      "pray",
+      "meditate",
+      "confess"
+    ],
+    "choice": "confess",
+    "reason": "Low openness and the recent repetition of confession make staying with the familiar interpersonal act plausible."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": 0.4,
+      "E": 0.2,
+      "A": 0.4,
+      "N": 0.6
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel",
+      "market"
+    ],
+    "candidates": [
+      "tavern",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "Some anxiety and only modest extraversion make the library more comfortable than the tavern."
+  },
+  {
+    "personality": {
+      "O": -0.9,
+      "C": 0.6,
+      "E": -0.9,
+      "A": 0.4,
+      "N": -0.5
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "arena",
+      "market",
+      "chapel"
+    ],
+    "choice": "chapel",
+    "reason": "Extreme introversion and conscientiousness favour the chapel over the market or arena."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.6,
+      "E": 0.0,
+      "A": -0.7,
+      "N": 0.8
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "forest",
+      "tavern",
+      "library",
+      "market",
+      "chapel"
+    ],
+    "choice": "library",
+    "reason": "Curiosity and conscientiousness make the library a safe way to pursue novelty despite high anxiety."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.7,
+      "E": 0.9,
+      "A": -0.7,
+      "N": -0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "chapel"
+    ],
+    "candidates": [
+      "forest",
+      "library",
+      "chapel"
+    ],
+    "choice": "chapel",
+    "reason": "Low openness makes the recently visited chapel more comfortable than switching to the forest or library."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.2,
+      "E": 0.6,
+      "A": 0.2,
+      "N": 0.0
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "arena",
+      "forest",
+      "forest"
+    ],
+    "recent_actions_same_location": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "explore",
+    "reason": "High openness makes exploration the most compelling option even after a varied sequence of forest activities."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.4,
+      "E": -0.9,
+      "A": -0.9,
+      "N": 0.4
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "tavern",
+      "market",
+      "forest",
+      "arena",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "Extreme introversion and low agreeableness make the library the clearest fit among the available locations."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": 0.4,
+      "E": -0.7,
+      "A": -0.9,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "market",
+      "arena",
+      "forest",
+      "chapel",
+      "tavern",
+      "library"
+    ],
+    "choice": "library",
+    "reason": "Low openness and introversion favour the orderly solitude of the library over busier alternatives."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": -0.9,
+      "E": 0.8,
+      "A": 0.8,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "market",
+      "tavern"
+    ],
+    "candidates": [
+      "library",
+      "chapel",
+      "market",
+      "arena"
+    ],
+    "choice": "market",
+    "reason": "Strong extraversion and agreeableness make returning to the socially active market more plausible than a quiet location."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": 0.8,
+      "E": 0.2,
+      "A": 0.0,
+      "N": -0.7
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "forest",
+      "arena",
+      "arena"
+    ],
+    "candidates": [
+      "arena",
+      "market",
+      "chapel",
+      "library",
+      "tavern"
+    ],
+    "choice": "arena",
+    "reason": "High conscientiousness and low openness make the repeated arena visits feel like an established routine rather than a source of boredom."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": 0.0,
+      "E": 0.6,
+      "A": 0.4,
+      "N": -0.9
+    },
+    "decision_type": "action",
+    "selected_location": "forest",
+    "recent_locations": [
+      "forest",
+      "arena",
+      "forest"
+    ],
+    "recent_actions_same_location": [
+      "forage",
+      "forage",
+      "forage"
+    ],
+    "candidates": [
+      "explore",
+      "forage",
+      "rest"
+    ],
+    "choice": "explore",
+    "reason": "After foraging three times, strong openness makes a switch to exploration highly plausible."
+  },
+  {
+    "personality": {
+      "O": 0.9,
+      "C": -0.5,
+      "E": 0.2,
+      "A": 0.6,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [
+      "market",
+      "market"
+    ],
+    "recent_actions_same_location": [
+      "browse",
+      "browse"
+    ],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "trade",
+    "reason": "Repeated browsing is likely to bore this highly open character, while trading provides a new and cooperative market activity."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.7,
+      "E": 0.2,
+      "A": -0.5,
+      "N": 0.0
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "arena",
+      "market",
+      "library"
+    ],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "discuss",
+    "reason": "Moderate curiosity and low agreeableness make an energetic exchange of ideas more appealing than solitary reading."
+  },
+  {
+    "personality": {
+      "O": -0.2,
+      "C": -0.7,
+      "E": -0.7,
+      "A": 0.6,
+      "N": 0.4
+    },
+    "decision_type": "action",
+    "selected_location": "library",
+    "recent_locations": [
+      "chapel",
+      "library"
+    ],
+    "recent_actions_same_location": [
+      "discuss",
+      "discuss",
+      "discuss"
+    ],
+    "candidates": [
+      "read",
+      "research",
+      "discuss"
+    ],
+    "choice": "read",
+    "reason": "After three discussions, an introverted and anxious character is likely to retreat to quiet reading."
+  },
+  {
+    "personality": {
+      "O": -0.5,
+      "C": -0.7,
+      "E": -0.5,
+      "A": -0.9,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [],
+    "candidates": [
+      "forest",
+      "arena",
+      "chapel"
+    ],
+    "choice": "forest",
+    "reason": "Introversion and low agreeableness make the forest's solitude more appealing than the arena or chapel."
+  },
+  {
+    "personality": {
+      "O": 0.4,
+      "C": -0.9,
+      "E": 0.8,
+      "A": 0.8,
+      "N": -0.9
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "tavern"
+    ],
+    "candidates": [
+      "tavern",
+      "library"
+    ],
+    "choice": "tavern",
+    "reason": "The tavern still best matches this warm, outgoing, and emotionally steady character despite the recent visit."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.0,
+      "E": 0.8,
+      "A": 0.4,
+      "N": 0.2
+    },
+    "decision_type": "location",
+    "recent_locations": [
+      "arena",
+      "chapel",
+      "arena"
+    ],
+    "candidates": [
+      "tavern",
+      "library",
+      "chapel",
+      "market",
+      "arena",
+      "forest"
+    ],
+    "choice": "tavern",
+    "reason": "Strong extraversion makes the tavern the most likely destination among a broad set of choices."
+  },
+  {
+    "personality": {
+      "O": -0.7,
+      "C": -0.9,
+      "E": 0.9,
+      "A": -0.9,
+      "N": 0.0
+    },
+    "decision_type": "action",
+    "selected_location": "tavern",
+    "recent_locations": [],
+    "recent_actions_same_location": [],
+    "candidates": [
+      "chat",
+      "drink",
+      "brawl"
+    ],
+    "choice": "brawl",
+    "reason": "High extraversion, very low agreeableness, and low conscientiousness make a brawl the most plausible tavern activity."
+  },
+  {
+    "personality": {
+      "O": 0.0,
+      "C": 0.6,
+      "E": 0.8,
+      "A": -0.5,
+      "N": -0.5
+    },
+    "decision_type": "action",
+    "selected_location": "arena",
+    "recent_locations": [
+      "market",
+      "arena"
+    ],
+    "recent_actions_same_location": [
+      "bet",
+      "coach"
+    ],
+    "candidates": [
+      "fight",
+      "spar",
+      "drill",
+      "coach",
+      "spectate",
+      "bet"
+    ],
+    "choice": "spar",
+    "reason": "High extraversion and conscientiousness favour active, controlled competition over gambling or passive watching."
+  },
+  {
+    "personality": {
+      "O": 0.2,
+      "C": -0.2,
+      "E": 0.0,
+      "A": -0.2,
+      "N": -0.2
+    },
+    "decision_type": "action",
+    "selected_location": "market",
+    "recent_locations": [
+      "library",
+      "library",
+      "market"
+    ],
+    "recent_actions_same_location": [
+      "trade"
+    ],
+    "candidates": [
+      "haggle",
+      "browse",
+      "trade"
+    ],
+    "choice": "browse",
+    "reason": "After trading, this broadly average character is most likely to wander the stalls without committing to another transaction."
+  }
+]

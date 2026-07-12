@@ -130,9 +130,13 @@ python -m experiments.rq2.run_e_diag --smoke
 2. **导入**：`python -m experiments.rq2.import_independent`
    看 `data/rq2_independent/report.txt`——有 SHORTFALL 行就按提示再要数据，
    重跑导入（全量重建，随时可重跑）。
-3. **训练**：`python -m experiments.rq2.train_2b`
+3. **标签体检（务必在训练前跑）**：`python -m experiments.rq2.run_label_probe`
+   产出 `results/rq2b/label_probe.csv` / `.png`：独立标签遵循哪些记忆通道
+   （O 求新 / C 守常 / N 粘熟），和手写 scorer 对比。**顺序重要**：预测要在
+   看到模型成绩之前写下并提交（预注册，设计稿 §11）。
+4. **训练**：`python -m experiments.rq2.train_2b`
    40 个 run，CPU 上约几分钟；中断后重跑同命令自动续。
-4. **评估**：`python -m experiments.rq2.run_2b`
+5. **评估**：`python -m experiments.rq2.run_2b`
    产出 `results/rq2b/main_table.csv`（论文 2B 主表）、`group_bars.png`、
    `diagnostics.csv`。
 
