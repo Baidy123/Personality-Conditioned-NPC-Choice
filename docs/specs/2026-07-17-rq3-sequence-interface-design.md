@@ -14,9 +14,15 @@ Python generates behaviour; Unity only presents it.
 
 - **Stimulus form.** Human-study stimuli are recorded video clips of a 2D
   top-down Unity scene with a fixed camera. Actions are conveyed by simple
-  character animation plus an on-screen text label. An interactive WebGL
-  build is a thesis-showcase item only; it produces no participant data and
-  has the lowest priority.
+  character animation plus an on-screen text label. An interactive build
+  additionally exists for thesis/viva demonstration; whether participants
+  also get an interactive block (operating the NPC world themselves before
+  judging personality) is an **open Study-3 decision** — if adopted, note
+  that remote participants have no local Python, so live inference would
+  need a hosted service or an in-engine port (C# scorer + ONNX/Sentis
+  models), and self-directed interaction adds per-participant stimulus
+  variance that the recorded-clip measure deliberately avoids. Recorded
+  clips remain the primary measure in any case.
 - **Playback timing.** Sequence files carry no time information. The Unity
   player advances one step per operator input ("continue" button) or on a
   fixed auto-advance interval used while recording, so matched clips share
