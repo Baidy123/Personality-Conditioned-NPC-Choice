@@ -351,11 +351,14 @@ Add a private dispatch method after `_select`:
     ) -> tuple[np.ndarray, ScoreTrace | None]:
         """Ask the policy for its choice distribution.
 
-        The hand-authored scorer is special-cased so its full trace is kept
-        (rq1/rq2 dataset generation records it); any other policy follows the
-        unified ``distribution`` convention of ``npc_policy.policies``.
+        Policies exposing ``trace()`` (the hand-authored scorer, or scorer
+        mimics like rq2's ``StudentTraceAdapter``) keep their full trace on the
+        ``Decision``; any other policy follows the unified ``distribution``
+        convention of ``npc_policy.policies`` and yields ``trace=None``.
+        (Execution note: dispatch is ``hasattr(policy, "trace")``, not
+        ``isinstance`` — rq2's ``StudentTraceAdapter`` duck-types the scorer.)
         """
-        if isinstance(self.policy, HandAuthoredScorer):
+        if hasattr(self.policy, "trace"):
             trace = self.policy.trace(personality, candidates, buffer=buffer, level=level)
             return trace.P_rule, trace
         dist = self.policy.distribution(

@@ -33,25 +33,24 @@ SelectionMode = Literal["argmax", "sample"]
 class Decision:
     """Outcome of one location or action choice.
 
-    ``trace`` carries the full scorer breakdown (base / P_base / relations /
-    P_rule), which is what dataset generation records.
+    ``distribution`` is the policy's choice distribution over the candidate
+    list. ``trace`` carries the scorer's full breakdown when the driving policy
+    is the hand-authored scorer; learned policies provide no trace.
     """
 
     option: Option          # the chosen option
     index: int              # its index in the candidate list passed in
-    trace: ScoreTrace       # scorer intermediates, incl. P_rule
-
-    @property
-    def distribution(self) -> np.ndarray:
-        return self.trace.P_rule
+    distribution: np.ndarray
+    trace: ScoreTrace | None = None
 
 
 class DecisionController:
-    """Holds ``H_t^L`` and ``H_t^A`` and runs the nested choice for one NPC."""
+    """Holds ``H_t^L`` and ``H_t^A`` and runs the nested choice for one NPC,
+    driven by any policy (see ``npc_policy.policies``)."""
 
     def __init__(
         self,
-        scorer: HandAuthoredScorer,
+        policy,
         config: ScorerConfig = DEFAULT_CONFIG,
         mode: SelectionMode = "argmax",
         rng: np.random.Generator | None = None,
@@ -64,7 +63,7 @@ class DecisionController:
             raise ValueError("selection_temperature must be > 0")
         if not (0.0 <= min_p < 1.0):
             raise ValueError("min_p must be in [0, 1)")
-        self.scorer = scorer
+        self.policy = policy
         self.config = config
         self.mode = mode
         self.rng = rng if rng is not None else np.random.default_rng()
@@ -80,6 +79,7 @@ class DecisionController:
         self.H_L = RecentBuffer(maxlen=config.K_L)   # recent locations
         self.H_A = RecentBuffer(maxlen=config.K_A)   # local recent actions
         self._last_location_id: str | None = None
+        self._last_location: Option | None = None    # action-context for learned policies
 
     # -- selection --------------------------------------------------------------
     def _select(self, dist: np.ndarray) -> int:
@@ -94,15 +94,42 @@ class DecisionController:
             p = p / p.sum()
         return int(self.rng.choice(len(p), p=p))
 
+    # -- policy dispatch --------------------------------------------------------
+    def _distribution(
+        self,
+        personality: Personality,
+        candidates: list[Option],
+        buffer: RecentBuffer,
+        level: str,
+        selected_location: Option | None,
+    ) -> tuple[np.ndarray, ScoreTrace | None]:
+        """Ask the policy for its choice distribution.
+
+        Policies exposing ``trace()`` (the hand-authored scorer, or scorer
+        mimics like rq2's ``StudentTraceAdapter``) keep their full trace on the
+        ``Decision`` (rq1/rq2 dataset generation records it); any other policy
+        follows the unified ``distribution`` convention of
+        ``npc_policy.policies`` and yields ``trace=None``.
+        """
+        if hasattr(self.policy, "trace"):
+            trace = self.policy.trace(personality, candidates, buffer=buffer, level=level)
+            return trace.P_rule, trace
+        dist = self.policy.distribution(
+            personality, candidates, buffer=buffer, level=level,
+            selected_location=selected_location,
+        )
+        return np.asarray(dist, dtype=float), None
+
     # -- decisions --------------------------------------------------------------
     def choose_location(
         self, personality: Personality, locations: list[Option]
     ) -> Decision:
         """Choose a location using ``H_t^L``; then commit it and apply the
         action-buffer reset rule."""
-        # read H_L (holds L_{t-1}, L_{t-2}, ...) -> scorer reweights -> pick
-        trace = self.scorer.trace(personality, locations, buffer=self.H_L, level="location")
-        idx = self._select(trace.P_rule)
+        # read H_L (holds L_{t-1}, L_{t-2}, ...) -> policy reweights -> pick
+        dist, trace = self._distribution(personality, locations, self.H_L,
+                                         "location", None)
+        idx = self._select(dist)
         chosen = locations[idx]
 
         # reset local action buffer BEFORE the next action choice if location changed
@@ -111,18 +138,21 @@ class DecisionController:
         # commit the location into the recent-location buffer
         self.H_L.push(chosen)
         self._last_location_id = chosen.id
-        return Decision(option=chosen, index=idx, trace=trace)
+        self._last_location = chosen
+        return Decision(option=chosen, index=idx, distribution=dist, trace=trace)
 
     def choose_action(
         self, personality: Personality, actions: list[Option]
     ) -> Decision:
         """Choose an action from the current location's action set using ``H_t^A``
-        (empty right after a location change), then record it."""
-        trace = self.scorer.trace(personality, actions, buffer=self.H_A, level="action")
-        idx = self._select(trace.P_rule)
+        (empty right after a location change), then record it. Learned policies
+        additionally receive the selected location as context."""
+        dist, trace = self._distribution(personality, actions, self.H_A,
+                                         "action", self._last_location)
+        idx = self._select(dist)
         chosen = actions[idx]
         self.H_A.push(chosen)
-        return Decision(option=chosen, index=idx, trace=trace)
+        return Decision(option=chosen, index=idx, distribution=dist, trace=trace)
 
     # -- lifecycle --------------------------------------------------------------
     def reset(self) -> None:
@@ -130,6 +160,7 @@ class DecisionController:
         self.H_L.clear()
         self.H_A.clear()
         self._last_location_id = None
+        self._last_location = None
 
     @property
     def current_location_id(self) -> str | None:
