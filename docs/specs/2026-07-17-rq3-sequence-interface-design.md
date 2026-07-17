@@ -165,14 +165,13 @@ byte-identical step lists.
   *step* call, which is where the reaction becomes visible. `force_npc`
   events are exposed on the same panel; a forced behaviour is marked as
   an override and is never counted as an autonomous choice.
-- **Participant-facing distribution note** (only relevant if the open
-  interactive-block decision is adopted): a browser build cannot embed
-  Python (browser sandbox), so the options are a desktop bundle with the
-  Python service packaged inside one application (e.g. PyInstaller
-  subprocess; suits in-person demos), a hosted inference server behind a
-  WebGL page (lowest participant friction for online studies), or an
-  in-engine port (C# scorer + ONNX/Sentis; largest effort, dual
-  implementation). Decide together with the evaluation protocol.
+- **Distribution (decided 2026-07-17): single desktop executable.** The
+  interactive build ships as one released application with the Python
+  service packaged inside (e.g. PyInstaller-built subprocess that Unity
+  starts and stops); no browser/WebGL route. Caveat to revisit with the
+  evaluation protocol: if the interactive block is given to remotely
+  recruited participants, they must download and run an executable —
+  state this in the ethics application and expect some drop-off.
 
 ## 6. Validation and testing
 
