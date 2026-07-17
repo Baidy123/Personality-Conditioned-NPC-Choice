@@ -1,0 +1,11 @@
+{
+  "out_dir": "data/rq3_sequences/smoke",
+  "worlds": ["data/world.json"],
+  "personalities": [
+    {"name": "high_E", "ocean": {"extraversion": 1.0}},
+    {"name": "low_E_high_N", "ocean": {"extraversion": -1.0, "neuroticism": 1.0}}
+  ],
+  "policies": [{"name": "scorer"}],
+  "n_cycles": 8,
+  "seeds": [42]
+}

@@ -88,3 +88,73 @@ def test_preview_is_one_line_per_sequence(world):
     assert line.startswith("S01")
     assert "scorer" in line and "high_E" in line
     assert line.count("/") >= 5                          # loc/act per cycle
+
+
+# ----------------------------------------------------------------------- CLI --
+
+import csv
+
+import torch
+
+from experiments.rq3.gen_sequences import run_config
+from npc_policy.policies import build_architecture
+
+
+def write_config(tmp_path, world_path, policies):
+    cfg = {
+        "out_dir": str(tmp_path / "out"),
+        "worlds": [str(world_path)],
+        "personalities": [
+            {"name": "high_E", "ocean": {"extraversion": 1.0}},
+            {"name": "low_E", "ocean": {"extraversion": -1.0}},
+        ],
+        "policies": policies,
+        "n_cycles": 4,
+        "seeds": [42, 43],
+    }
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps(cfg), encoding="utf-8")
+    return path, cfg
+
+
+def test_run_config_end_to_end(tmp_path, world):
+    world_path = tmp_path / "world.json"          # written by the fixture
+    torch.manual_seed(0)
+    model = build_architecture("simple")
+    ckpt = tmp_path / "simple.pt"
+    torch.save({"model": "simple", "state_dict": model.state_dict()}, ckpt)
+
+    cfg_path, cfg = write_config(
+        tmp_path, world_path,
+        [{"name": "scorer"}, {"name": "simple_2b", "checkpoint": str(ckpt)}],
+    )
+    n = run_config(cfg_path, preview=False)
+    # 1 world x 2 personalities x 2 policies x 2 seeds
+    assert n == 8
+
+    out = tmp_path / "out"
+    files = sorted(f.name for f in out.glob("S*.json"))
+    assert files == [f"S{i:02d}.json" for i in range(1, 9)]
+
+    with open(out / "manifest.csv", newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    assert len(rows) == 8
+    assert rows[0]["sequence_id"] == "S01"
+    assert {r["policy"] for r in rows} == {"scorer", "simple_2b"}
+
+    # every written file passes the export gate again on re-read
+    for name in files:
+        seq = json.loads((out / name).read_text(encoding="utf-8"))
+        validate_sequence(seq, world)
+
+
+def test_run_config_reproducible_steps(tmp_path, world):
+    world_path = tmp_path / "world.json"
+    cfg_path, _ = write_config(tmp_path, world_path, [{"name": "scorer"}])
+    run_config(cfg_path, preview=False)
+    first = {f.name: json.loads(f.read_text(encoding="utf-8"))["steps"]
+             for f in (tmp_path / "out").glob("S*.json")}
+    run_config(cfg_path, preview=False)               # overwrite in place
+    second = {f.name: json.loads(f.read_text(encoding="utf-8"))["steps"]
+              for f in (tmp_path / "out").glob("S*.json")}
+    assert first == second
