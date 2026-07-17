@@ -148,10 +148,31 @@ byte-identical step lists.
   fixed-interval auto-advance toggle (used for recording).
 - **Live demo mode** (lowest priority, after all data collection). A local
   Python HTTP service owns `World` + `DecisionController` and exposes
-  three endpoints: *step* (compute and return the next decision), *event*
-  (toggle a world event / unlock flag), *reset*. Unity renders, and its
-  event buttons call *event*. Endpoint payloads are defined at
-  implementation time; nothing in items 1–4 depends on this mode.
+  four endpoints: *state* (report world locations, their authored events,
+  and unlock flags), *step* (compute and return the next decision),
+  *event* (toggle a world event / unlock flag), *reset*. Exact payloads
+  are defined at implementation time; nothing in items 1–4 depends on
+  this mode.
+- **Global event controller** (the live mode's control panel). Unity
+  calls *state* at startup and builds the panel automatically from the
+  world data: per location, one on/off button per authored event, plus an
+  unlock/lock toggle — adding an event to `world.json` adds a button with
+  no code change. Pressing a button sends
+  `{location, event_name, active}` (or an unlock change) to *event*;
+  Python mutates world state. Consistent with the project's checkpoint
+  principle, a change never interrupts the current behaviour: it alters
+  the candidate set and effective features the NPC sees at its next
+  *step* call, which is where the reaction becomes visible. `force_npc`
+  events are exposed on the same panel; a forced behaviour is marked as
+  an override and is never counted as an autonomous choice.
+- **Participant-facing distribution note** (only relevant if the open
+  interactive-block decision is adopted): a browser build cannot embed
+  Python (browser sandbox), so the options are a desktop bundle with the
+  Python service packaged inside one application (e.g. PyInstaller
+  subprocess; suits in-person demos), a hosted inference server behind a
+  WebGL page (lowest participant friction for online studies), or an
+  in-engine port (C# scorer + ONNX/Sentis; largest effort, dual
+  implementation). Decide together with the evaluation protocol.
 
 ## 6. Validation and testing
 
