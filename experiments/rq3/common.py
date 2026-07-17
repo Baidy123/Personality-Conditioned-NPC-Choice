@@ -53,8 +53,10 @@ def generate_sequence(spec: SequenceSpec, policy, world: World) -> dict:
             "location": d_loc.option.id,
             "action": d_act.option.id,
             "moved": d_loc.option.id != prev,
-            "location_probs": {o.id: float(p) for o, p in zip(locs, d_loc.distribution)},
-            "action_probs": {o.id: float(p) for o, p in zip(acts, d_act.distribution)},
+            "location_probs": {o.id: float(p)
+                               for o, p in zip(locs, d_loc.distribution, strict=True)},
+            "action_probs": {o.id: float(p)
+                             for o, p in zip(acts, d_act.distribution, strict=True)},
         })
         prev = d_loc.option.id
     return {
@@ -79,18 +81,34 @@ def validate_sequence(seq: dict, world: World) -> None:
     steps = seq["steps"]
     if len(steps) != seq["meta"]["n_cycles"]:
         raise ValueError(f"{sid}: {len(steps)} steps != n_cycles {seq['meta']['n_cycles']}")
+    all_loc_ids = set(world.location_ids())
+    prev: str | None = None
     for step in steps:
+        cyc = step["cycle"]
         loc = step["location"]
-        if loc not in world.location_ids() or not world.entries[loc].unlocked:
-            raise ValueError(f"{sid} cycle {step['cycle']}: unknown/locked location {loc!r}")
+        if loc not in all_loc_ids or not world.entries[loc].unlocked:
+            raise ValueError(f"{sid} cycle {cyc}: unknown/locked location {loc!r}")
         action_ids = {a.id for a in world.actions_at(loc)}
         if step["action"] not in action_ids:
             raise ValueError(
-                f"{sid} cycle {step['cycle']}: action {step['action']!r} not at {loc!r}")
-        for key in ("location_probs", "action_probs"):
-            total = sum(step[key].values())
+                f"{sid} cycle {cyc}: action {step['action']!r} not at {loc!r}")
+        if bool(step["moved"]) != (loc != prev):
+            raise ValueError(
+                f"{sid} cycle {cyc}: moved={step['moved']} inconsistent with previous "
+                f"location {prev!r}")
+        for key, known in (("location_probs", all_loc_ids), ("action_probs", action_ids)):
+            unknown = set(step[key]) - known
+            if unknown:
+                raise ValueError(f"{sid} cycle {cyc}: unknown ids in {key}: {sorted(unknown)}")
+            vals = list(step[key].values())
+            if any(v < 0 for v in vals):
+                raise ValueError(f"{sid} cycle {cyc}: negative probability in {key}")
+            total = sum(vals)
             if abs(total - 1.0) > 1e-6:
-                raise ValueError(f"{sid} cycle {step['cycle']}: {key} sum {total} != 1")
+                raise ValueError(f"{sid} cycle {cyc}: {key} sum {total} != 1")
+        if loc not in step["location_probs"] or step["action"] not in step["action_probs"]:
+            raise ValueError(f"{sid} cycle {cyc}: chosen option missing from its probs")
+        prev = loc
 
 
 def format_preview(seq: dict) -> str:

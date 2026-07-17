@@ -1,6 +1,6 @@
 {
   "meta": {
-    "sequence_id": "S02",
+    "sequence_id": "S002",
     "policy": "scorer",
     "checkpoint": "",
     "personality_name": "low_E_high_N",
@@ -14,7 +14,7 @@
     "world": "data/world.json",
     "seed": 42,
     "n_cycles": 8,
-    "generated_at": "2026-07-17T18:01:34"
+    "generated_at": "2026-07-17T18:08:22"
   },
   "steps": [
     {

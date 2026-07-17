@@ -62,7 +62,7 @@ def run_config(config_path: str | Path, preview: bool = False) -> int:
                 for seed in cfg["seeds"]:
                     i += 1
                     spec = SequenceSpec(
-                        sequence_id=f"S{i:02d}",
+                        sequence_id=f"S{i:03d}",
                         policy_name=entry["name"],
                         checkpoint=entry.get("checkpoint", ""),
                         personality_name=pers["name"],
@@ -86,6 +86,14 @@ def run_config(config_path: str | Path, preview: bool = False) -> int:
                     })
                     if preview:
                         print(format_preview(seq))
+
+    # A re-run with a smaller config must not leave orphaned stimuli beside a
+    # shrunken manifest — the manifest and the S*.json set stay in lockstep.
+    written = {row["file"] for row in rows}
+    for stale in out_dir.glob("S*.json"):
+        if stale.name not in written:
+            stale.unlink()
+            print(f"removed stale {stale.name}")
 
     with open(out_dir / "manifest.csv", "w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=MANIFEST_FIELDS)

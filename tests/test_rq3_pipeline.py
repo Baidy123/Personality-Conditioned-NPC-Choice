@@ -82,6 +82,27 @@ def test_validate_rejects_unknown_ids_and_bad_probs(world):
         validate_sequence(bad2, world)
 
 
+def test_validate_rejects_inconsistent_moved_and_alien_prob_keys(world):
+    seq = generate_sequence(make_spec(), HandAuthoredScorer(), world)
+
+    bad = json.loads(json.dumps(seq))
+    bad["steps"][1]["moved"] = not bad["steps"][1]["moved"]
+    with pytest.raises(ValueError, match="moved"):
+        validate_sequence(bad, world)
+
+    bad2 = json.loads(json.dumps(seq))
+    bad2["steps"][0]["location_probs"] = {"atlantis": 1.0}
+    with pytest.raises(ValueError, match="atlantis"):
+        validate_sequence(bad2, world)
+
+    bad3 = json.loads(json.dumps(seq))
+    first = bad3["steps"][0]["action_probs"]
+    k1, k2 = list(first)
+    bad3["steps"][0]["action_probs"] = {k1: -0.5, k2: 1.5}
+    with pytest.raises(ValueError, match="negative"):
+        validate_sequence(bad3, world)
+
+
 def test_preview_is_one_line_per_sequence(world):
     seq = generate_sequence(make_spec(), HandAuthoredScorer(), world)
     line = format_preview(seq)
@@ -134,12 +155,12 @@ def test_run_config_end_to_end(tmp_path, world):
 
     out = tmp_path / "out"
     files = sorted(f.name for f in out.glob("S*.json"))
-    assert files == [f"S{i:02d}.json" for i in range(1, 9)]
+    assert files == [f"S{i:03d}.json" for i in range(1, 9)]
 
     with open(out / "manifest.csv", newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
     assert len(rows) == 8
-    assert rows[0]["sequence_id"] == "S01"
+    assert rows[0]["sequence_id"] == "S001"
     assert {r["policy"] for r in rows} == {"scorer", "simple_2b"}
 
     # every written file passes the export gate again on re-read
@@ -158,3 +179,14 @@ def test_run_config_reproducible_steps(tmp_path, world):
     second = {f.name: json.loads(f.read_text(encoding="utf-8"))["steps"]
               for f in (tmp_path / "out").glob("S*.json")}
     assert first == second
+
+
+def test_run_config_removes_stale_outputs(tmp_path, world):
+    world_path = tmp_path / "world.json"
+    cfg_path, cfg = write_config(tmp_path, world_path, [{"name": "scorer"}])
+    assert run_config(cfg_path, preview=False) == 4   # 2 personalities x 2 seeds
+    cfg["seeds"] = [42]                               # shrink the cross
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    assert run_config(cfg_path, preview=False) == 2
+    files = sorted(f.name for f in (tmp_path / "out").glob("S*.json"))
+    assert files == ["S001.json", "S002.json"]        # S003/S004 cleaned up
