@@ -162,13 +162,82 @@ byte-identical step lists.
   clips remain the planned study stimulus. Perspective may be
   straight top-down or Stardew-style 3/4 view — a tileset choice; the
   sequence format is perspective-agnostic.
-- **Live demo mode** (lowest priority, after all data collection). A local
-  Python HTTP service owns `World` + `DecisionController` and exposes
-  four endpoints: *state* (report world locations, their authored events,
-  and unlock flags), *step* (compute and return the next decision),
-  *event* (toggle a world event / unlock flag), *reset*. Exact payloads
-  are defined at implementation time; nothing in items 1–4 depends on
-  this mode.
+- **Live demo mode** (design finalised 2026-07-18; brainstorm decisions:
+  demo events live in `data/world.json` as inactive entries; NPCs display
+  their configured personality name; forced behaviour enters the buffers
+  and is marked as an override). A local Python HTTP service owns the
+  mutable world state and one `DecisionController` per NPC; Unity is a
+  pure frontend. NPC count is server-side configuration — Unity renders
+  however many the service reports.
+
+  **Server config** (`experiments/rq3/live_config_demo.json`):
+
+  ```json
+  { "world": "data/world.json",
+    "personalities": "data/personalities.json",
+    "port": 8973,
+    "mode": "sample", "selection_temperature": 1.0, "seed": 42,
+    "npcs": [
+      {"name": "Karlach",     "policy": "scorer"},
+      {"name": "Shadowheart", "policy": "scorer"},
+      {"name": "Laezel",      "policy": "scorer"} ] }
+  ```
+
+  `name` is both the display name and the lookup key into
+  `personalities.json`; an inline `"ocean": {...}` overrides the lookup.
+  Learned policies use `{"policy": "<label>", "checkpoint": "<path>"}`.
+  Each NPC gets its own controller and a deterministic rng seeded
+  `(seed, slot)`, so a session replays identically after `/reset`.
+
+  **Endpoints** (all JSON; arrays rather than maps so Unity's JsonUtility
+  can parse them; the key is `overridden` because `override` is a C#
+  keyword):
+
+  - `GET /state` →
+    `{world, step_count, locations: [{id, unlocked, events: [{name,
+    active, force_npc}]}], npcs: [{slot, name, policy, ocean: [O,C,E,A,N],
+    location}]}`. Unity builds the event-controller panel from this —
+    adding an event to `world.json` adds a button with no code change.
+  - `POST /step` (empty body) → one decision cycle for every NPC:
+    `{step_count, steps: [{slot, name, location, action, moved,
+    overridden, location_probs: [{id, p}], action_probs: [{id, p}]}]}`.
+    If any *active* event carries `force_npc: "location/action"`, every
+    NPC's step is that pair with `overridden: true`, empty prob arrays
+    (no policy call is made — the counterfactual distribution is not
+    computed), and buffers updated through the controller's forced-commit
+    path. With several active force events, the first in location-then-
+    event order wins. A forced target that is locked is a 400.
+  - `POST /event` — either `{location, event, active}` (toggle a local
+    event) or `{location, unlocked}` (lock/unlock). Returns the updated
+    `/state` payload. Consistent with the checkpoint principle, changes
+    never interrupt a current behaviour; they alter what the NPCs see at
+    the next `/step`.
+  - `POST /reset` — authored world state restored (reload from file),
+    controllers cleared, rngs re-seeded. Returns the fresh `/state`.
+
+  Errors: 400 with `{"error": msg}` for bad requests, 404 for unknown
+  paths. The server start-up log prints the NPC roster with full OCEAN
+  vectors (the values deliberately stay off the Unity screen — name
+  labels only, so the frame stays clean; the presenter narrates traits).
+
+  **Demo events** (added 2026-07-18, all `active: false`, so `resolve()`
+  ignores them and every existing research artefact is unaffected):
+  tavern `celebration` (pre-existing), library `guest_lecture`, chapel
+  `holy_day`, market `festival`, forest `storm` (raises risk, *lowers*
+  exploration), arena `grand_tournament` with `force_npc:
+  "arena/spectate"`. `enemy_camp` is exercised through its unlock toggle.
+
+  **Unity side.** A Mode dropdown (Playback / Live) toggles two UI groups
+  and controller components in the same scene. Live mode: Connect fetches
+  `/state`, spawns one dot per reported NPC from an inactive prototype
+  (distinct colours, personality-name label under the dot, action label
+  above on the same staggered height planes as playback), and builds the
+  right-side event panel (per location: an unlock toggle plus one button
+  per authored event; force events are visually marked). Continue/Space
+  posts `/step` and animates the returned steps — walk if `moved`, then
+  loop the action; overridden steps show the action label with a
+  "(forced)" suffix. R posts `/reset`. Request failures land in the
+  status line, not exceptions.
 - **Global event controller** (the live mode's control panel). Unity
   calls *state* at startup and builds the panel automatically from the
   world data: per location, one on/off button per authored event, plus an
