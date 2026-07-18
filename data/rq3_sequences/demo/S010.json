@@ -1,173 +1,173 @@
 {
   "meta": {
     "sequence_id": "S010",
-    "policy": "simple_2b",
-    "checkpoint": "results/rq2b/models/IND__simple__s0.pt",
-    "personality_name": "Laezel",
+    "policy": "scorer",
+    "checkpoint": "",
+    "personality_name": "neutral",
     "ocean": {
-      "O": -0.3,
-      "C": 0.7,
-      "E": -0.2,
-      "A": -0.9,
-      "N": -0.7
+      "O": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "A": 0.0,
+      "N": 0.0
     },
     "world": "configs/game_world.json",
     "seed": 42,
     "n_cycles": 8,
     "selection_temperature": 0.1,
-    "generated_at": "2026-07-18T23:18:15"
+    "generated_at": "2026-07-18T23:27:24"
   },
   "steps": [
     {
       "cycle": 1,
-      "location": "library",
-      "action": "read",
+      "location": "market",
+      "action": "browse",
       "moved": true,
       "location_probs": {
-        "tavern": 0.0016921889983669382,
-        "library": 0.681378689384039,
-        "chapel": 0.012414872028845019,
-        "market": 0.026982540505532396,
-        "forest": 0.23654146784115887,
-        "arena": 0.040990241242057766
+        "tavern": 0.1692756178321841,
+        "library": 0.16327193933069392,
+        "chapel": 0.15291184740111088,
+        "market": 0.21880806453821727,
+        "forest": 0.1587108220046632,
+        "arena": 0.13702170889313062
       },
       "action_probs": {
-        "read": 0.736059734166888,
-        "research": 0.25891504254146264,
-        "discuss": 0.005025223291649476
+        "haggle": 0.32810171523315923,
+        "browse": 0.3304064845211658,
+        "trade": 0.34149180024567494
       }
     },
     {
       "cycle": 2,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "forest",
+      "action": "forage",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.1902296400750753,
+        "library": 0.1834827877221442,
+        "chapel": 0.17184025713121717,
+        "market": 0.12210711373819476,
+        "forest": 0.17835706602410736,
+        "arena": 0.15398313530926117
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "explore": 0.3146744767474189,
+        "forage": 0.39368011841247985,
+        "rest": 0.29164540484010126
       }
     },
     {
       "cycle": 3,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "tavern",
+      "action": "drink",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.18950667315347403,
+        "library": 0.1827854621836322,
+        "chapel": 0.17118717897969304,
+        "market": 0.1884044355453255,
+        "forest": 0.11471832706614506,
+        "arena": 0.15339792307173017
       },
       "action_probs": {
-        "read": 0.7106398350656522,
-        "research": 0.2884823651391182,
-        "discuss": 0.0008777997952296662
+        "chat": 0.3725896144977783,
+        "drink": 0.37184517995147387,
+        "brawl": 0.25556520555074774
       }
     },
     {
       "cycle": 4,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "market",
+      "action": "trade",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.1327550906739701,
+        "library": 0.18300944311749673,
+        "chapel": 0.17139694765470392,
+        "market": 0.2156688441817397,
+        "forest": 0.14358378115409062,
+        "arena": 0.15358589321799906
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "haggle": 0.32810171523315923,
+        "browse": 0.3304064845211658,
+        "trade": 0.34149180024567494
       }
     },
     {
       "cycle": 5,
       "location": "library",
-      "action": "read",
-      "moved": false,
+      "action": "discuss",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.15481849023033573,
+        "library": 0.18501335342137987,
+        "chapel": 0.17327370386798233,
+        "market": 0.17348010492026547,
+        "forest": 0.15814672498038354,
+        "arena": 0.1552676225796531
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "read": 0.2859865042090738,
+        "research": 0.32252950538806235,
+        "discuss": 0.3914839904028639
       }
     },
     {
       "cycle": 6,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "market",
+      "action": "trade",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.1675631095556965,
+        "library": 0.1285962323689924,
+        "chapel": 0.1721325493316557,
+        "market": 0.19880261234867794,
+        "forest": 0.17866044301016562,
+        "arena": 0.15424505338481195
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "haggle": 0.32810171523315923,
+        "browse": 0.3304064845211658,
+        "trade": 0.34149180024567494
       }
     },
     {
       "cycle": 7,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "chapel",
+      "action": "confess",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.19141831544608234,
+        "library": 0.14901758826553932,
+        "chapel": 0.17291402398121375,
+        "market": 0.1522331987372056,
+        "forest": 0.1794715540268406,
+        "arena": 0.15494531954311833
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "pray": 0.30458390800489726,
+        "meditate": 0.30695360400311805,
+        "confess": 0.3884624879919847
       }
     },
     {
       "cycle": 8,
-      "location": "library",
-      "action": "read",
-      "moved": false,
+      "location": "market",
+      "action": "haggle",
+      "moved": true,
       "location_probs": {
-        "tavern": 0.00032047370380584416,
-        "library": 0.9476088924486835,
-        "chapel": 0.0015031609385801224,
-        "market": 0.004436021493723393,
-        "forest": 0.0382557959478979,
-        "arena": 0.007875655467309228
+        "tavern": 0.18973395827209447,
+        "library": 0.16092530796168825,
+        "chapel": 0.11991862017394286,
+        "market": 0.1979478918724663,
+        "forest": 0.17789232061415805,
+        "arena": 0.15358190110565012
       },
       "action_probs": {
-        "read": 0.7106398350656525,
-        "research": 0.28848236513911785,
-        "discuss": 0.0008777997952296654
+        "haggle": 0.32810171523315923,
+        "browse": 0.3304064845211658,
+        "trade": 0.34149180024567494
       }
     }
   ]

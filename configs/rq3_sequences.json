@@ -12,8 +12,7 @@
   "policies": [
     {"name": "scorer"},
     {"name": "simple_2b",    "checkpoint": "results/rq2b/models/IND__simple__s0.pt"},
-    {"name": "nonlinear_2b", "checkpoint": "results/rq2b/models/IND__nonlinear__wd0.001__s0.pt"},
-    {"name": "agnostic_2b",  "checkpoint": "results/rq2b/models/IND__agnostic_nonlinear__wd0.001__s0.pt"}
+    {"name": "nonlinear_2b", "checkpoint": "results/rq2b/models/IND__nonlinear__wd0.001__s0.pt"}
   ],
   "n_cycles": 8,
   "seeds": [42],
