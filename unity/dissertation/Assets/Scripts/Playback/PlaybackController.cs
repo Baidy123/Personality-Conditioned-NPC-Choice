@@ -25,7 +25,9 @@ namespace Dissertation.Playback
 
         Sequence[] sequences;
         PlaybackModel[] models;
-        string[] files = new string[0];
+        string[] files = new string[0];   // all discovered sequence paths
+        string[] chosen;                  // per-slot chosen path, null = none
+        List<string>[] slotFiles;         // per-slot offered paths (minus others' picks)
 
         static string SlotName(int slot) => ((char)('A' + slot)).ToString();
 
@@ -37,13 +39,12 @@ namespace Dissertation.Playback
                 : new string[0];
             sequences = new Sequence[npcs.Length];
             models = new PlaybackModel[npcs.Length];
-            var options = new List<string> { "(none)" };
-            options.AddRange(files.Select(Path.GetFileNameWithoutExtension));
+            chosen = new string[npcs.Length];
+            slotFiles = new List<string>[npcs.Length];
+            RefreshDropdownOptions();
             for (var i = 0; i < dropdowns.Length; i++)
             {
                 var slot = i;
-                dropdowns[i].ClearOptions();
-                dropdowns[i].AddOptions(options);
                 dropdowns[i].onValueChanged.AddListener(_ => LoadSlot(slot));
                 npcs[i].gameObject.SetActive(false);
             }
@@ -71,8 +72,10 @@ namespace Dissertation.Playback
                     // event here left the NPC alive when the event didn't fire
                     dropdowns[i].SetValueWithoutNotify(0);
                     ClearSlot(i);
+                    chosen[i] = null;
                 }
             }
+            RefreshDropdownOptions();
         }
 
         void ClearSlot(int slot)
@@ -82,19 +85,44 @@ namespace Dissertation.Playback
             npcs[slot].gameObject.SetActive(false);
         }
 
+        // Every dropdown offers "(none)" + the sequences no OTHER slot has
+        // picked (its own pick stays listed), so one sequence can never play
+        // on two NPCs at once. Selections survive the rebuild by name.
+        void RefreshDropdownOptions()
+        {
+            for (var i = 0; i < dropdowns.Length; i++)
+            {
+                var offered = new List<string>();
+                foreach (var f in files)
+                    if (chosen[i] == f || System.Array.IndexOf(chosen, f) < 0)
+                        offered.Add(f);
+                slotFiles[i] = offered;
+                var labels = new List<string> { "(none)" };
+                labels.AddRange(offered.Select(Path.GetFileNameWithoutExtension));
+                dropdowns[i].ClearOptions();
+                dropdowns[i].AddOptions(labels);
+                dropdowns[i].SetValueWithoutNotify(
+                    chosen[i] == null ? 0 : offered.IndexOf(chosen[i]) + 1);
+                dropdowns[i].RefreshShownValue();
+            }
+        }
+
         void LoadSlot(int slot)
         {
             ClearSlot(slot);
             var sel = dropdowns[slot].value;                // 0 = "(none)"
             if (sel == 0)
             {
+                chosen[slot] = null;
+                RefreshDropdownOptions();
                 SetStatus($"{SlotName(slot)} cleared");
                 return;
             }
+            var path = slotFiles[slot][sel - 1];
             Sequence loaded;
             try
             {
-                loaded = Sequence.FromJson(File.ReadAllText(files[sel - 1]));
+                loaded = Sequence.FromJson(File.ReadAllText(path));
                 foreach (var step in loaded.steps)
                     if (!LocationLayout.Entries.ContainsKey(step.location))
                         throw new System.InvalidOperationException(
@@ -102,9 +130,13 @@ namespace Dissertation.Playback
             }
             catch (System.Exception e)
             {
+                chosen[slot] = null;
+                RefreshDropdownOptions();
                 SetStatus($"load error ({SlotName(slot)}): {e.Message}");
                 return;
             }
+            chosen[slot] = path;
+            RefreshDropdownOptions();
             sequences[slot] = loaded;
             models[slot] = new PlaybackModel(loaded.steps);
             npcs[slot].gameObject.SetActive(true);
