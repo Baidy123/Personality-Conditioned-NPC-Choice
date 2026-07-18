@@ -8,6 +8,8 @@
   "npcs": [
     {"name": "Karlach",     "policy": "scorer"},
     {"name": "Shadowheart", "policy": "scorer"},
-    {"name": "Laezel",      "policy": "scorer"}
+    {"name": "Laezel",      "policy": "scorer",
+     "ocean": {"openness": -0.6, "conscientiousness": 0.5, "extraversion": 0.1,
+               "agreeableness": -1.0, "neuroticism": -0.3}}
   ]
 }
