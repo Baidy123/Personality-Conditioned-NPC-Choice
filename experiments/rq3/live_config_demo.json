@@ -3,13 +3,11 @@
   "personalities": "data/personalities.json",
   "port": 8973,
   "mode": "sample",
-  "selection_temperature": 1.0,
+  "selection_temperature": 0.1,
   "seed": 42,
   "npcs": [
     {"name": "Karlach",     "policy": "scorer"},
     {"name": "Shadowheart", "policy": "scorer"},
-    {"name": "Laezel",      "policy": "scorer",
-     "ocean": {"openness": -0.6, "conscientiousness": 0.5, "extraversion": 0.1,
-               "agreeableness": -1.0, "neuroticism": -0.3}}
+    {"name": "Laezel",      "policy": "scorer"}
   ]
 }
