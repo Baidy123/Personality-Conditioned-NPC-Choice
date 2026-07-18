@@ -20,11 +20,14 @@ namespace Dissertation.EditorTools
         const string ScenePath = "Assets/Scenes/Playback.unity";
         const float NpcScale = 0.55f;
 
+        static ArtSet artSet;    // resolved per build; slots win over Assets/Art
+
         [MenuItem("Dissertation/Build Playback Scene")]
         public static void Build()
         {
             // rebuilding replaces the open scene — don't silently drop edits
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            artSet = LoadOrCreateArtSet();
             var square = EnsureSprite("white_square.png", MakeSquareTex());
             var circle = EnsureSprite("circle.png", MakeCircleTex());
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -41,11 +44,10 @@ namespace Dissertation.EditorTools
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.13f, 0.16f, 0.13f);
 
-            // Art convention: drop a PNG into Assets/Art named after what it
-            // replaces (tavern.png ... enemy_camp.png, ground.png, npc.png),
-            // rerun this menu item, and it is used instead of the colour
-            // placeholder. No file -> placeholder stays. See configs/README.md.
-            var groundArt = ArtOrNull("ground");
+            // Art resolution order per visual: ArtSet Inspector slot ->
+            // Assets/Art/<name>.png -> colour placeholder. The ArtSet asset
+            // (Assets/ArtSet.asset) survives rebuilds; see configs/README.md.
+            var groundArt = artSet.ground != null ? artSet.ground : ArtOrNull("ground");
             var ground = NewSprite("Ground", groundArt ?? square,
                 groundArt != null ? Color.white : new Color(0.21f, 0.26f, 0.21f));
             FitSprite(ground, 19f, 11f);
@@ -53,7 +55,8 @@ namespace Dissertation.EditorTools
 
             foreach (var kv in LocationLayout.Entries)
             {
-                var art = ArtOrNull(kv.Key);
+                var slot = artSet.Location(kv.Key);
+                var art = slot != null ? slot : ArtOrNull(kv.Key);
                 var block = NewSprite(kv.Key, art ?? square,
                     art != null ? Color.white : kv.Value.Color);
                 block.transform.position = kv.Value.Position;
@@ -79,7 +82,9 @@ namespace Dissertation.EditorTools
             };
             var agents = new NpcAgent[slotColors.Length];
             var badges = new GameObject[slotColors.Length];
-            var npcArt = ArtOrNull("npc");   // custom art still gets slot tints
+            var npcArt = artSet.npc != null       // custom art still gets slot tints
+                ? NormalizeToUnit(artSet.npc)
+                : ArtOrNull("npc");
             for (var i = 0; i < slotColors.Length; i++)
             {
                 var slotName = ((char)('A' + i)).ToString();
@@ -464,6 +469,49 @@ namespace Dissertation.EditorTools
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             return go;
+        }
+
+        // The Inspector-facing art asset; created on first build with one
+        // prefilled row per location, missing rows synced on later builds.
+        static ArtSet LoadOrCreateArtSet()
+        {
+            const string path = "Assets/ArtSet.asset";
+            var set = AssetDatabase.LoadAssetAtPath<ArtSet>(path);
+            if (set == null)
+            {
+                set = ScriptableObject.CreateInstance<ArtSet>();
+                AssetDatabase.CreateAsset(set, path);
+            }
+            var changed = false;
+            foreach (var id in LocationLayout.Entries.Keys)
+                if (set.locations.TrueForAll(e => e.id != id))
+                {
+                    set.locations.Add(new ArtSet.LocationArt { id = id });
+                    changed = true;
+                }
+            if (changed)
+            {
+                EditorUtility.SetDirty(set);
+                AssetDatabase.SaveAssets();
+            }
+            return set;
+        }
+
+        // NPC art must be 1 world unit wide at scale 1: the NPC root keeps
+        // its fixed NpcScale (labels compensate by 1/NpcScale), so sizing is
+        // done via the sprite's pixels-per-unit rather than the transform.
+        static Sprite NormalizeToUnit(Sprite sprite)
+        {
+            var path = AssetDatabase.GetAssetPath(sprite);
+            var imp = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (imp == null) return sprite;
+            if (Mathf.Abs(imp.spritePixelsPerUnit - sprite.texture.width) > 0.5f)
+            {
+                imp.spritePixelsPerUnit = sprite.texture.width;
+                imp.SaveAndReimport();
+                sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            }
+            return sprite;
         }
 
         // Assets/Art/<name>.png if present, unit-normalised (1 world unit
