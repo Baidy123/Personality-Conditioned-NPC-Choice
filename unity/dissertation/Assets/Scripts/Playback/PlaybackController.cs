@@ -15,6 +15,8 @@ namespace Dissertation.Playback
     {
         public NpcAgent[] npcs;
         public Dropdown[] dropdowns;
+        public Dropdown countDropdown;   // how many slots are in play (1..npcs.Length)
+        public GameObject[] slotRows;    // per-slot caption+dropdown rows, hidden when unused
         public Button continueButton;
         public Button restartButton;
         public Text statusText;
@@ -45,10 +47,27 @@ namespace Dissertation.Playback
                 dropdowns[i].onValueChanged.AddListener(_ => LoadSlot(slot));
                 npcs[i].gameObject.SetActive(false);
             }
+            countDropdown.ClearOptions();
+            countDropdown.AddOptions(
+                Enumerable.Range(1, npcs.Length).Select(n => n.ToString()).ToList());
+            countDropdown.onValueChanged.AddListener(_ => ApplyCount());
             continueButton.onClick.AddListener(NextStep);
             restartButton.onClick.AddListener(ReloadAll);
+            ApplyCount();                                   // default: 1 NPC
             if (files.Length > 0) dropdowns[0].value = 1;   // fires LoadSlot(0)
             else SetStatus("no sequences in StreamingAssets/sequences");
+        }
+
+        void ApplyCount()
+        {
+            var count = countDropdown.value + 1;
+            for (var i = 0; i < slotRows.Length; i++)
+            {
+                var active = i < count;
+                slotRows[i].SetActive(active);
+                if (!active && dropdowns[i].value != 0)
+                    dropdowns[i].value = 0;   // fires LoadSlot -> clears the NPC
+            }
         }
 
         void LoadSlot(int slot)

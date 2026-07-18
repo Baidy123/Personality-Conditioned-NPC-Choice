@@ -154,7 +154,9 @@ byte-identical step lists.
   is manual (Continue/Space); if recordings need uniform pacing, a scripted
   pacer can be added at recording time. Recording mode = control bar hidden
   (H key); the recording tool (Unity Recorder vs OBS) is deferred. The
-  player has three NPC slots (A/B/C, distinct colours, per-slot dropdown)
+  player has three NPC slots (A/B/C, distinct colours, per-slot dropdown;
+  an NPC-count selector shows 1–3 slot rows, default 1; a playback/live
+  mode switch is deferred until the live mode exists)
   stepped in lockstep by one Continue — demo material only: sequences are
   independently generated, NPCs do not perceive each other, and single-NPC
   clips remain the planned study stimulus. Perspective may be

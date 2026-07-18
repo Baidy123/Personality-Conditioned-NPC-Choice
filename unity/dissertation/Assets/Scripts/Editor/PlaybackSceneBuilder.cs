@@ -121,40 +121,57 @@ namespace Dissertation.EditorTools
 
             var res = new DefaultControls.Resources();
 
+            var countCapGo = DefaultControls.CreateText(res);
+            var countCap = countCapGo.GetComponent<Text>();
+            countCap.text = "NPCs";
+            countCap.color = Color.white;
+            countCap.alignment = TextAnchor.MiddleCenter;
+            Place(countCapGo, bar.transform, 20f, 60f);
+
+            var countGo = DefaultControls.CreateDropdown(res);
+            Place(countGo, bar.transform, 85f, 85f);
+
             var dropdowns = new Dropdown[agents.Length];
+            var slotRows = new GameObject[agents.Length];
             for (var i = 0; i < agents.Length; i++)
             {
-                var x = 20f + i * 265f;
+                var row = new GameObject("SlotRow_" + (char)('A' + i),
+                    typeof(RectTransform));
+                Place(row, bar.transform, 200f + i * 260f, 250f);
+                slotRows[i] = row;
+
                 var capGo = DefaultControls.CreateText(res);
                 var cap = capGo.GetComponent<Text>();
                 cap.text = ((char)('A' + i)).ToString();
                 cap.color = Color.white;
                 cap.alignment = TextAnchor.MiddleCenter;
-                Place(capGo, bar.transform, x, 25f);
+                Place(capGo, row.transform, 0f, 25f);
                 var dropdownGo = DefaultControls.CreateDropdown(res);
-                Place(dropdownGo, bar.transform, x + 30f, 215f);
+                Place(dropdownGo, row.transform, 30f, 215f);
                 dropdowns[i] = dropdownGo.GetComponent<Dropdown>();
             }
 
             var continueGo = DefaultControls.CreateButton(res);
             continueGo.GetComponentInChildren<Text>().text = "Continue (Space)";
-            Place(continueGo, bar.transform, 830f, 200f);
+            Place(continueGo, bar.transform, 1000f, 200f);
 
             var restartGo = DefaultControls.CreateButton(res);
             restartGo.GetComponentInChildren<Text>().text = "Restart (R)";
-            Place(restartGo, bar.transform, 1050f, 150f);
+            Place(restartGo, bar.transform, 1220f, 150f);
 
             var statusGo = DefaultControls.CreateText(res);
             var status = statusGo.GetComponent<Text>();
             status.text = "";
             status.color = Color.white;
             status.alignment = TextAnchor.MiddleLeft;
-            Place(statusGo, bar.transform, 1230f, 670f);
+            Place(statusGo, bar.transform, 1390f, 510f);
 
             var ctrl = new GameObject("PlaybackController")
                 .AddComponent<PlaybackController>();
             ctrl.npcs = agents;
             ctrl.dropdowns = dropdowns;
+            ctrl.countDropdown = countGo.GetComponent<Dropdown>();
+            ctrl.slotRows = slotRows;
             ctrl.continueButton = continueGo.GetComponent<Button>();
             ctrl.restartButton = restartGo.GetComponent<Button>();
             ctrl.statusText = status;
