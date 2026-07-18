@@ -6,7 +6,8 @@
   "personalities": [
     {"name": "Karlach"},
     {"name": "Shadowheart"},
-    {"name": "Laezel"}
+    {"name": "Laezel"},
+    {"name": "neutral", "ocean": {}}
   ],
   "policies": [
     {"name": "scorer"},

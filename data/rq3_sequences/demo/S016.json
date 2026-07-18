@@ -1,15 +1,15 @@
 {
   "meta": {
-    "sequence_id": "S012",
+    "sequence_id": "S016",
     "policy": "agnostic_2b",
     "checkpoint": "results/rq2b/models/IND__agnostic_nonlinear__wd0.001__s0.pt",
-    "personality_name": "Laezel",
+    "personality_name": "neutral",
     "ocean": {
-      "O": -0.3,
-      "C": 0.7,
-      "E": -0.2,
-      "A": -0.9,
-      "N": -0.7
+      "O": 0.0,
+      "C": 0.0,
+      "E": 0.0,
+      "A": 0.0,
+      "N": 0.0
     },
     "world": "configs/game_world.json",
     "seed": 42,
