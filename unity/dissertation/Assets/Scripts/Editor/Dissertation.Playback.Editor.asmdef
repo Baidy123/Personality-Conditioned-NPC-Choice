@@ -1,0 +1,5 @@
+{
+    "name": "Dissertation.Playback.Editor",
+    "references": ["Dissertation.Playback", "UnityEngine.UI"],
+    "includePlatforms": ["Editor"]
+}

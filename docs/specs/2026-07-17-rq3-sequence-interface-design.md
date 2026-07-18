@@ -146,6 +146,14 @@ byte-identical step lists.
   if `moved`, walk the NPC to `location`, then play the `action` animation
   in a loop with a text label. Advances on the continue button or on a
   fixed-interval auto-advance toggle (used for recording).
+  Scene decisions (2026-07-18, implemented in `unity/dissertation`, plan
+  `docs/plans/2026-07-18-unity-playback-player.md`): on-screen info is
+  location name plates + NPC action label only (no step counter; condition
+  fields are never parsed by the player); NPC moves in a straight line;
+  recording mode = auto-advance ON + control bar hidden (H key); the
+  recording tool (Unity Recorder vs OBS) is deferred. Perspective may be
+  straight top-down or Stardew-style 3/4 view — a tileset choice; the
+  sequence format is perspective-agnostic.
 - **Live demo mode** (lowest priority, after all data collection). A local
   Python HTTP service owns `World` + `DecisionController` and exposes
   four endpoints: *state* (report world locations, their authored events,
