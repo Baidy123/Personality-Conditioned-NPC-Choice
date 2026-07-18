@@ -17,12 +17,14 @@ namespace Dissertation.EditorTools
     public static class PlaybackSceneBuilder
     {
         const string SpriteDir = "Assets/Sprites";
+        // historical name kept for the file so scene references stay stable;
+        // the menu label reflects what it really builds: both demo modes
         const string ScenePath = "Assets/Scenes/Playback.unity";
         const float NpcScale = 0.55f;
 
         static ArtSet artSet;    // resolved per build; slots win over Assets/Art
 
-        [MenuItem("Dissertation/Build Playback Scene")]
+        [MenuItem("Dissertation/Build Demo Scene (playback + live)")]
         public static void Build()
         {
             // rebuilding replaces the open scene — don't silently drop edits
