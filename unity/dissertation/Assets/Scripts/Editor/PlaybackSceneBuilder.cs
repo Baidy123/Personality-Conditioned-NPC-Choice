@@ -213,23 +213,27 @@ namespace Dissertation.EditorTools
             resetGo.GetComponentInChildren<Text>().text = "Reset (R)";
             Place(resetGo, liveGroup.transform, 515f, 130f);
 
+            var eventToggleGo = DefaultControls.CreateButton(res);
+            eventToggleGo.GetComponentInChildren<Text>().text = "Events";
+            Place(eventToggleGo, liveGroup.transform, 660f, 110f);
+
             var persToggleGo = DefaultControls.CreateButton(res);
             persToggleGo.GetComponentInChildren<Text>().text = "Personality";
-            Place(persToggleGo, liveGroup.transform, 660f, 140f);
+            Place(persToggleGo, liveGroup.transform, 785f, 140f);
 
             var logToggleGo = DefaultControls.CreateButton(res);
             logToggleGo.GetComponentInChildren<Text>().text = "Log";
-            Place(logToggleGo, liveGroup.transform, 815f, 90f);
+            Place(logToggleGo, liveGroup.transform, 940f, 90f);
 
             var policyCapGo = DefaultControls.CreateText(res);
             var policyCap = policyCapGo.GetComponent<Text>();
             policyCap.text = "Policy";
             policyCap.color = Color.white;
             policyCap.alignment = TextAnchor.MiddleCenter;
-            Place(policyCapGo, liveGroup.transform, 920f, 65f);
+            Place(policyCapGo, liveGroup.transform, 1045f, 65f);
 
             var policyGo = DefaultControls.CreateDropdown(res);
-            Place(policyGo, liveGroup.transform, 990f, 190f);
+            Place(policyGo, liveGroup.transform, 1115f, 185f);
 
             // ------------------------------------------------ event panel (R) --
             var eventPanel = new GameObject("EventPanel", typeof(RectTransform),
@@ -372,6 +376,7 @@ namespace Dissertation.EditorTools
             liveCtrl.statusText = status;
             liveCtrl.controlBar = bar;
             liveCtrl.eventPanel = eventPanel;
+            liveCtrl.eventToggleButton = eventToggleGo.GetComponent<Button>();
             liveCtrl.eventPanelContent = epRt;
             liveCtrl.personalityPanel = persPanel;
             liveCtrl.personalityToggleButton = persToggleGo.GetComponent<Button>();

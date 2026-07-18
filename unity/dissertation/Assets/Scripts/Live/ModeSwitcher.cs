@@ -34,8 +34,8 @@ namespace Dissertation.Live
             live.enabled = liveMode;
             playbackGroup.SetActive(!liveMode);
             liveGroup.SetActive(liveMode);
-            eventPanel.SetActive(liveMode);
-            personalityPanel.SetActive(false);   // toggle buttons summon these
+            eventPanel.SetActive(false);         // toggle buttons summon these
+            personalityPanel.SetActive(false);
             logPanel.SetActive(false);
             playback.SetNpcsVisible(!liveMode);
             live.SetNpcsVisible(liveMode);

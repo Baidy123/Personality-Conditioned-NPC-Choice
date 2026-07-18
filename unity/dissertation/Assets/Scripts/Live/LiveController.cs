@@ -24,6 +24,7 @@ namespace Dissertation.Live
         public GameObject controlBar;
         public RectTransform eventPanelContent;   // rows rebuilt from /state
         public GameObject eventPanel;
+        public Button eventToggleButton;
         public GameObject personalityPanel;
         public Button personalityToggleButton;
         public Dropdown policyDropdown;   // global model switch (catalog from /state)
@@ -66,6 +67,9 @@ namespace Dissertation.Live
             logToggleButton.onClick.AddListener(
                 () => TogglePanel(logPanel, personalityPanel));
             policyDropdown.onValueChanged.AddListener(_ => OnPolicyPicked());
+            // right-side panel: independent toggle (left pair stays exclusive)
+            eventToggleButton.onClick.AddListener(
+                () => eventPanel.SetActive(!eventPanel.activeSelf));
             npcDropdown.onValueChanged.AddListener(_ => LoadSlidersFromSelected());
             for (var i = 0; i < traitSliders.Length; i++)
             {
@@ -407,9 +411,9 @@ namespace Dissertation.Live
             {
                 var show = !controlBar.activeSelf;
                 controlBar.SetActive(show);
-                eventPanel.SetActive(show);
                 if (!show)                       // summoned panels never auto-return
                 {
+                    eventPanel.SetActive(false);
                     personalityPanel.SetActive(false);
                     logPanel.SetActive(false);
                 }
