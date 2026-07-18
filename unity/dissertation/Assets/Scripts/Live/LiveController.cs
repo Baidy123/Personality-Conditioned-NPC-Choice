@@ -304,14 +304,10 @@ namespace Dissertation.Live
                 if (nameLabel != null)
                     nameLabel.GetComponent<TextMesh>().text = npc.name;
 
-                // per-slot label height plane, same anti-overlap scheme as playback
+                // label height comes from the prototype (uniform + boxed;
+                // hover-to-front handles co-located overlap)
                 var offset = LocationLayout.SlotOffsets[
                     i % LocationLayout.SlotOffsets.Length];
-                var plane = LocationLayout.LabelPlanes[
-                    i % LocationLayout.LabelPlanes.Length];
-                agent.actionLabel.transform.localPosition = new Vector3(
-                    0f, (plane - offset.y) / go.transform.localScale.x, 0f);
-
                 var pos = npc.location != ""
                           && LocationLayout.Entries.ContainsKey(npc.location)
                     ? LocationLayout.Entries[npc.location].Position

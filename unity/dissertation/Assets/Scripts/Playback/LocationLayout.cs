@@ -38,10 +38,10 @@ namespace Dissertation.Playback
             new Vector2(0f, 0.4f),
         };
 
-        // each slot's action label sits on its own height plane above the
-        // stand point, so co-located labels never overlap either
-        public static readonly float[] LabelPlanes =
-            { 1.0f, 1.6f, 2.2f, 2.8f, 3.4f, 4.0f };
+        // all action labels share one low height above their NPC (boxed, and
+        // hover raises a label to the top layer — see NpcAgent), so labels
+        // near the top locations never leave the frame
+        public const float ActionLabelHeight = 1.0f;
 
         public static readonly Dictionary<string, Entry> Entries =
             new Dictionary<string, Entry>

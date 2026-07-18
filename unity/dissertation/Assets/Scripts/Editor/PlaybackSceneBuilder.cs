@@ -87,19 +87,21 @@ namespace Dissertation.EditorTools
                 badge.GetComponent<MeshRenderer>().sortingOrder = 11;
                 badges[i] = badge;
 
-                // each slot's label lives on its own global height plane so
-                // co-located NPCs' action words never overlap; localPosition is
-                // in parent units, hence the divide by the parent scale
+                // one shared low label height; overlap is handled by the
+                // hover-to-front behaviour in NpcAgent, not by stagger
                 var label = NewText("ActionLabel", font, "", 0.11f);
                 label.transform.SetParent(npcGo.transform, false);
                 label.transform.localScale = Vector3.one / NpcScale;
-                var worldHeight = LocationLayout.LabelPlanes[i]
-                                  - LocationLayout.SlotOffsets[i].y;
-                label.transform.localPosition =
-                    new Vector3(0f, worldHeight / NpcScale, 0f);
+                label.transform.localPosition = new Vector3(
+                    0f, LocationLayout.ActionLabelHeight / NpcScale, 0f);
                 var labelTm = label.GetComponent<TextMesh>();
                 labelTm.color = labelColors[i];
                 agents[i].actionLabel = labelTm;
+                agents[i].labelBox = AttachLabelBox(label, square);
+
+                var hoverArea = npcGo.AddComponent<CircleCollider2D>();
+                hoverArea.isTrigger = true;
+                hoverArea.radius = 0.7f;     // forgiving hover target
             }
 
             // -------------------------------------------- live NPC prototype --
@@ -113,9 +115,13 @@ namespace Dissertation.EditorTools
             var protoAction = NewText("ActionLabel", font, "", 0.11f);
             protoAction.transform.SetParent(proto.transform, false);
             protoAction.transform.localScale = Vector3.one / NpcScale;
-            protoAction.transform.localPosition =
-                new Vector3(0f, LocationLayout.LabelPlanes[0] / NpcScale, 0f);
+            protoAction.transform.localPosition = new Vector3(
+                0f, LocationLayout.ActionLabelHeight / NpcScale, 0f);
             protoAgent.actionLabel = protoAction.GetComponent<TextMesh>();
+            protoAgent.labelBox = AttachLabelBox(protoAction, square);
+            var protoHover = proto.AddComponent<CircleCollider2D>();
+            protoHover.isTrigger = true;
+            protoHover.radius = 0.7f;
 
             var protoName = NewText("NameLabel", font, "", 0.09f);
             protoName.transform.SetParent(proto.transform, false);
@@ -447,6 +453,17 @@ namespace Dissertation.EditorTools
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             return go;
+        }
+
+        static SpriteRenderer AttachLabelBox(GameObject label, Sprite square)
+        {
+            var box = NewSprite("LabelBox", square, new Color(0f, 0f, 0f, 0.75f));
+            box.transform.SetParent(label.transform, false);
+            box.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
+            var sr = box.GetComponent<SpriteRenderer>();
+            sr.sortingOrder = 9;             // just under the text (10)
+            sr.enabled = false;              // NpcAgent.FitLabelBox turns it on
+            return sr;
         }
 
         static void Tint(GameObject root, string childPath, Color color)

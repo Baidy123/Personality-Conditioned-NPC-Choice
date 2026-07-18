@@ -10,6 +10,11 @@ namespace Dissertation.Playback
     {
         public float moveSpeed = 3f;          // world units / second
         public TextMesh actionLabel;
+        public SpriteRenderer labelBox;       // dark frame behind the text
+
+        const int BaseLabelOrder = 10;        // hover lifts to HoverLabelOrder
+        const int HoverLabelOrder = 60;
+        MeshRenderer labelRenderer;
 
         Vector2 target;
         Action onArrive;
@@ -44,6 +49,7 @@ namespace Dissertation.Playback
             basePosition = transform.position;
             bobT = 0f;
             actionLabel.text = actionId;
+            FitLabelBox();
         }
 
         public void StopAll()
@@ -52,6 +58,34 @@ namespace Dissertation.Playback
             walking = false;
             performing = false;
             if (actionLabel != null) actionLabel.text = "";
+            FitLabelBox();
+        }
+
+        // size the frame to the current text (label lossyScale ~ 1, so the
+        // renderer's world bounds map straight onto the box's local scale)
+        void FitLabelBox()
+        {
+            if (labelBox == null || actionLabel == null) return;
+            var hasText = !string.IsNullOrEmpty(actionLabel.text);
+            labelBox.enabled = hasText;
+            if (!hasText) return;
+            var size = actionLabel.GetComponent<MeshRenderer>().bounds.size;
+            labelBox.transform.localScale =
+                new Vector3(size.x + 0.35f, size.y + 0.18f, 1f);
+        }
+
+        // hover brings this NPC's label (and frame) to the top layer, so
+        // co-located NPCs' overlapping labels are readable one at a time
+        void OnMouseEnter() => SetLabelOnTop(true);
+        void OnMouseExit() => SetLabelOnTop(false);
+
+        public void SetLabelOnTop(bool onTop)
+        {
+            var order = onTop ? HoverLabelOrder : BaseLabelOrder;
+            if (labelRenderer == null && actionLabel != null)
+                labelRenderer = actionLabel.GetComponent<MeshRenderer>();
+            if (labelRenderer != null) labelRenderer.sortingOrder = order + 1;
+            if (labelBox != null) labelBox.sortingOrder = order;
         }
 
         void Update()
