@@ -65,16 +65,26 @@ namespace Dissertation.Playback
             {
                 var active = i < count;
                 slotRows[i].SetActive(active);
-                if (!active && dropdowns[i].value != 0)
-                    dropdowns[i].value = 0;   // fires LoadSlot -> clears the NPC
+                if (!active)
+                {
+                    // clear directly — relying on the dropdown's value-changed
+                    // event here left the NPC alive when the event didn't fire
+                    dropdowns[i].SetValueWithoutNotify(0);
+                    ClearSlot(i);
+                }
             }
         }
 
-        void LoadSlot(int slot)
+        void ClearSlot(int slot)
         {
             models[slot] = null;
             sequences[slot] = null;
             npcs[slot].gameObject.SetActive(false);
+        }
+
+        void LoadSlot(int slot)
+        {
+            ClearSlot(slot);
             var sel = dropdowns[slot].value;                // 0 = "(none)"
             if (sel == 0)
             {
