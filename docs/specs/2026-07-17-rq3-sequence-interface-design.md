@@ -212,8 +212,19 @@ byte-identical step lists.
     `/state` payload. Consistent with the checkpoint principle, changes
     never interrupt a current behaviour; they alter what the NPCs see at
     the next `/step`.
+  - `POST /npc` (added 2026-07-18) — runtime personality editing, the live
+    mode's second control surface next to the event panel. Two payload
+    forms: `{slot, ocean: {trait: value, ...}, reset_buffers?}` replaces an
+    existing NPC's personality (buffers are **kept** by default — "same
+    history, different character"; `reset_buffers: true` gives a blank
+    slate), and `{name, ocean?, policy?, checkpoint?}` appends a new NPC
+    (inline `ocean`, or a `personalities.json` name lookup). Returns the
+    updated `/state`. Runtime edits and additions are in-memory only:
+    `/reset` restores the startup config roster. Like every world change,
+    a personality change takes effect at the next `/step`.
   - `POST /reset` — authored world state restored (reload from file),
-    controllers cleared, rngs re-seeded. Returns the fresh `/state`.
+    controllers cleared, rngs re-seeded, runtime NPC edits/additions
+    discarded. Returns the fresh `/state`.
 
   Errors: 400 with `{"error": msg}` for bad requests, 404 for unknown
   paths. The server start-up log prints the NPC roster with full OCEAN
@@ -233,11 +244,13 @@ byte-identical step lists.
   (distinct colours, personality-name label under the dot, action label
   above on the same staggered height planes as playback), and builds the
   right-side event panel (per location: an unlock toggle plus one button
-  per authored event; force events are visually marked). Continue/Space
-  posts `/step` and animates the returned steps — walk if `moved`, then
-  loop the action; overridden steps show the action label with a
-  "(forced)" suffix. R posts `/reset`. Request failures land in the
-  status line, not exceptions.
+  per authored event; force events are visually marked) and the left-side
+  personality panel (NPC selector, five OCEAN sliders in [−1, 1], Apply →
+  `/npc` edit; an Add NPC control with a name field appends a new scorer
+  NPC via `/npc` add). Continue/Space posts `/step` and animates the
+  returned steps — walk if `moved`, then loop the action; overridden
+  steps show the action label with a "(forced)" suffix. R posts `/reset`.
+  Request failures land in the status line, not exceptions.
 - **Global event controller** (the live mode's control panel). Unity
   calls *state* at startup and builds the panel automatically from the
   world data: per location, one on/off button per authored event, plus an

@@ -1,0 +1,13 @@
+{
+  "world": "data/world.json",
+  "personalities": "data/personalities.json",
+  "port": 8973,
+  "mode": "sample",
+  "selection_temperature": 1.0,
+  "seed": 42,
+  "npcs": [
+    {"name": "Karlach",     "policy": "scorer"},
+    {"name": "Shadowheart", "policy": "scorer"},
+    {"name": "Laezel",      "policy": "scorer"}
+  ]
+}

@@ -59,37 +59,68 @@ class LiveSession:
 
     # -- construction -----------------------------------------------------------
     def _build_npcs(self) -> list[LiveNpc]:
-        lookup: dict[str, Personality] = {}
-        if self.config.get("personalities"):
-            lookup = load_personalities(self.config["personalities"])
-        npcs = []
-        for slot, entry in enumerate(self.config["npcs"]):
-            name = entry["name"]
-            if "ocean" in entry:
-                personality = Personality.from_traits(**entry["ocean"])
-            elif name in lookup:
-                personality = lookup[name]
-            else:
+        return [self._build_one(slot, entry)
+                for slot, entry in enumerate(self.config["npcs"])]
+
+    @staticmethod
+    def _personality_from(ocean: dict) -> Personality:
+        unknown = set(ocean) - set(OCEAN_TRAITS)
+        if unknown:
+            raise ValueError(f"unknown OCEAN traits: {sorted(unknown)}")
+        return Personality.from_traits(**ocean)   # range-checked by Personality
+
+    def _build_one(self, slot: int, entry: dict) -> LiveNpc:
+        """One NPC from a config-style entry (shared by startup and /npc add)."""
+        name = entry["name"]
+        if "ocean" in entry:
+            personality = self._personality_from(entry["ocean"])
+        else:
+            lookup: dict[str, Personality] = {}
+            if self.config.get("personalities"):
+                lookup = load_personalities(self.config["personalities"])
+            if name not in lookup:
                 raise ValueError(
                     f"npc {name!r}: not in personalities file and no inline ocean")
-            label = entry.get("policy", "scorer")
-            if label == "scorer":
-                policy = HandAuthoredScorer()
-            elif "checkpoint" in entry:
-                policy = LearnedPolicyAdapter(entry["checkpoint"])
-            else:
-                raise ValueError(f"npc {name!r}: policy {label!r} needs a checkpoint")
-            controller = DecisionController(
-                policy,
-                mode=self.config.get("mode", "sample"),
-                rng=np.random.default_rng([int(self.config.get("seed", 0)), slot]),
-                selection_temperature=float(
-                    self.config.get("selection_temperature", 1.0)),
-            )
-            npcs.append(LiveNpc(slot=slot, name=name, policy_label=label,
-                                personality=personality, policy=policy,
-                                controller=controller))
-        return npcs
+            personality = lookup[name]
+        label = entry.get("policy", "scorer")
+        if label == "scorer":
+            policy = HandAuthoredScorer()
+        elif "checkpoint" in entry:
+            policy = LearnedPolicyAdapter(entry["checkpoint"])
+        else:
+            raise ValueError(f"npc {name!r}: policy {label!r} needs a checkpoint")
+        controller = DecisionController(
+            policy,
+            mode=self.config.get("mode", "sample"),
+            rng=np.random.default_rng([int(self.config.get("seed", 0)), slot]),
+            selection_temperature=float(
+                self.config.get("selection_temperature", 1.0)),
+        )
+        return LiveNpc(slot=slot, name=name, policy_label=label,
+                       personality=personality, policy=policy,
+                       controller=controller)
+
+    # -- runtime npc editing ----------------------------------------------------
+    def set_personality(self, slot: int, ocean: dict,
+                        reset_buffers: bool = False) -> None:
+        """Replace one NPC's OCEAN vector at the next checkpoint.
+
+        Buffers are kept by default — "same history, different character";
+        ``reset_buffers=True`` clears them for a blank slate."""
+        slot = int(slot)
+        if not 0 <= slot < len(self.npcs):
+            raise ValueError(f"no npc slot {slot}")
+        npc = self.npcs[slot]
+        npc.personality = self._personality_from(ocean)
+        if reset_buffers:
+            npc.controller.reset()
+
+    def add_npc(self, entry: dict) -> None:
+        """Append a runtime NPC (config-entry shape: name, ocean?, policy?,
+        checkpoint?). In-memory only — ``reset()`` restores the startup roster."""
+        if not entry.get("name"):
+            raise ValueError("add_npc needs a name")
+        self.npcs.append(self._build_one(len(self.npcs), entry))
 
     # -- world mutation ---------------------------------------------------------
     def _entry(self, location: str):

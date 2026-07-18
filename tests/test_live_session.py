@@ -232,6 +232,58 @@ def test_force_target_locked_raises(config_path):
         session.step()
 
 
+# ------------------------------------------------------ runtime npc editing --
+
+def test_set_personality_replaces_ocean_and_keeps_buffers(config_path):
+    session = LiveSession.from_config(config_path)
+    first = session.step()
+    where = first["steps"][0]["location"]
+
+    session.set_personality(0, {"extraversion": -1.0, "neuroticism": 0.8})
+    state = session.state()
+    assert state["npcs"][0]["ocean"] == [0.0, 0.0, -1.0, 0.0, 0.8]
+    # buffers kept by default: the controller still remembers the location
+    assert state["npcs"][0]["location"] == where
+
+    session.set_personality(0, {"extraversion": 0.5}, reset_buffers=True)
+    assert session.state()["npcs"][0]["location"] == ""
+    nxt = session.step()
+    assert nxt["steps"][0]["moved"] is True   # fresh history: first step walks
+
+
+def test_set_personality_validation(config_path):
+    session = LiveSession.from_config(config_path)
+    with pytest.raises(ValueError, match="slot"):
+        session.set_personality(9, {"extraversion": 0.5})
+    with pytest.raises(ValueError, match="charisma"):
+        session.set_personality(0, {"charisma": 0.5})
+    with pytest.raises(ValueError):
+        session.set_personality(0, {"extraversion": 2.0})   # out of [-1, 1]
+
+
+def test_add_npc_appends_and_reset_restores_roster(config_path):
+    session = LiveSession.from_config(config_path)
+    session.add_npc({"name": "Zed", "ocean": {"openness": 1.0}})
+    state = session.state()
+    assert [n["name"] for n in state["npcs"]] == ["Alice", "Bob", "Zed"]
+    assert state["npcs"][2]["slot"] == 2
+    assert state["npcs"][2]["ocean"] == [1.0, 0.0, 0.0, 0.0, 0.0]
+
+    step = session.step()
+    assert [s["name"] for s in step["steps"]] == ["Alice", "Bob", "Zed"]
+
+    session.reset()
+    assert [n["name"] for n in session.state()["npcs"]] == ["Alice", "Bob"]
+
+
+def test_add_npc_by_personality_lookup_and_errors(config_path):
+    session = LiveSession.from_config(config_path)
+    session.add_npc({"name": "Bob"})          # exists in personalities.json
+    assert session.state()["npcs"][2]["ocean"] == [0.5, 0.0, -1.0, 0.0, 0.0]
+    with pytest.raises(ValueError, match="Ghost"):
+        session.add_npc({"name": "Ghost"})    # unknown, no inline ocean
+
+
 # ------------------------------------------- controller commit_forced (unit) --
 
 def _options(world, loc_id, act_id):
