@@ -9,16 +9,21 @@ run configs live here, and this table says where everything else is.
 |--------------------------------------------------|-----------------------------------------|
 | which sequences get generated for Unity playback (characters, policies, steps, seeds) | `configs/rq3_sequences.json` |
 | the live demo (roster, sampling temperature, port, seed) | `configs/live_demo.json` |
-| the world: locations, their actions, feature values, events | `data/world.json` |
-| the character roster: names + OCEAN vectors      | `data/personalities.json`               |
+| the **game** world: locations, actions, feature values, events | `configs/game_world.json` — edit freely |
+| the **game** character roster: names + OCEAN vectors | `configs/game_personalities.json` — edit freely |
 | the map layout / colours in Unity                | `unity/.../Assets/Scripts/Playback/LocationLayout.cs`, then re-run *Dissertation → Build Playback Scene* |
 
-**Caution — shared research assets.** `data/world.json` and
-`data/personalities.json` also feed the RQ1/RQ2 experiment pipelines and all
-recorded results. Additive edits are safe (a new event with `"active": false`,
-a brand-new character). Changing *existing* values (location features, the six
-original characters' vectors) diverges from the recorded results — treat that
-as a tuning round: check `docs/tuning_log.md` first and document the change.
+**The research/game split (decided 2026-07-18).** `data/world.json` and
+`data/personalities.json` are the RQ1/RQ2 research sources — frozen; changing
+them means a documented tuning round (`docs/tuning_log.md`). The
+`configs/game_*.json` files started as exact copies and are what BOTH game
+modes (playback generation and live demo) actually read — edit them freely.
+If a future tuning round changes the research files and you want the game to
+follow, re-copy or merge by hand; the two pairs do not sync automatically.
+
+**One Unity caveat:** if you add a location to `game_world.json`, also add its
+position/colour to `LocationLayout.cs` and rebuild the scene, or the players
+will refuse the unknown id.
 
 ## Commands
 

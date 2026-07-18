@@ -1,8 +1,8 @@
 {
   "out_dir": "data/rq3_sequences/demo",
   "unity_dir": "unity/dissertation/Assets/StreamingAssets/sequences",
-  "worlds": ["data/world.json"],
-  "personalities_file": "data/personalities.json",
+  "worlds": ["configs/game_world.json"],
+  "personalities_file": "configs/game_personalities.json",
   "personalities": [
     {"name": "Karlach"},
     {"name": "Shadowheart"},

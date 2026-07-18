@@ -11,11 +11,11 @@
       "A": 0.6,
       "N": -0.5
     },
-    "world": "data/world.json",
+    "world": "configs/game_world.json",
     "seed": 42,
     "n_cycles": 8,
     "selection_temperature": 0.1,
-    "generated_at": "2026-07-18T22:04:19"
+    "generated_at": "2026-07-18T22:14:53"
   },
   "steps": [
     {

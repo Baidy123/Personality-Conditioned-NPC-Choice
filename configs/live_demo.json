@@ -1,6 +1,6 @@
 {
-  "world": "data/world.json",
-  "personalities": "data/personalities.json",
+  "world": "configs/game_world.json",
+  "personalities": "configs/game_personalities.json",
   "port": 8973,
   "mode": "sample",
   "selection_temperature": 0.1,
