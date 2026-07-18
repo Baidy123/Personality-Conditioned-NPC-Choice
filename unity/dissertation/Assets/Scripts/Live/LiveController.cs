@@ -25,6 +25,10 @@ namespace Dissertation.Live
         public RectTransform eventPanelContent;   // rows rebuilt from /state
         public GameObject eventPanel;
         public GameObject personalityPanel;
+        public Button personalityToggleButton;
+        public GameObject logPanel;
+        public Text logText;
+        public Button logToggleButton;
         public Dropdown npcDropdown;
         public Slider[] traitSliders;             // O, C, E, A, N
         public Text[] traitValueLabels;
@@ -45,6 +49,8 @@ namespace Dissertation.Live
         LiveState state;
         readonly List<NpcAgent> agents = new List<NpcAgent>();
         readonly List<GameObject> spawned = new List<GameObject>();
+        readonly List<string> logHistory = new List<string>();
+        const int LogTailLines = 22;
         bool busy;
 
         void Start()
@@ -54,6 +60,10 @@ namespace Dissertation.Live
             resetButton.onClick.AddListener(ResetSession);
             applyButton.onClick.AddListener(ApplyPersonality);
             addNpcButton.onClick.AddListener(AddNpc);
+            personalityToggleButton.onClick.AddListener(
+                () => TogglePanel(personalityPanel, logPanel));
+            logToggleButton.onClick.AddListener(
+                () => TogglePanel(logPanel, personalityPanel));
             npcDropdown.onValueChanged.AddListener(_ => LoadSlidersFromSelected());
             for (var i = 0; i < traitSliders.Length; i++)
             {
@@ -88,6 +98,9 @@ namespace Dissertation.Live
                 {
                     state = JsonUtility.FromJson<LiveState>(body);
                     RebuildAll();
+                    var names = new List<string>();
+                    foreach (var npc in state.npcs) names.Add(npc.name);
+                    Log($"connected: {string.Join(", ", names)}");
                     SetStatus($"connected - {state.npcs.Count} NPCs, "
                               + $"world {state.world}");
                     done = true;
@@ -117,6 +130,7 @@ namespace Dissertation.Live
             }, err =>
             {
                 busy = false;
+                Log($"ERROR step: {err}");
                 SetStatus($"step error: {err}");
             });
         }
@@ -128,29 +142,44 @@ namespace Dissertation.Live
             {
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildAll();
+                Log("reset: authored world and startup roster restored");
                 SetStatus("reset - authored world and startup roster restored");
-            }, err => SetStatus($"reset error: {err}"));
+            }, err =>
+            {
+                Log($"ERROR reset: {err}");
+                SetStatus($"reset error: {err}");
+            });
         }
 
-        void PostEvent(string json)
+        void PostEvent(string json, string description)
         {
             client.Post("/event", json, body =>
             {
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildEventPanel();     // NPCs unaffected: changes apply next step
-                SetStatus("world updated - takes effect at the next step");
-            }, err => SetStatus($"event error: {err}"));
+                Log(description);
+                SetStatus($"{description} - takes effect at the next step");
+            }, err =>
+            {
+                Log($"ERROR {description}: {err}");
+                SetStatus($"event error: {err}");
+            });
         }
 
-        void PostNpc(string json)
+        void PostNpc(string json, string description)
         {
             client.Post("/npc", json, body =>
             {
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildNpcs();
                 RebuildNpcDropdown();
-                SetStatus("roster updated - takes effect at the next step");
-            }, err => SetStatus($"npc error: {err}"));
+                Log(description);
+                SetStatus($"{description} - takes effect at the next step");
+            }, err =>
+            {
+                Log($"ERROR {description}: {err}");
+                SetStatus($"npc error: {err}");
+            });
         }
 
         // --------------------------------------------------------- personality --
@@ -182,7 +211,7 @@ namespace Dissertation.Live
             {
                 slot = npc.slot,
                 ocean = OceanFromSliders(),
-            }));
+            }), $"personality applied to {npc.name}");
         }
 
         void AddNpc()
@@ -198,7 +227,7 @@ namespace Dissertation.Live
             {
                 name = name,
                 ocean = OceanFromSliders(),
-            }));
+            }), $"added NPC {name}");
         }
 
         // ------------------------------------------------------------- render --
@@ -261,7 +290,7 @@ namespace Dissertation.Live
                     {
                         location = locId,
                         unlocked = !unlocked,
-                    })));
+                    }), $"{(unlocked ? "locked" : "unlocked")} {locId}"));
                 foreach (var ev in loc.events)
                 {
                     var evName = ev.name;
@@ -273,7 +302,7 @@ namespace Dissertation.Live
                             location = locId,
                             @event = evName,
                             active = !active,
-                        })));
+                        }), $"event {evName} -> {(active ? "OFF" : "ON")} @ {locId}"));
                 }
             }
         }
@@ -309,9 +338,12 @@ namespace Dissertation.Live
                 var label = s.action + (s.overridden ? " (forced)" : "");
                 if (s.moved) agent.WalkTo(pos, () => agent.PerformAction(label));
                 else agent.PerformAction(label);
-                parts.Add($"{s.name} {s.location}/{s.action}{(s.overridden ? "!" : "")}");
+                parts.Add($"{s.name} {s.location}/{s.action}"
+                          + (s.overridden ? " (forced)" : ""));
             }
-            SetStatus($"step {resp.step_count}: {string.Join("   ", parts)}");
+            var line = $"step {resp.step_count}: {string.Join("  |  ", parts)}";
+            Log(line);
+            SetStatus(line);
         }
 
         // -------------------------------------------------------------- misc --
@@ -330,8 +362,28 @@ namespace Dissertation.Live
                 var show = !controlBar.activeSelf;
                 controlBar.SetActive(show);
                 eventPanel.SetActive(show);
-                personalityPanel.SetActive(show);
+                if (!show)                       // summoned panels never auto-return
+                {
+                    personalityPanel.SetActive(false);
+                    logPanel.SetActive(false);
+                }
             }
+        }
+
+        static void TogglePanel(GameObject panel, GameObject other)
+        {
+            var show = !panel.activeSelf;
+            panel.SetActive(show);
+            if (show) other.SetActive(false);    // the two share the left side
+        }
+
+        void Log(string message)
+        {
+            logHistory.Add($"[{System.DateTime.Now:HH:mm:ss}] {message}");
+            if (logText == null) return;
+            var start = Mathf.Max(0, logHistory.Count - LogTailLines);
+            logText.text = string.Join("\n",
+                logHistory.GetRange(start, logHistory.Count - start));
         }
 
         void AddPanelHeader(string text)

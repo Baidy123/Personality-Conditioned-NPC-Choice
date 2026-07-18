@@ -213,6 +213,14 @@ namespace Dissertation.EditorTools
             resetGo.GetComponentInChildren<Text>().text = "Reset (R)";
             Place(resetGo, liveGroup.transform, 515f, 130f);
 
+            var persToggleGo = DefaultControls.CreateButton(res);
+            persToggleGo.GetComponentInChildren<Text>().text = "Personality";
+            Place(persToggleGo, liveGroup.transform, 660f, 140f);
+
+            var logToggleGo = DefaultControls.CreateButton(res);
+            logToggleGo.GetComponentInChildren<Text>().text = "Log";
+            Place(logToggleGo, liveGroup.transform, 815f, 90f);
+
             // ------------------------------------------------ event panel (R) --
             var eventPanel = new GameObject("EventPanel", typeof(RectTransform),
                 typeof(Image), typeof(VerticalLayoutGroup));
@@ -300,6 +308,34 @@ namespace Dissertation.EditorTools
             addGo.GetComponentInChildren<Text>().text = "Add NPC";
             PlaceAt(addGo, persPanel.transform, 200f, 330f, 90f, 32f);
 
+            // ------------------------------------------------- log panel (L) --
+            // shares the left side with the personality panel; the controller
+            // keeps at most one of the two visible
+            var logPanel = new GameObject("LogPanel",
+                typeof(RectTransform), typeof(Image));
+            logPanel.transform.SetParent(canvasGo.transform, false);
+            var lpRt = logPanel.GetComponent<RectTransform>();
+            lpRt.anchorMin = new Vector2(0f, 0f);
+            lpRt.anchorMax = new Vector2(0f, 1f);
+            lpRt.offsetMin = new Vector2(10f, 100f);
+            lpRt.offsetMax = new Vector2(480f, -10f);
+            logPanel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.65f);
+
+            var logTextGo = DefaultControls.CreateText(res);
+            logTextGo.transform.SetParent(logPanel.transform, false);
+            var ltRt = logTextGo.GetComponent<RectTransform>();
+            ltRt.anchorMin = Vector2.zero;
+            ltRt.anchorMax = Vector2.one;
+            ltRt.offsetMin = new Vector2(10f, 10f);
+            ltRt.offsetMax = new Vector2(-10f, -10f);
+            var logText = logTextGo.GetComponent<Text>();
+            logText.text = "";
+            logText.color = new Color(0.8f, 0.95f, 0.8f);
+            logText.fontSize = 15;
+            logText.alignment = TextAnchor.LowerLeft;
+            logText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            logText.verticalOverflow = VerticalWrapMode.Overflow;
+
             // ------------------------------------------------------- wiring --
             var playCtrl = new GameObject("PlaybackController")
                 .AddComponent<PlaybackController>();
@@ -328,6 +364,10 @@ namespace Dissertation.EditorTools
             liveCtrl.eventPanel = eventPanel;
             liveCtrl.eventPanelContent = epRt;
             liveCtrl.personalityPanel = persPanel;
+            liveCtrl.personalityToggleButton = persToggleGo.GetComponent<Button>();
+            liveCtrl.logPanel = logPanel;
+            liveCtrl.logText = logText;
+            liveCtrl.logToggleButton = logToggleGo.GetComponent<Button>();
             liveCtrl.npcDropdown = npcDdGo.GetComponent<Dropdown>();
             liveCtrl.traitSliders = sliders;
             liveCtrl.traitValueLabels = valueLabels;
@@ -343,11 +383,13 @@ namespace Dissertation.EditorTools
             switcher.liveGroup = liveGroup;
             switcher.eventPanel = eventPanel;
             switcher.personalityPanel = persPanel;
+            switcher.logPanel = logPanel;
 
             // playback is the startup mode; ModeSwitcher re-syncs at runtime
             liveGroup.SetActive(false);
             eventPanel.SetActive(false);
             persPanel.SetActive(false);
+            logPanel.SetActive(false);
 
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);

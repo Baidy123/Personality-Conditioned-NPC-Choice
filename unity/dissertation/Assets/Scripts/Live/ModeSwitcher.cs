@@ -17,6 +17,7 @@ namespace Dissertation.Live
         public GameObject liveGroup;       // live's control-bar widgets
         public GameObject eventPanel;
         public GameObject personalityPanel;
+        public GameObject logPanel;
 
         void Start()
         {
@@ -34,7 +35,8 @@ namespace Dissertation.Live
             playbackGroup.SetActive(!liveMode);
             liveGroup.SetActive(liveMode);
             eventPanel.SetActive(liveMode);
-            personalityPanel.SetActive(liveMode);
+            personalityPanel.SetActive(false);   // toggle buttons summon these
+            logPanel.SetActive(false);
             playback.SetNpcsVisible(!liveMode);
             live.SetNpcsVisible(liveMode);
         }
