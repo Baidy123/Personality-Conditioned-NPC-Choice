@@ -41,15 +41,23 @@ namespace Dissertation.EditorTools
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.13f, 0.16f, 0.13f);
 
-            var ground = NewSprite("Ground", square, new Color(0.21f, 0.26f, 0.21f));
-            ground.transform.localScale = new Vector3(19f, 11f, 1f);
+            // Art convention: drop a PNG into Assets/Art named after what it
+            // replaces (tavern.png ... enemy_camp.png, ground.png, npc.png),
+            // rerun this menu item, and it is used instead of the colour
+            // placeholder. No file -> placeholder stays. See configs/README.md.
+            var groundArt = ArtOrNull("ground");
+            var ground = NewSprite("Ground", groundArt ?? square,
+                groundArt != null ? Color.white : new Color(0.21f, 0.26f, 0.21f));
+            FitSprite(ground, 19f, 11f);
             ground.GetComponent<SpriteRenderer>().sortingOrder = -10;
 
             foreach (var kv in LocationLayout.Entries)
             {
-                var block = NewSprite(kv.Key, square, kv.Value.Color);
+                var art = ArtOrNull(kv.Key);
+                var block = NewSprite(kv.Key, art ?? square,
+                    art != null ? Color.white : kv.Value.Color);
                 block.transform.position = kv.Value.Position;
-                block.transform.localScale = new Vector3(2.4f, 1.7f, 1f);
+                FitSprite(block, 2.4f, 1.7f);
                 // plate is not parented: the block's non-uniform scale would distort it
                 var plate = NewText(kv.Key + "_label", font, kv.Key, 0.12f);
                 plate.transform.position =
@@ -71,11 +79,14 @@ namespace Dissertation.EditorTools
             };
             var agents = new NpcAgent[slotColors.Length];
             var badges = new GameObject[slotColors.Length];
+            var npcArt = ArtOrNull("npc");   // custom art still gets slot tints
             for (var i = 0; i < slotColors.Length; i++)
             {
                 var slotName = ((char)('A' + i)).ToString();
-                var npcGo = NewSprite("NPC_" + slotName, circle, slotColors[i]);
+                var npcGo = NewSprite("NPC_" + slotName, npcArt ?? circle, slotColors[i]);
                 npcGo.transform.position = LocationLayout.NpcStart;
+                // root scale must stay NpcScale: the labels compensate by
+                // 1/NpcScale (art is unit-normalised at import instead)
                 npcGo.transform.localScale = Vector3.one * NpcScale;
                 npcGo.GetComponent<SpriteRenderer>().sortingOrder = 5;
                 agents[i] = npcGo.AddComponent<NpcAgent>();
@@ -106,7 +117,7 @@ namespace Dissertation.EditorTools
 
             // -------------------------------------------- live NPC prototype --
             // LiveController instantiates one copy per NPC the server reports.
-            var proto = NewSprite("LiveNpcPrototype", circle, Color.white);
+            var proto = NewSprite("LiveNpcPrototype", npcArt ?? circle, Color.white);
             proto.transform.position = LocationLayout.NpcStart;
             proto.transform.localScale = Vector3.one * NpcScale;
             proto.GetComponent<SpriteRenderer>().sortingOrder = 5;
@@ -453,6 +464,36 @@ namespace Dissertation.EditorTools
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             return go;
+        }
+
+        // Assets/Art/<name>.png if present, unit-normalised (1 world unit
+        // wide) so the placeholder sizing math keeps working; null otherwise.
+        static Sprite ArtOrNull(string name)
+        {
+            var path = $"Assets/Art/{name}.png";
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+            if (imp == null) return null;
+            var needsImport =
+                imp.textureType != TextureImporterType.Sprite
+                || (sprite != null
+                    && Mathf.Abs(imp.spritePixelsPerUnit - sprite.texture.width) > 0.5f);
+            if (needsImport)
+            {
+                imp.textureType = TextureImporterType.Sprite;
+                if (sprite != null) imp.spritePixelsPerUnit = sprite.texture.width;
+                imp.SaveAndReimport();
+                sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            }
+            return sprite;
+        }
+
+        // stretch a sprite object to an exact world-unit footprint
+        static void FitSprite(GameObject go, float width, float height)
+        {
+            var sr = go.GetComponent<SpriteRenderer>();
+            var size = sr.sprite.bounds.size;
+            go.transform.localScale = new Vector3(width / size.x, height / size.y, 1f);
         }
 
         static SpriteRenderer AttachLabelBox(GameObject label, Sprite square)

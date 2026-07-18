@@ -12,6 +12,7 @@ run configs live here, and this table says where everything else is.
 | the **game** world: locations, actions, feature values, events | `configs/game_world.json` — edit freely |
 | the **game** character roster: names + OCEAN vectors | `configs/game_personalities.json` — edit freely |
 | the map layout / colours in Unity                | `unity/.../Assets/Scripts/Playback/LocationLayout.cs`, then re-run *Dissertation → Build Playback Scene* |
+| the artwork (replace colour blocks with images)  | drop PNGs into `unity/.../Assets/Art/` named `tavern.png` ... `enemy_camp.png`, `ground.png`, `npc.png`, then rebuild the scene; missing files keep their placeholder. NPC art still gets the per-slot tint, so prefer light/white art for the dot. Manual edits made directly in the Unity scene do NOT survive a rebuild — always go through Art/ + LocationLayout. |
 
 **The research/game split (decided 2026-07-18).** `data/world.json` and
 `data/personalities.json` are the RQ1/RQ2 research sources — frozen; changing
