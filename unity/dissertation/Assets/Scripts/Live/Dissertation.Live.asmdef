@@ -1,0 +1,4 @@
+{
+    "name": "Dissertation.Live",
+    "references": ["Dissertation.Playback", "UnityEngine.UI"]
+}

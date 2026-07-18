@@ -1,4 +1,5 @@
 using System.IO;
+using Dissertation.Live;
 using Dissertation.Playback;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -8,13 +9,16 @@ using UnityEngine.UI;
 
 namespace Dissertation.EditorTools
 {
-    // One-click placeholder scene: camera, ground, location blocks + name
-    // plates from LocationLayout, NPC, control-bar UI, wired controller.
-    // Rerunnable — layout tweaks in LocationLayout.cs, then run again.
+    // One-click placeholder scene for BOTH modes: camera, ground, location
+    // blocks + name plates from LocationLayout, playback NPCs (A/B/C), the
+    // live-NPC prototype, the control bar (mode dropdown + per-mode widget
+    // groups), the live event/personality panels, and all component wiring.
+    // Rerunnable — tweak LocationLayout.cs or this file, then run again.
     public static class PlaybackSceneBuilder
     {
         const string SpriteDir = "Assets/Sprites";
         const string ScenePath = "Assets/Scenes/Playback.unity";
+        const float NpcScale = 0.55f;
 
         [MenuItem("Dissertation/Build Playback Scene")]
         public static void Build()
@@ -52,6 +56,7 @@ namespace Dissertation.EditorTools
                     kv.Value.Position + new Vector2(0f, 1.15f);
             }
 
+            // ------------------------------------------------- playback NPCs --
             var slotColors = new[]
             {
                 new Color(0.13f, 0.13f, 0.16f),   // A near-black
@@ -64,7 +69,6 @@ namespace Dissertation.EditorTools
                 new Color(0.85f, 0.65f, 0.95f),
                 new Color(0.55f, 0.95f, 0.90f),
             };
-            const float npcScale = 0.55f;
             var agents = new NpcAgent[slotColors.Length];
             var badges = new GameObject[slotColors.Length];
             for (var i = 0; i < slotColors.Length; i++)
@@ -72,33 +76,54 @@ namespace Dissertation.EditorTools
                 var slotName = ((char)('A' + i)).ToString();
                 var npcGo = NewSprite("NPC_" + slotName, circle, slotColors[i]);
                 npcGo.transform.position = LocationLayout.NpcStart;
-                npcGo.transform.localScale = Vector3.one * npcScale;
+                npcGo.transform.localScale = Vector3.one * NpcScale;
                 npcGo.GetComponent<SpriteRenderer>().sortingOrder = 5;
                 agents[i] = npcGo.AddComponent<NpcAgent>();
 
                 var badge = NewText("Badge", font, slotName, 0.08f);
                 badge.transform.SetParent(npcGo.transform, false);
-                badge.transform.localScale = Vector3.one / npcScale;   // undo parent scale
+                badge.transform.localScale = Vector3.one / NpcScale;   // undo parent scale
                 badge.transform.localPosition = Vector3.zero;
                 badge.GetComponent<MeshRenderer>().sortingOrder = 11;
                 badges[i] = badge;
 
-                var label = NewText("ActionLabel", font, "", 0.11f);
-                label.transform.SetParent(npcGo.transform, false);
-                label.transform.localScale = Vector3.one / npcScale;
                 // each slot's label lives on its own global height plane so
                 // co-located NPCs' action words never overlap; localPosition is
                 // in parent units, hence the divide by the parent scale
+                var label = NewText("ActionLabel", font, "", 0.11f);
+                label.transform.SetParent(npcGo.transform, false);
+                label.transform.localScale = Vector3.one / NpcScale;
                 var worldHeight = LocationLayout.LabelPlanes[i]
                                   - LocationLayout.SlotOffsets[i].y;
                 label.transform.localPosition =
-                    new Vector3(0f, worldHeight / npcScale, 0f);
+                    new Vector3(0f, worldHeight / NpcScale, 0f);
                 var labelTm = label.GetComponent<TextMesh>();
                 labelTm.color = labelColors[i];
                 agents[i].actionLabel = labelTm;
             }
 
-            // ------------------------------------------------------------- UI
+            // -------------------------------------------- live NPC prototype --
+            // LiveController instantiates one copy per NPC the server reports.
+            var proto = NewSprite("LiveNpcPrototype", circle, Color.white);
+            proto.transform.position = LocationLayout.NpcStart;
+            proto.transform.localScale = Vector3.one * NpcScale;
+            proto.GetComponent<SpriteRenderer>().sortingOrder = 5;
+            var protoAgent = proto.AddComponent<NpcAgent>();
+
+            var protoAction = NewText("ActionLabel", font, "", 0.11f);
+            protoAction.transform.SetParent(proto.transform, false);
+            protoAction.transform.localScale = Vector3.one / NpcScale;
+            protoAction.transform.localPosition =
+                new Vector3(0f, LocationLayout.LabelPlanes[0] / NpcScale, 0f);
+            protoAgent.actionLabel = protoAction.GetComponent<TextMesh>();
+
+            var protoName = NewText("NameLabel", font, "", 0.09f);
+            protoName.transform.SetParent(proto.transform, false);
+            protoName.transform.localScale = Vector3.one / NpcScale;
+            protoName.transform.localPosition = new Vector3(0f, -0.6f / NpcScale, 0f);
+            proto.SetActive(false);
+
+            // ------------------------------------------------------------- UI --
             var canvasGo = new GameObject("Canvas",
                 typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasGo.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
@@ -121,15 +146,29 @@ namespace Dissertation.EditorTools
 
             var res = new DefaultControls.Resources();
 
+            // shared: mode dropdown (far left) + status line (far right)
+            var modeGo = DefaultControls.CreateDropdown(res);
+            Place(modeGo, bar.transform, 20f, 150f);
+
+            var statusGo = DefaultControls.CreateText(res);
+            var status = statusGo.GetComponent<Text>();
+            status.text = "";
+            status.color = Color.white;
+            status.alignment = TextAnchor.MiddleLeft;
+            Place(statusGo, bar.transform, 1470f, 440f);
+
+            // ------------------------------------------- playback bar widgets --
+            var playbackGroup = Group("PlaybackGroup", bar.transform);
+
             var countCapGo = DefaultControls.CreateText(res);
             var countCap = countCapGo.GetComponent<Text>();
             countCap.text = "NPCs";
             countCap.color = Color.white;
             countCap.alignment = TextAnchor.MiddleCenter;
-            Place(countCapGo, bar.transform, 20f, 60f);
+            Place(countCapGo, playbackGroup.transform, 185f, 60f);
 
             var countGo = DefaultControls.CreateDropdown(res);
-            Place(countGo, bar.transform, 85f, 85f);
+            Place(countGo, playbackGroup.transform, 250f, 85f);
 
             var dropdowns = new Dropdown[agents.Length];
             var slotRows = new GameObject[agents.Length];
@@ -137,7 +176,7 @@ namespace Dissertation.EditorTools
             {
                 var row = new GameObject("SlotRow_" + (char)('A' + i),
                     typeof(RectTransform));
-                Place(row, bar.transform, 200f + i * 260f, 250f);
+                Place(row, playbackGroup.transform, 360f + i * 260f, 250f);
                 slotRows[i] = row;
 
                 var capGo = DefaultControls.CreateText(res);
@@ -153,36 +192,167 @@ namespace Dissertation.EditorTools
 
             var continueGo = DefaultControls.CreateButton(res);
             continueGo.GetComponentInChildren<Text>().text = "Continue (Space)";
-            Place(continueGo, bar.transform, 1000f, 200f);
+            Place(continueGo, playbackGroup.transform, 1150f, 160f);
 
             var restartGo = DefaultControls.CreateButton(res);
             restartGo.GetComponentInChildren<Text>().text = "Restart (R)";
-            Place(restartGo, bar.transform, 1220f, 150f);
+            Place(restartGo, playbackGroup.transform, 1320f, 130f);
 
-            var statusGo = DefaultControls.CreateText(res);
-            var status = statusGo.GetComponent<Text>();
-            status.text = "";
-            status.color = Color.white;
-            status.alignment = TextAnchor.MiddleLeft;
-            Place(statusGo, bar.transform, 1390f, 510f);
+            // ----------------------------------------------- live bar widgets --
+            var liveGroup = Group("LiveGroup", bar.transform);
 
-            var ctrl = new GameObject("PlaybackController")
+            var connectGo = DefaultControls.CreateButton(res);
+            connectGo.GetComponentInChildren<Text>().text = "Connect";
+            Place(connectGo, liveGroup.transform, 185f, 140f);
+
+            var stepGo = DefaultControls.CreateButton(res);
+            stepGo.GetComponentInChildren<Text>().text = "Step (Space)";
+            Place(stepGo, liveGroup.transform, 340f, 160f);
+
+            var resetGo = DefaultControls.CreateButton(res);
+            resetGo.GetComponentInChildren<Text>().text = "Reset (R)";
+            Place(resetGo, liveGroup.transform, 515f, 130f);
+
+            // ------------------------------------------------ event panel (R) --
+            var eventPanel = new GameObject("EventPanel", typeof(RectTransform),
+                typeof(Image), typeof(VerticalLayoutGroup));
+            eventPanel.transform.SetParent(canvasGo.transform, false);
+            var epRt = eventPanel.GetComponent<RectTransform>();
+            epRt.anchorMin = new Vector2(1f, 0f);
+            epRt.anchorMax = new Vector2(1f, 1f);
+            epRt.offsetMin = new Vector2(-320f, 100f);
+            epRt.offsetMax = new Vector2(-10f, -10f);
+            eventPanel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+            var vlg = eventPanel.GetComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(8, 8, 8, 8);
+            vlg.spacing = 4f;
+            vlg.childControlWidth = true;
+            vlg.childForceExpandWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandHeight = false;
+            vlg.childAlignment = TextAnchor.UpperLeft;
+
+            // ------------------------------------------ personality panel (L) --
+            var persPanel = new GameObject("PersonalityPanel",
+                typeof(RectTransform), typeof(Image));
+            persPanel.transform.SetParent(canvasGo.transform, false);
+            var ppRt = persPanel.GetComponent<RectTransform>();
+            ppRt.anchorMin = new Vector2(0f, 0f);
+            ppRt.anchorMax = new Vector2(0f, 1f);
+            ppRt.offsetMin = new Vector2(10f, 100f);
+            ppRt.offsetMax = new Vector2(320f, -10f);
+            persPanel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+
+            var titleGo = DefaultControls.CreateText(res);
+            var title = titleGo.GetComponent<Text>();
+            title.text = "Personality";
+            title.color = Color.white;
+            title.fontStyle = FontStyle.Bold;
+            title.alignment = TextAnchor.MiddleLeft;
+            PlaceAt(titleGo, persPanel.transform, 10f, 10f, 280f, 26f);
+
+            var npcDdGo = DefaultControls.CreateDropdown(res);
+            PlaceAt(npcDdGo, persPanel.transform, 10f, 42f, 280f, 32f);
+
+            var traitNames = new[] { "O", "C", "E", "A", "N" };
+            var sliders = new Slider[5];
+            var valueLabels = new Text[5];
+            for (var i = 0; i < 5; i++)
+            {
+                var y = 86f + i * 38f;
+                var capGo = DefaultControls.CreateText(res);
+                var cap = capGo.GetComponent<Text>();
+                cap.text = traitNames[i];
+                cap.color = Color.white;
+                cap.alignment = TextAnchor.MiddleCenter;
+                PlaceAt(capGo, persPanel.transform, 10f, y, 25f, 30f);
+
+                var sliderGo = DefaultControls.CreateSlider(res);
+                PlaceAt(sliderGo, persPanel.transform, 42f, y + 6f, 178f, 20f);
+                var slider = sliderGo.GetComponent<Slider>();
+                slider.minValue = -1f;
+                slider.maxValue = 1f;
+                slider.value = 0f;
+                Tint(sliderGo, "Background", new Color(0.35f, 0.35f, 0.35f));
+                Tint(sliderGo, "Fill Area/Fill", new Color(0.35f, 0.6f, 0.9f));
+                sliders[i] = slider;
+
+                var valGo = DefaultControls.CreateText(res);
+                var val = valGo.GetComponent<Text>();
+                val.text = "+0.00";
+                val.color = Color.white;
+                val.alignment = TextAnchor.MiddleRight;
+                PlaceAt(valGo, persPanel.transform, 228f, y, 62f, 30f);
+                valueLabels[i] = val;
+            }
+
+            var applyGo = DefaultControls.CreateButton(res);
+            applyGo.GetComponentInChildren<Text>().text = "Apply";
+            PlaceAt(applyGo, persPanel.transform, 10f, 286f, 135f, 32f);
+
+            var nameInputGo = DefaultControls.CreateInputField(res);
+            PlaceAt(nameInputGo, persPanel.transform, 10f, 330f, 180f, 32f);
+            var nameInput = nameInputGo.GetComponent<InputField>();
+            var placeholder = nameInput.placeholder as Text;
+            if (placeholder != null) placeholder.text = "new NPC name...";
+
+            var addGo = DefaultControls.CreateButton(res);
+            addGo.GetComponentInChildren<Text>().text = "Add NPC";
+            PlaceAt(addGo, persPanel.transform, 200f, 330f, 90f, 32f);
+
+            // ------------------------------------------------------- wiring --
+            var playCtrl = new GameObject("PlaybackController")
                 .AddComponent<PlaybackController>();
-            ctrl.npcs = agents;
-            ctrl.dropdowns = dropdowns;
-            ctrl.countDropdown = countGo.GetComponent<Dropdown>();
-            ctrl.slotRows = slotRows;
-            ctrl.continueButton = continueGo.GetComponent<Button>();
-            ctrl.restartButton = restartGo.GetComponent<Button>();
-            ctrl.statusText = status;
-            ctrl.controlBar = bar;
-            ctrl.badges = badges;
+            playCtrl.npcs = agents;
+            playCtrl.dropdowns = dropdowns;
+            playCtrl.countDropdown = countGo.GetComponent<Dropdown>();
+            playCtrl.slotRows = slotRows;
+            playCtrl.continueButton = continueGo.GetComponent<Button>();
+            playCtrl.restartButton = restartGo.GetComponent<Button>();
+            playCtrl.statusText = status;
+            playCtrl.controlBar = bar;
+            playCtrl.badges = badges;
+
+            var liveGo = new GameObject("LiveController");
+            var client = liveGo.AddComponent<LiveClient>();
+            var liveCtrl = liveGo.AddComponent<LiveController>();
+            liveCtrl.client = client;
+            liveCtrl.npcPrototype = protoAgent;
+            liveCtrl.connectButton = connectGo.GetComponent<Button>();
+            liveCtrl.stepButton = stepGo.GetComponent<Button>();
+            liveCtrl.resetButton = resetGo.GetComponent<Button>();
+            liveCtrl.statusText = status;
+            liveCtrl.controlBar = bar;
+            liveCtrl.eventPanel = eventPanel;
+            liveCtrl.eventPanelContent = epRt;
+            liveCtrl.personalityPanel = persPanel;
+            liveCtrl.npcDropdown = npcDdGo.GetComponent<Dropdown>();
+            liveCtrl.traitSliders = sliders;
+            liveCtrl.traitValueLabels = valueLabels;
+            liveCtrl.applyButton = applyGo.GetComponent<Button>();
+            liveCtrl.newNpcName = nameInput;
+            liveCtrl.addNpcButton = addGo.GetComponent<Button>();
+
+            var switcher = new GameObject("ModeSwitcher").AddComponent<ModeSwitcher>();
+            switcher.modeDropdown = modeGo.GetComponent<Dropdown>();
+            switcher.playback = playCtrl;
+            switcher.live = liveCtrl;
+            switcher.playbackGroup = playbackGroup;
+            switcher.liveGroup = liveGroup;
+            switcher.eventPanel = eventPanel;
+            switcher.personalityPanel = persPanel;
+
+            // playback is the startup mode; ModeSwitcher re-syncs at runtime
+            liveGroup.SetActive(false);
+            eventPanel.SetActive(false);
+            persPanel.SetActive(false);
 
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
-            Debug.Log($"Playback scene built and saved to {ScenePath}");
+            Debug.Log($"Playback + Live scene built and saved to {ScenePath}");
         }
 
+        // ------------------------------------------------------------ helpers --
         static void Place(GameObject go, Transform parent, float x, float width)
         {
             go.transform.SetParent(parent, false);
@@ -192,6 +362,39 @@ namespace Dissertation.EditorTools
             rt.pivot = new Vector2(0f, 0.5f);
             rt.anchoredPosition = new Vector2(x, 0f);
             rt.sizeDelta = new Vector2(width, 48f);
+        }
+
+        // top-left anchored placement inside a panel (y grows downward)
+        static void PlaceAt(GameObject go, Transform parent,
+                            float x, float y, float width, float height)
+        {
+            go.transform.SetParent(parent, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(x, -y);
+            rt.sizeDelta = new Vector2(width, height);
+        }
+
+        static GameObject Group(string name, Transform parent)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            return go;
+        }
+
+        static void Tint(GameObject root, string childPath, Color color)
+        {
+            var child = root.transform.Find(childPath);
+            if (child == null) return;
+            var image = child.GetComponent<Image>();
+            if (image != null) image.color = color;
         }
 
         static GameObject NewSprite(string name, Sprite sprite, Color color)

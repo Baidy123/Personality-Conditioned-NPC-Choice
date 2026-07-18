@@ -159,5 +159,16 @@ namespace Dissertation.Playback
         {
             if (statusText != null) statusText.text = msg;
         }
+
+        // Mode switching (see Dissertation.Live.ModeSwitcher): hide this
+        // mode's NPCs without losing which slots are loaded.
+        public void SetNpcsVisible(bool visible)
+        {
+            for (var i = 0; i < npcs.Length; i++)
+            {
+                var loaded = models != null && i < models.Length && models[i] != null;
+                npcs[i].gameObject.SetActive(visible && loaded);
+            }
+        }
     }
 }
