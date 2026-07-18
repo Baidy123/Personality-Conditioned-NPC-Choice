@@ -19,6 +19,8 @@ namespace Dissertation.EditorTools
         [MenuItem("Dissertation/Build Playback Scene")]
         public static void Build()
         {
+            // rebuilding replaces the open scene — don't silently drop edits
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             var square = EnsureSprite("white_square.png", MakeSquareTex());
             var circle = EnsureSprite("circle.png", MakeCircleTex());
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -57,6 +59,7 @@ namespace Dissertation.EditorTools
                 new Color(0.05f, 0.28f, 0.32f),   // C dark teal
             };
             var agents = new NpcAgent[slotColors.Length];
+            var badges = new GameObject[slotColors.Length];
             for (var i = 0; i < slotColors.Length; i++)
             {
                 var slotName = ((char)('A' + i)).ToString();
@@ -71,6 +74,7 @@ namespace Dissertation.EditorTools
                 badge.transform.localScale = Vector3.one / 0.55f;   // undo parent scale
                 badge.transform.localPosition = Vector3.zero;
                 badge.GetComponent<MeshRenderer>().sortingOrder = 11;
+                badges[i] = badge;
 
                 var label = NewText("ActionLabel", font, "", 0.11f);
                 label.transform.SetParent(npcGo.transform, false);
@@ -140,6 +144,7 @@ namespace Dissertation.EditorTools
             ctrl.restartButton = restartGo.GetComponent<Button>();
             ctrl.statusText = status;
             ctrl.controlBar = bar;
+            ctrl.badges = badges;
 
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -185,19 +190,21 @@ namespace Dissertation.EditorTools
 
         static Sprite EnsureSprite(string file, Texture2D tex)
         {
+            // always rewrite + reimport: idempotent, and self-heals a half-done
+            // first run or an edited Make*Tex shape
             Directory.CreateDirectory(SpriteDir);
             var path = $"{SpriteDir}/{file}";
-            if (!File.Exists(path))
-            {
-                File.WriteAllBytes(path, tex.EncodeToPNG());
-                AssetDatabase.ImportAsset(path);
-                var imp = (TextureImporter)AssetImporter.GetAtPath(path);
-                imp.textureType = TextureImporterType.Sprite;
-                imp.spritePixelsPerUnit = tex.width;   // every sprite is 1x1 world units
-                imp.SaveAndReimport();
-            }
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path);
+            var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+            imp.textureType = TextureImporterType.Sprite;
+            imp.spritePixelsPerUnit = tex.width;   // every sprite is 1x1 world units
+            imp.SaveAndReimport();
             Object.DestroyImmediate(tex);
-            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite == null)
+                throw new System.InvalidOperationException($"sprite import failed: {path}");
+            return sprite;
         }
 
         static Texture2D MakeSquareTex()

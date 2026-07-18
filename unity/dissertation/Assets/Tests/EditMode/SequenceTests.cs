@@ -62,6 +62,18 @@ public class SequenceTests
     }
 
     [Test]
+    public void DtoNeverDeclaresConditionFields()
+    {
+        // blinding constraint: if someone adds one of these to SequenceMeta,
+        // JsonUtility would start parsing it and the UI could leak it
+        var forbidden = new List<string>
+            { "policy", "checkpoint", "personality_name", "ocean", "seed" };
+        foreach (var name in forbidden)
+            Assert.IsNull(typeof(SequenceMeta).GetField(name),
+                $"condition field {name} must not be parsed by the player");
+    }
+
+    [Test]
     public void LayoutCoversAllWorldLocations()
     {
         // must stay in sync with data/world.json

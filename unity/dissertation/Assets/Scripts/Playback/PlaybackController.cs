@@ -19,6 +19,7 @@ namespace Dissertation.Playback
         public Button restartButton;
         public Text statusText;
         public GameObject controlBar;
+        public GameObject[] badges;   // A/B/C letters; hidden with the bar for clean frames
 
         Sequence[] sequences;
         PlaybackModel[] models;
@@ -99,10 +100,18 @@ namespace Dissertation.Playback
 
         void NextStep()
         {
+            // all-or-nothing: advancing only the slots that finished walking
+            // would let lockstep cycles drift apart permanently
+            for (var i = 0; i < npcs.Length; i++)
+                if (models[i] != null && npcs[i].IsWalking)
+                {
+                    SetStatus("walking...");
+                    return;
+                }
             var parts = new List<string>();
             for (var i = 0; i < npcs.Length; i++)
             {
-                if (models[i] == null || npcs[i].IsWalking) continue;
+                if (models[i] == null) continue;
                 var step = models[i].Advance();
                 if (step == null)
                 {
@@ -125,7 +134,13 @@ namespace Dissertation.Playback
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space)) NextStep();
-            if (Input.GetKeyDown(KeyCode.H)) controlBar.SetActive(!controlBar.activeSelf);
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                var show = !controlBar.activeSelf;
+                controlBar.SetActive(show);
+                if (badges != null)
+                    foreach (var badge in badges) badge.SetActive(show);
+            }
             if (Input.GetKeyDown(KeyCode.R)) ReloadAll();
         }
 

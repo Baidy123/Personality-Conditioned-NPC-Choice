@@ -36,6 +36,9 @@ namespace Dissertation.Playback
 
         public void PerformAction(string actionId)
         {
+            // consecutive same-location actions: drop any bob offset before
+            // re-capturing basePosition, or the NPC creeps upward step by step
+            if (performing) transform.position = basePosition;
             walking = false;
             performing = true;
             basePosition = transform.position;
