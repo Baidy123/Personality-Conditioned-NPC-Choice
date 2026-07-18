@@ -239,7 +239,15 @@ byte-identical step lists.
   "arena/spectate"`. `enemy_camp` is exercised through its unlock toggle.
 
   **Unity side.** A Mode dropdown (Playback / Live) toggles two UI groups
-  and controller components in the same scene. Live mode: Connect fetches
+  and controller components in the same scene. Live mode: Connect first
+  auto-starts the brain as a hidden child process (`BrainLauncher`: dev
+  default `python -m experiments.rq3.live_server` from `code/`; the
+  packaged build points the same component at the bundled PyInstaller
+  exe), retries `/state` until the server answers, kills the process on
+  quit, and mirrors the brain's console into the Unity Console with a
+  `[brain]` prefix. A manually started server on the same port also
+  works — the launcher's duplicate simply fails to bind and the retry
+  loop reaches the existing one. Connect then fetches
   `/state`, spawns one dot per reported NPC from an inactive prototype
   (distinct colours, personality-name label under the dot, action label
   above on the same staggered height planes as playback), and builds the

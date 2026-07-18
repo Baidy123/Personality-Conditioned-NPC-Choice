@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Dissertation.Playback;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace Dissertation.Live
     public class LiveController : MonoBehaviour
     {
         public LiveClient client;
+        public BrainLauncher launcher;         // optional: auto-starts the brain
         public NpcAgent npcPrototype;          // inactive template in the scene
         public Button connectButton;
         public Button stepButton;
@@ -65,12 +67,37 @@ namespace Dissertation.Live
         // ---------------------------------------------------------- requests --
         void Connect()
         {
-            client.Get("/state", body =>
+            // auto-start the brain if a launcher is wired; even if that fails,
+            // the retry loop can still reach a manually started server
+            if (launcher != null && !launcher.IsRunning)
             {
-                state = JsonUtility.FromJson<LiveState>(body);
-                RebuildAll();
-                SetStatus($"connected - {state.npcs.Count} NPCs, world {state.world}");
-            }, err => SetStatus($"connect failed: {err} - is the brain server running?"));
+                SetStatus("starting brain...");
+                launcher.StartBrain();
+            }
+            StartCoroutine(ConnectRoutine());
+        }
+
+        IEnumerator ConnectRoutine()
+        {
+            const int attempts = 12;               // ~5 s of patience for boot
+            for (var i = 0; i < attempts; i++)
+            {
+                var done = false;
+                var success = false;
+                client.Get("/state", body =>
+                {
+                    state = JsonUtility.FromJson<LiveState>(body);
+                    RebuildAll();
+                    SetStatus($"connected - {state.npcs.Count} NPCs, "
+                              + $"world {state.world}");
+                    done = true;
+                    success = true;
+                }, _ => done = true);
+                yield return new WaitUntil(() => done);
+                if (success) yield break;
+                yield return new WaitForSeconds(0.4f);
+            }
+            SetStatus("connect failed - check the Console for [brain] errors");
         }
 
         void Step()

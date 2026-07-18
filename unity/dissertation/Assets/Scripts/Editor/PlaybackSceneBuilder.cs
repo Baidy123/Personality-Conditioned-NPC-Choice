@@ -315,8 +315,10 @@ namespace Dissertation.EditorTools
 
             var liveGo = new GameObject("LiveController");
             var client = liveGo.AddComponent<LiveClient>();
+            var launcher = liveGo.AddComponent<BrainLauncher>();
             var liveCtrl = liveGo.AddComponent<LiveController>();
             liveCtrl.client = client;
+            liveCtrl.launcher = launcher;
             liveCtrl.npcPrototype = protoAgent;
             liveCtrl.connectButton = connectGo.GetComponent<Button>();
             liveCtrl.stepButton = stepGo.GetComponent<Button>();
