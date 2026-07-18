@@ -58,6 +58,13 @@ namespace Dissertation.EditorTools
                 new Color(0.30f, 0.12f, 0.35f),   // B dark purple
                 new Color(0.05f, 0.28f, 0.32f),   // C dark teal
             };
+            var labelColors = new[]               // light tints of the slot colours
+            {
+                new Color(0.95f, 0.95f, 0.95f),
+                new Color(0.85f, 0.65f, 0.95f),
+                new Color(0.55f, 0.95f, 0.90f),
+            };
+            const float npcScale = 0.55f;
             var agents = new NpcAgent[slotColors.Length];
             var badges = new GameObject[slotColors.Length];
             for (var i = 0; i < slotColors.Length; i++)
@@ -65,22 +72,30 @@ namespace Dissertation.EditorTools
                 var slotName = ((char)('A' + i)).ToString();
                 var npcGo = NewSprite("NPC_" + slotName, circle, slotColors[i]);
                 npcGo.transform.position = LocationLayout.NpcStart;
-                npcGo.transform.localScale = Vector3.one * 0.55f;
+                npcGo.transform.localScale = Vector3.one * npcScale;
                 npcGo.GetComponent<SpriteRenderer>().sortingOrder = 5;
                 agents[i] = npcGo.AddComponent<NpcAgent>();
 
                 var badge = NewText("Badge", font, slotName, 0.08f);
                 badge.transform.SetParent(npcGo.transform, false);
-                badge.transform.localScale = Vector3.one / 0.55f;   // undo parent scale
+                badge.transform.localScale = Vector3.one / npcScale;   // undo parent scale
                 badge.transform.localPosition = Vector3.zero;
                 badge.GetComponent<MeshRenderer>().sortingOrder = 11;
                 badges[i] = badge;
 
                 var label = NewText("ActionLabel", font, "", 0.11f);
                 label.transform.SetParent(npcGo.transform, false);
-                label.transform.localScale = Vector3.one / 0.55f;
-                label.transform.localPosition = new Vector3(0f, 1.5f, 0f);
-                agents[i].actionLabel = label.GetComponent<TextMesh>();
+                label.transform.localScale = Vector3.one / npcScale;
+                // each slot's label lives on its own global height plane so
+                // co-located NPCs' action words never overlap; localPosition is
+                // in parent units, hence the divide by the parent scale
+                var worldHeight = LocationLayout.LabelPlanes[i]
+                                  - LocationLayout.SlotOffsets[i].y;
+                label.transform.localPosition =
+                    new Vector3(0f, worldHeight / npcScale, 0f);
+                var labelTm = label.GetComponent<TextMesh>();
+                labelTm.color = labelColors[i];
+                agents[i].actionLabel = labelTm;
             }
 
             // ------------------------------------------------------------- UI

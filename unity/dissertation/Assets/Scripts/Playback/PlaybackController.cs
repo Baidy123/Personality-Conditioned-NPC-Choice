@@ -25,14 +25,6 @@ namespace Dissertation.Playback
         PlaybackModel[] models;
         string[] files = new string[0];
 
-        // side-by-side stands so co-located NPCs never overlap
-        static readonly Vector2[] SlotOffsets =
-        {
-            new Vector2(-0.45f, 0f),
-            new Vector2(0.45f, 0f),
-            new Vector2(0f, -0.55f),
-        };
-
         static string SlotName(int slot) => ((char)('A' + slot)).ToString();
 
         void Start()
@@ -87,7 +79,7 @@ namespace Dissertation.Playback
             sequences[slot] = loaded;
             models[slot] = new PlaybackModel(loaded.steps);
             npcs[slot].gameObject.SetActive(true);
-            npcs[slot].Teleport(LocationLayout.NpcStart + SlotOffsets[slot]);
+            npcs[slot].Teleport(LocationLayout.NpcStart + LocationLayout.SlotOffsets[slot]);
             SetStatus($"{SlotName(slot)} = {loaded.meta.sequence_id} "
                       + $"({loaded.steps.Count} steps) - Continue to start");
         }
@@ -120,7 +112,7 @@ namespace Dissertation.Playback
                     continue;
                 }
                 var pos = LocationLayout.Entries[step.location].Position
-                          + LocationLayout.NpcOffset + SlotOffsets[i];
+                          + LocationLayout.NpcOffset + LocationLayout.SlotOffsets[i];
                 var slot = i;               // avoid loop-variable capture
                 var action = step.action;
                 if (step.moved) npcs[i].WalkTo(pos, () => npcs[slot].PerformAction(action));
