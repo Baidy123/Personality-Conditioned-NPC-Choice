@@ -112,7 +112,7 @@ def _parse_rounds(argv: list[str]) -> int:
     try:
         rounds = int(raw)
     except ValueError:
-        raise SystemExit(f"error: rounds must be an integer, got {raw!r}")
+        raise SystemExit(f"error: rounds must be an integer, got {raw!r}") from None
     if rounds < 1:
         raise SystemExit(f"error: rounds must be >= 1, got {rounds}")
     return rounds
@@ -125,7 +125,7 @@ def _parse_seed(argv: list[str]) -> int | None:
     try:
         return int(raw)
     except ValueError:
-        raise SystemExit(f"error: seed must be an integer, got {raw!r}")
+        raise SystemExit(f"error: seed must be an integer, got {raw!r}") from None
 
 
 if __name__ == "__main__":

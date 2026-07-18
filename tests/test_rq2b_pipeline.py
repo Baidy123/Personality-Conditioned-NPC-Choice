@@ -11,7 +11,6 @@ import torch
 
 from experiments.rq2.common import RunSpec, case_input_dict, read_pool, write_pool
 from npc_policy import DEFAULT_CONFIG, IndependentCase, Option, RecentBuffer, compute_relations
-from npc_policy.representation import Personality
 
 CODE = Path(__file__).resolve().parents[1]
 
@@ -261,7 +260,7 @@ class TestImport:
         recent_locations must count as held-out family (checked by id, not by
         the filter function itself — non-circular)."""
         from experiments.rq2.import_independent import run_import
-        raw = _write_raw_dir(tmp_path, n_general=20, n_pers=2, n_family=2)
+        _write_raw_dir(tmp_path, n_general=20, n_pers=2, n_family=2)
         sneaky = _raw_action_case(
             selected_location="tavern",
             recent_locations=["infirmary", "tavern"],

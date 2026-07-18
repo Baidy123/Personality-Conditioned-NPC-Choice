@@ -1,12 +1,15 @@
 """E4 — memory-context ablation (the "decision structure" part of RQ1).
 
 The bounded recent-choice context is a structural component of the proposal.
-E4 reruns trajectories under three conditions — no memory, location memory
-only, location + action memory — and measures what the component contributes,
-and through which traits. By design the memory term works through O, C, and
-(since v1.3) N: the O/C familiarity affinity, the C-modulated satiation, and
-the N familiarity clinging. E and A should be largely unaffected. E4 verifies
-that attribution.
+E4 measures what it contributes and through which traits, at both levels:
+location choice is compared on free trajectories with H_L off vs live, action
+choice on fixed-location rollouts with H_A off vs live. Holding the location
+fixed is what makes the action side readable — on a free trajectory a profile
+that rarely stays put leaves the same-location denominator empty.
+
+By design the memory term works through O, C, and (since v1.3) N: the O/C
+familiarity affinity, the C-modulated satiation, and the N familiarity
+clinging. E and A should be largely unaffected. E4 verifies that attribution.
 
 Outputs: results/rq1/e4_ablation.png, e4_ablation.csv
 
@@ -23,13 +26,13 @@ from npc_policy.representation import Personality
 
 from .common import (
     CONDITION_COLORS, RESULTS, TRAIT_SHORT, TRAITS, TRAJ_SEEDS,
-    load_cases, personality_of, run_trajectory, setup_style,
-    trajectory_metrics, world_for, write_csv,
+    action_repeat_rate, load_cases, personality_of, run_action_trajectory,
+    run_trajectory, setup_style, trajectory_metrics, world_for, write_csv,
 )
 
-CONDITIONS = ("none", "location_only", "full")
-METRICS = ("repeat_rate", "visit_entropy", "max_share", "distinct",
-           "action_repeat_rate")
+CONDITIONS = ("none", "full")
+METRICS = ("repeat_rate", "visit_entropy", "max_share", "distinct")
+ACTION_METRIC = "action_repeat_rate"
 
 
 def systematic_profiles() -> list[tuple[str, Personality]]:
@@ -51,39 +54,51 @@ def main() -> None:
         (e["id"], personality_of(e)) for e in cases["profiles"]["named"]
     ]
 
+    location_ids = [o.id for o in world.resolve()]
+
     rows = []
     agg: dict[tuple[str, str], dict[str, float]] = {}
     for pid, p in profiles:
         for cond in CONDITIONS:
             per_seed = {m: [] for m in METRICS}
+            per_seed[ACTION_METRIC] = []
             for seed in TRAJ_SEEDS:
-                met = trajectory_metrics(
-                    *run_trajectory(scorer, world, p, seed, memory=cond))
-                for m in METRICS:
+                visits, _ = run_trajectory(scorer, world, p, seed, memory=cond)
+                met = trajectory_metrics(visits)
+                # Action side: one fixed-location rollout per location, averaged
+                # over the six. Staying put keeps H_A alive for the whole run, so
+                # every profile contributes a rate rather than an empty denominator.
+                met[ACTION_METRIC] = float(np.mean([
+                    action_repeat_rate(run_action_trajectory(
+                        scorer, world, p, loc, seed, memory=cond))
+                    for loc in location_ids
+                ]))
+                for m in (*METRICS, ACTION_METRIC):
                     per_seed[m].append(met[m])
-                rows.append([pid, cond, seed] + [f"{met[m]:.4f}" for m in METRICS])
-            agg[(pid, cond)] = {m: float(np.mean(per_seed[m])) for m in METRICS}
+                rows.append([pid, cond, seed]
+                            + [f"{met[m]:.4f}" for m in (*METRICS, ACTION_METRIC)])
+            agg[(pid, cond)] = {m: float(np.mean(per_seed[m]))
+                                for m in (*METRICS, ACTION_METRIC)}
 
     write_csv(RESULTS / "e4_ablation.csv",
-              ["profile", "condition", "seed", *METRICS], rows)
+              ["profile", "condition", "seed", *METRICS, ACTION_METRIC], rows)
 
-    # ---- figure: repeat rate + variety, systematic profiles x conditions ----
+    # ---- figure: location + action repeat rate, systematic profiles x conditions ----
     sys_ids = [pid for pid, _ in systematic_profiles()]
-    fig, axes = plt.subplots(3, 1, figsize=(12, 10.5), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(12, 7.5), sharex=True)
     panel = (("repeat_rate", "stickiness: immediate location-repeat rate"),
-             ("visit_entropy", "variety: entropy of visit shares"),
-             ("action_repeat_rate",
-              "action stickiness: action-repeat rate on same-location stays "
-              "(separates location_only vs full)"))
+             (ACTION_METRIC,
+              "action stickiness: action-repeat rate at a fixed location "
+              "(mean over the 6 locations)"))
     x = np.arange(len(sys_ids))
     for ax, (metric, title) in zip(axes, panel):
         for i, cond in enumerate(CONDITIONS):
             vals = [agg[(pid, cond)][metric] for pid in sys_ids]
-            ax.bar(x + (i - 1) * 0.27, vals, width=0.25,
+            ax.bar(x + (i - 0.5) * 0.42, vals, width=0.38,
                    color=CONDITION_COLORS[cond], label=cond)
         ax.set_title(title)
         ax.set_xticks(x, sys_ids)
-    axes[0].legend(frameon=False, ncol=3, title="memory condition")
+    axes[0].legend(frameon=False, ncol=2, title="memory condition")
     fig.suptitle("What the bounded recent-choice context contributes "
                  f"(50 rounds x {len(TRAJ_SEEDS)} seeds)", y=0.995)
     fig.tight_layout()

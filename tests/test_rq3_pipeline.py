@@ -3,7 +3,6 @@
 
 import json
 
-import numpy as np
 import pytest
 
 from experiments.rq3.common import (

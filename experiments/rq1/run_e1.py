@@ -6,8 +6,9 @@ measures how strongly the choice distribution responds:
   - sensitivity curves: P_rule per location vs trait value (empty memory);
   - expression strength: endpoint TVD per trait, on P_base and on P_rule
     (their gap quantifies how much the N temperature dilutes each trait's
-    preference signal), plus the context-averaged and action-level values;
-  - the N entropy curve (bidirectional temperature, checklist A5 formalised).
+    preference signal), plus the action level (empty memory, mean over the
+    six locations' action sets). Context-averaged columns stay in the CSV
+    only as channel weights for E2's weighted consistency check;
 
 Outputs: results/rq1/e1_curves.png, e1_action_curves.png, e1_strength.png,
 e1_sensitivity.csv
@@ -23,8 +24,8 @@ import numpy as np
 from npc_policy import HandAuthoredScorer
 
 from .common import (
-    LOC_COLORS, RESULTS, TRAIT_COLORS, TRAIT_SHORT, TRAITS,
-    action_buffer, entropy, load_cases, location_buffer, personality_of,
+    LOC_COLORS, RESULTS, TRAIT_SHORT, TRAITS,
+    action_buffer, load_cases, location_buffer, personality_of,
     setup_style, tvd, world_for, write_csv,
 )
 
@@ -44,7 +45,10 @@ def main() -> None:
     locs = world.resolve()
     ids = [o.id for o in locs]
 
-    fig, axes = plt.subplots(2, 3, figsize=(13, 7), sharex=True, sharey=False)
+    # One panel per trait. The N entropy curve that used to sit in a sixth panel
+    # is not evidence for E1 (whose metric is TVD); it belongs to the RQ2 E-diag
+    # overlay, which plots the same teacher curve against the students'.
+    fig, axes = plt.subplots(2, 3, figsize=(13, 7), sharex=True, sharey=True)
     for ax, trait in zip(axes.flat, TRAITS):
         P = np.stack([
             scorer.distribution(personality_of(sweep_entry(trait, v)), locs, level="location")
@@ -53,21 +57,14 @@ def main() -> None:
         for k, lid in enumerate(ids):
             ax.plot(values, P[:, k], color=LOC_COLORS[lid], label=lid)
         ax.set_title(f"{TRAIT_SHORT[trait]} ({trait})")
-        ax.set_ylabel("P_rule")
         ax.set_xlabel("trait value")
-
-    ax = axes.flat[5]  # N temperature: entropy of P_rule over the N sweep
-    ent = [entropy(scorer.distribution(personality_of(sweep_entry("neuroticism", v)),
-                                       locs, level="location")) for v in values]
-    ax.plot(values, ent, color=TRAIT_COLORS["neuroticism"])
-    ax.set_title("Neuroticism temperature: choice entropy")
-    ax.set_ylabel("entropy (nats)")
-    ax.set_xlabel("N value")
+        ax.set_ylabel("P_rule")
+    axes.flat[5].axis("off")     # five traits, six slots
 
     handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=len(ids), frameon=False)
     fig.suptitle("Location-choice sensitivity to single traits (empty memory)", y=1.0)
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e1_curves.png", bbox_inches="tight")
     plt.close(fig)
@@ -132,7 +129,20 @@ def main() -> None:
             ))
         tvd_ctx = float(np.mean(ctx_tvds))
 
-        # action level: mean endpoint TVD over all action contexts
+        # action level, empty memory: one action set per location, averaged
+        # over the six. Memory contexts stay out of E1 — what memory adds is
+        # E4's subject.
+        act_empty_tvds = []
+        for o in locs:
+            acts = world.actions_at(o.id)
+            act_empty_tvds.append(tvd(
+                scorer.distribution(p_lo, acts, level="action"),
+                scorer.distribution(p_hi, acts, level="action"),
+            ))
+        tvd_act = float(np.mean(act_empty_tvds))
+
+        # context-averaged action TVD, kept only because E2's weighted
+        # consistency check reads this column as a channel weight.
         act_tvds = []
         for ctx in cases["action_contexts"]:
             w = world_for(ctx["world"])
@@ -142,27 +152,26 @@ def main() -> None:
                 scorer.distribution(p_lo, acts, buffer=buf, level="action"),
                 scorer.distribution(p_hi, acts, buffer=buf, level="action"),
             ))
-        tvd_act = float(np.mean(act_tvds))
+        tvd_act_ctx = float(np.mean(act_tvds))
 
         strength[trait] = {"base": tvd_base, "rule": tvd_rule,
                            "ctx": tvd_ctx, "act": tvd_act}
         rows.append([trait, f"{tvd_base:.4f}", f"{tvd_rule:.4f}",
-                     f"{tvd_ctx:.4f}", f"{tvd_act:.4f}"])
+                     f"{tvd_ctx:.4f}", f"{tvd_act_ctx:.4f}", f"{tvd_act:.4f}"])
 
     write_csv(RESULTS / "e1_sensitivity.csv",
               ["trait", "tvd_base_location", "tvd_rule_location",
-               "tvd_rule_location_ctx_avg", "tvd_rule_action_avg"], rows)
+               "tvd_rule_location_ctx_avg", "tvd_rule_action_avg",
+               "tvd_rule_action_empty"], rows)
 
     fig, ax = plt.subplots(figsize=(9, 4.5))
     x = np.arange(len(TRAITS))
     bars = [("P_base (location)", "base", "#BBBBBB"),
             ("P_rule (location)", "rule", "#0072B2"),
-            ("P_rule (action, avg)", "act", "#E69F00")]
+            ("P_rule (action)", "act", "#E69F00")]
     for i, (label, key, color) in enumerate(bars):
         vals = [strength[t][key] for t in TRAITS]
         ax.bar(x + (i - 1) * 0.26, vals, width=0.24, color=color, label=label)
-    ax.axhline(0.15, color="0.4", linewidth=1, linestyle="--")
-    ax.text(len(TRAITS) - 0.5, 0.155, "B1 floor (0.15)", fontsize=8, color="0.4")
     ax.set_xticks(x, [TRAIT_SHORT[t] for t in TRAITS])
     ax.set_ylabel("endpoint TVD (trait -1 vs +1)")
     ax.set_title("Expression strength per trait channel")
@@ -172,10 +181,10 @@ def main() -> None:
 
     # ------------------------------------------------------------- summary ---
     print("E1 expression strength (endpoint TVD):")
-    print(f"{'trait':<18} {'P_base':>7} {'P_rule':>7} {'ctx-avg':>8} {'action':>7}")
+    print(f"{'trait':<18} {'P_base':>7} {'P_rule':>7} {'ctx-avg':>8} {'action(empty)':>13}")
     for t in TRAITS:
         s = strength[t]
-        print(f"{t:<18} {s['base']:>7.3f} {s['rule']:>7.3f} {s['ctx']:>8.3f} {s['act']:>7.3f}")
+        print(f"{t:<18} {s['base']:>7.3f} {s['rule']:>7.3f} {s['ctx']:>8.3f} {s['act']:>13.3f}")
     n = strength["neuroticism"]
     print(f"\nN dilution: preference signal {n['base']:.3f} (P_base) -> "
           f"{n['rule']:.3f} (P_rule) = {100 * (1 - n['rule'] / n['base']):.0f}% absorbed"

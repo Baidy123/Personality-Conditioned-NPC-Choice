@@ -15,6 +15,31 @@ pip install -r requirements.txt
 python -m examples.demo
 ```
 
+## Running the experiments
+
+Every command runs from `code/`; run `python -m pytest -q` first to confirm
+the environment (expected: all green).
+
+**RQ1 — behavioural-expression analyses** (outputs → `results/rq1/`):
+
+```powershell
+python -m experiments.rq1.gen_cases   # matched cases (profiles x contexts x world variants)
+python -m experiments.rq1.run_e1      # E1 trait sensitivity curves
+python -m experiments.rq1.run_e2      # E2 profile-distance correlation
+python -m experiments.rq1.run_e3      # E3 trajectory patterns (named + sweep profiles)
+python -m experiments.rq1.run_e4      # E4 memory/context ablations
+```
+
+Run `gen_cases` first; E1–E4 are independent of each other after that.
+
+**RQ2 — policy learning (2A controlled + 2B independent):** follow
+`docs/rq2_runbook.md` step by step (2A: `gen_controlled → train → run_2a →
+run_e_diag`, smoke first; 2B: `import_independent → run_label_probe →
+train_2b → run_2b`, generation protocol in `docs/rq2b_generation_guide.md`).
+
+**Game modes (playback generation + live demo):** see `configs/README.md` —
+the change-X-edit-Y map, both run commands, and model/checkpoint selection.
+
 ## What is implemented (verified)
 
 1. Given a personality, a candidate set, and the relevant memory, produce a
@@ -180,16 +205,24 @@ Done:
       (§10 step 3): trait sensitivity, profile distinguishability, trajectory
       patterns, memory ablations (`experiments/rq1/`, design record:
       `docs/specs/2026-07-03-rq1-experiments.md`).
+- [x] Learned-policy layer (simple / nonlinear / agnostic under the shared
+      12-dim interface) and the 2A controlled pipeline: dataset generation,
+      130 training runs (S0 + G1–G6 + ablations + data sizes), metrics, and
+      the E1–E4 structural diagnostic (`experiments/rq2/`,
+      `docs/rq2_runbook.md`).
+- [x] 2B independent pipeline: AI-assisted generation protocol
+      (`docs/rq2b_generation_guide.md`), import/review gates, label probe,
+      training, and evaluation (`results/rq2b/`).
+- [x] RQ3 tooling: sequence pipeline + Unity evaluation environment
+      (playback player and live demo with the local decision service;
+      `experiments/rq3/`, `unity/dissertation`, `configs/README.md`).
 
 Next:
-- [ ] Personality-agnostic control + simple + nonlinear learned policies under the
-      shared 12-dim interface (§10 step 4).
-- [ ] Add the learned-model fields to `cases.py` (padded-12 candidates,
-      `selected_location_context`, decision-type interactions).
-- [ ] Controlled dataset generation + controlled-learning experiments (§10 step 5).
-- [ ] Independent dataset protocol, training, and the cross-variant comparison
-      (§10 steps 6–8).
-- [ ] Evaluation world materials + human study (§10 step 9).
+- [ ] Human-study protocol (with supervisor), ethics, stimulus recording,
+      and the study itself — the sole evidence source for RQ3.
+- [ ] Study 3 comparative automated evaluation write-up on the independent
+      test cases.
+- [ ] Dissertation writing.
 
 Global-event switches (toggling `unlocked` / `active`) are deferred to game-engine
 integration; `force_npc` is stored but unused (game layer, excluded from data per §5c).

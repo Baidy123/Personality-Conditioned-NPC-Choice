@@ -24,7 +24,7 @@ import numpy as np
 
 from .config import DEFAULT_CONFIG, ScorerConfig
 from .representation import Option, Personality, RecentBuffer
-from .scorer import HandAuthoredScorer, ScoreTrace
+from .scorer import ScoreTrace
 
 SelectionMode = Literal["argmax", "sample"]
 

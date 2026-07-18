@@ -23,7 +23,7 @@ fields on ``IndependentCase`` keep the manual-review trail required by the desig
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 import numpy as np

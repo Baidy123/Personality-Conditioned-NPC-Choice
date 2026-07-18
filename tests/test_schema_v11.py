@@ -19,7 +19,7 @@ def test_relational_tags():
 
 def test_native_action_layout():
     # guarantee used by the scorer: intensity block first, relational block last
-    assert ACTION_TAGS == INTENSITY_TAGS["action"] + RELATIONAL_TAGS
+    assert INTENSITY_TAGS["action"] + RELATIONAL_TAGS == ACTION_TAGS
 
 
 def test_n_intensity():

@@ -28,7 +28,7 @@ from .common import (
 )
 
 N_BINS = 12
-MANTEL_PERMS = 999
+MANTEL_PERMS = 9999
 
 
 def main() -> None:
@@ -117,7 +117,7 @@ def main() -> None:
     ax.set_ylabel("behavioural distance (mean JSD over matched contexts)")
     ax.set_title(f"Distinguishability: {n} random profiles, "
                  f"{n * (n - 1) // 2} pairs, {n_ctx} contexts")
-    ax.text(0.02, 0.95, f"Spearman rho = {rho:.3f}\nMantel p = {p_m:.3f} "
+    ax.text(0.02, 0.95, f"Spearman rho = {rho:.3f}\nMantel p = {p_m:.4f} "
             f"({MANTEL_PERMS} perms)", transform=ax.transAxes, va="top",
             fontsize=10, bbox=dict(boxstyle="round", fc="white", ec="0.8"))
     ax.legend(frameon=False, loc="lower right")
@@ -143,7 +143,7 @@ def main() -> None:
     print(f"E2: Spearman rho = {rho:.3f} combined "
           f"(location-only {rho_loc:.3f} over {n_loc} contexts, "
           f"action-only {rho_act:.3f} over {n_act} contexts), "
-          f"Mantel p = {p_m:.3f}, {n * (n - 1) // 2} pairs")
+          f"Mantel p = {p_m:.4f}, {n * (n - 1) // 2} pairs")
     print(f"    channel-strength-weighted personality distance: "
           f"location {rho_loc_w:.3f}, action {rho_act_w:.3f} "
           "(consistency check, weights from E1)")

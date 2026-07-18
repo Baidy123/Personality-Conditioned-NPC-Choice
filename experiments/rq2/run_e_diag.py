@@ -204,8 +204,8 @@ def main(argv=None) -> None:
         ax.set_xlabel("N value")
         ax.set_ylabel("entropy (nats)")
         ax.legend(frameon=False)
-        fig.suptitle(f"Trait sensitivity: hand-authored policy vs {fam} student "
-                     f"(seed mean)", y=1.0)
+        fig.suptitle(f"Trait sensitivity: hand-authored policy vs {fam} student",
+                     y=1.0)
         fig.tight_layout()
         fig.savefig(out / f"e1_overlay_{fam}.png", bbox_inches="tight")
         plt.close(fig)

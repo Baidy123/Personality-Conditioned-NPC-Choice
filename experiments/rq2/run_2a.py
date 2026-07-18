@@ -13,6 +13,7 @@ Run from ``code/``:  python -m experiments.rq2.run_2a [--smoke]
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -139,43 +140,66 @@ def _lookup(table, **want):
     return [row for row in table if all(row[k] == v for k, v in want.items())]
 
 
+def _read_main_table(path: Path) -> list[dict]:
+    """Re-read an aggregated main_table.csv, restoring the value types the
+    figure/diagnostic lookups expect (used by --figures-only, which redraws
+    without the datasets and trained models being present)."""
+    def cast(k: str, v: str):
+        if k == "n_train":
+            return None if v in ("", "None") else int(v)
+        if k in ("split", "model", "ablation", "eval_split", "decision_type"):
+            return v
+        return float(v)
+    with path.open(encoding="utf-8", newline="") as f:
+        return [{k: cast(k, v) for k, v in row.items()} for row in csv.DictReader(f)]
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="Study 2A metrics and figures")
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--figures-only", action="store_true",
+                    help="redraw the figures from an existing main_table.csv")
     args = ap.parse_args(argv)
     setup_style()
     data_dir, results_dir = dirs(args.smoke)
-    runs_dir = results_dir / "runs"
-    run_files = sorted(runs_dir.glob("*.json"))
-    if not run_files:
-        raise SystemExit(f"no run results in {runs_dir} - run train first")
 
-    tests = {s: [c for c, _ in read_pool(data_dir / f"test_{s}.jsonl")]
-             for s in ALL_SPLITS if (data_dir / f"test_{s}.jsonl").exists()}
+    if args.figures_only:
+        table = _read_main_table(results_dir / "main_table.csv")
+    else:
+        runs_dir = results_dir / "runs"
+        run_files = sorted(runs_dir.glob("*.json"))
+        if not run_files:
+            raise SystemExit(f"no run results in {runs_dir} - run train first")
 
-    # -- per-run evaluation ----------------------------------------------------
-    per_run: list[dict] = []
-    for f in run_files:
-        meta = json.loads(f.read_text(encoding="utf-8"))
-        model = load_student(results_dir, meta["run_id"])
-        for split in eval_splits_for(meta, list(tests)):
-            for s in _summarise(eval_cases(model, tests[split], meta["ablation"])):
-                per_run.append({**s, "split": meta["split"], "model": meta["model"],
-                                "ablation": meta["ablation"], "n_train": meta["n_train"],
-                                "seed": meta["seed"], "eval_split": split})
-        print(f"evaluated {meta['run_id']}")
-    # untrained floor, once per split
-    for split, cases in tests.items():
-        for s in _summarise(eval_cases(UniformBaseline(), cases)):
-            per_run.append({**s, "split": split, "model": "uniform", "ablation": "full",
-                            "n_train": None, "seed": 0, "eval_split": split})
+        tests = {s: [c for c, _ in read_pool(data_dir / f"test_{s}.jsonl")]
+                 for s in ALL_SPLITS if (data_dir / f"test_{s}.jsonl").exists()}
 
-    table = aggregate(per_run)
-    write_csv(results_dir / "main_table.csv", list(table[0].keys()),
-              [list(r.values()) for r in table])
+        # -- per-run evaluation ------------------------------------------------
+        per_run: list[dict] = []
+        for f in run_files:
+            meta = json.loads(f.read_text(encoding="utf-8"))
+            model = load_student(results_dir, meta["run_id"])
+            for split in eval_splits_for(meta, list(tests)):
+                for s in _summarise(eval_cases(model, tests[split], meta["ablation"])):
+                    per_run.append({**s, "split": meta["split"], "model": meta["model"],
+                                    "ablation": meta["ablation"], "n_train": meta["n_train"],
+                                    "seed": meta["seed"], "eval_split": split})
+            print(f"evaluated {meta['run_id']}")
+        # untrained floor, once per split
+        for split, cases in tests.items():
+            for s in _summarise(eval_cases(UniformBaseline(), cases)):
+                per_run.append({**s, "split": split, "model": "uniform", "ablation": "full",
+                                "n_train": None, "seed": 0, "eval_split": split})
+
+        table = aggregate(per_run)
+        write_csv(results_dir / "main_table.csv", list(table[0].keys()),
+                  [list(r.values()) for r in table])
 
     # -- figure: simple-vs-nonlinear gap across splits ---------------------------
-    mains = {"S0": "S0"} | {g: g for g in G_SPLITS}
+    # G2 (out-of-world spike, exclusion effect ~0) is dropped; the remaining
+    # splits are renumbered G1..G5 for display while lookups keep the real ids.
+    _kept = [g for g in G_SPLITS if g != "G2"]
+    mains = {"S0": "S0"} | {f"G{i + 1}": g for i, g in enumerate(_kept)}
     fig, ax = plt.subplots(figsize=(9, 4.5))
     x = np.arange(len(mains))
     series = [("simple", "simple", False), ("nonlinear", "nonlinear", False),
@@ -183,13 +207,13 @@ def main(argv=None) -> None:
               ("nonlinear (S0-trained)", "nonlinear", True)]
     for i, (label, fam, s0_trained) in enumerate(series):
         ys, es = [], []
-        for split in mains:
-            if s0_trained and split == "S0":     # identical to the main S0 bar
+        for real in mains.values():
+            if s0_trained and real == "S0":     # identical to the main S0 bar
                 ys.append(np.nan)
                 es.append(0.0)
                 continue
-            rows = _lookup(table, split="S0" if s0_trained else split, model=fam,
-                           ablation="full", n_train=None, eval_split=split,
+            rows = _lookup(table, split="S0" if s0_trained else real, model=fam,
+                           ablation="full", n_train=None, eval_split=real,
                            decision_type="all")
             ys.append(rows[0]["kl_mean"] if rows else np.nan)
             es.append(rows[0]["kl_std"] if rows else 0.0)
@@ -199,7 +223,8 @@ def main(argv=None) -> None:
     ax.set_xticks(x, list(mains))
     ax.set_ylabel("KL(teacher ‖ student), nats")
     ax.set_title("Student fidelity to the hand-authored policy, per split")
-    ax.legend(frameon=False)
+    ax.legend(frameon=False, loc="upper left", fontsize=7, ncol=2,
+              handlelength=1.2, columnspacing=1.0, borderaxespad=0.2)
     fig.savefig(results_dir / "gap_by_split.png", bbox_inches="tight")
     plt.close(fig)
 
@@ -223,6 +248,10 @@ def main(argv=None) -> None:
     ax.legend(frameon=False, loc="upper right", fontsize=8)
     fig.savefig(results_dir / "data_size_curve.png", bbox_inches="tight")
     plt.close(fig)
+
+    if args.figures_only:
+        print("redrawn: gap_by_split.png, data_size_curve.png")
+        return
 
     # -- diagnostics --------------------------------------------------------------
     diag_rows: list[list] = []

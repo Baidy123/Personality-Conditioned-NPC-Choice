@@ -6,7 +6,7 @@ import pytest
 import torch
 
 from npc_policy.config import DEFAULT_CONFIG
-from npc_policy.learned import NonlinearPolicy, predict_distribution
+from npc_policy.learned import predict_distribution
 from npc_policy.policies import LearnedPolicyAdapter, build_architecture
 from npc_policy.relations import compute_relations
 from npc_policy.representation import Option, Personality, RecentBuffer

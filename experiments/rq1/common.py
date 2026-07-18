@@ -227,6 +227,50 @@ def run_trajectory(
     return visits, acts
 
 
+def run_action_trajectory(
+    scorer: HandAuthoredScorer,
+    world: World,
+    personality: Personality,
+    location_id: str,
+    seed: int,
+    rounds: int = TRAJ_ROUNDS,
+    memory: str = "full",
+) -> list[str]:
+    """One action sequence at a fixed location; returns the chosen action ids.
+
+    The location choice is skipped, so ``H_A`` is never reset by a move: every
+    consecutive pair is a same-location stay and the action-repeat rate has a
+    fixed denominator of ``rounds - 1``. A free trajectory instead leaves that
+    denominator empty for any profile that rarely stays put, which is why the
+    action conditions are compared here rather than on ``run_trajectory``.
+
+    ``memory``: "full" — H_A live; "none" — H_A cleared after every cycle.
+    """
+    if memory not in ("full", "none"):
+        raise ValueError(f"unknown memory condition {memory!r}")
+    ctrl = DecisionController(
+        scorer, mode="sample", rng=np.random.default_rng(seed),
+        selection_temperature=TRAJ_TEMPERATURE,
+    )
+    pool = world.actions_at(location_id)
+    acts: list[str] = []
+    for _ in range(rounds):
+        a = ctrl.choose_action(personality, pool)
+        acts.append(a.option.id)
+        if memory == "none":
+            ctrl.H_A.clear()
+    return acts
+
+
+def action_repeat_rate(acts: list[str]) -> float:
+    """Fraction of consecutive pairs that repeat the action.
+
+    For a fixed-location sequence every pair counts, so the denominator is
+    always ``len(acts) - 1``.
+    """
+    return sum(1 for a, b in zip(acts, acts[1:]) if a == b) / (len(acts) - 1)
+
+
 def trajectory_metrics(visits: list[str], acts: list[str] | None = None) -> dict[str, float]:
     """Pattern statistics for one sequence (the RQ1 'consistency' measures).
 

@@ -24,6 +24,7 @@ Errors: 400 with {"error": msg} for bad input, 404 for unknown paths.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -128,10 +129,8 @@ def main() -> None:
                           for k, v in zip("OCEAN", npc.personality.vector))
         print(f"  [{npc.slot}] {npc.name:<14} {npc.policy_label:<10} {ocean}")
     print("Ctrl+C to stop.")
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         server.serve_forever()
-    except KeyboardInterrupt:
-        pass
 
 
 if __name__ == "__main__":
