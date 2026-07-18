@@ -14,6 +14,8 @@ Endpoints (spec: docs/specs/2026-07-17-rq3-sequence-interface-design.md §5):
     POST /event   {location, event, active} or {location, unlocked} -> new state
     POST /npc     {slot, ocean, reset_buffers?} edits a personality;
                   {name, ocean?, policy?, checkpoint?} appends an NPC -> new state
+    POST /policy  {policy: label} switches EVERY NPC to one catalog policy
+                  (config "policies" shelf + scorer) -> new state
     POST /reset   authored world + startup roster restored -> new state
 
 Errors: 400 with {"error": msg} for bad input, 404 for unknown paths.
@@ -82,6 +84,9 @@ class LiveHandler(BaseHTTPRequestHandler):
                         reset_buffers=bool(body.get("reset_buffers", False)))
                 else:
                     self.session.add_npc(body)
+                self._send(200, self.session.state())
+            elif self.path == "/policy":
+                self.session.set_policy(body["policy"])
                 self._send(200, self.session.state())
             elif self.path == "/reset":
                 self.session.reset()

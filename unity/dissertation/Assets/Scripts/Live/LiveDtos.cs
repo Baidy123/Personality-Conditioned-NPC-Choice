@@ -40,6 +40,8 @@ namespace Dissertation.Live
     {
         public string world;
         public int step_count;
+        public List<string> policies;     // catalog labels (scorer + config shelf)
+        public string active_policy;      // one label, or "mixed"
         public List<LiveLocation> locations;
         public List<LiveNpc> npcs;
     }
@@ -118,5 +120,11 @@ namespace Dissertation.Live
     {
         public string name;
         public Ocean ocean;
+    }
+
+    [Serializable]
+    public class PolicyRequest        // /policy: switch every NPC's model
+    {
+        public string policy;
     }
 }

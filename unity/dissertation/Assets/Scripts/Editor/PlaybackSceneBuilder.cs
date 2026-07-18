@@ -221,6 +221,16 @@ namespace Dissertation.EditorTools
             logToggleGo.GetComponentInChildren<Text>().text = "Log";
             Place(logToggleGo, liveGroup.transform, 815f, 90f);
 
+            var policyCapGo = DefaultControls.CreateText(res);
+            var policyCap = policyCapGo.GetComponent<Text>();
+            policyCap.text = "Policy";
+            policyCap.color = Color.white;
+            policyCap.alignment = TextAnchor.MiddleCenter;
+            Place(policyCapGo, liveGroup.transform, 920f, 65f);
+
+            var policyGo = DefaultControls.CreateDropdown(res);
+            Place(policyGo, liveGroup.transform, 990f, 190f);
+
             // ------------------------------------------------ event panel (R) --
             var eventPanel = new GameObject("EventPanel", typeof(RectTransform),
                 typeof(Image), typeof(VerticalLayoutGroup));
@@ -365,6 +375,7 @@ namespace Dissertation.EditorTools
             liveCtrl.eventPanelContent = epRt;
             liveCtrl.personalityPanel = persPanel;
             liveCtrl.personalityToggleButton = persToggleGo.GetComponent<Button>();
+            liveCtrl.policyDropdown = policyGo.GetComponent<Dropdown>();
             liveCtrl.logPanel = logPanel;
             liveCtrl.logText = logText;
             liveCtrl.logToggleButton = logToggleGo.GetComponent<Button>();

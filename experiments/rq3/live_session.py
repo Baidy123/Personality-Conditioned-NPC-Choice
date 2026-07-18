@@ -51,6 +51,15 @@ class LiveSession:
         self.config = config
         self.world: World = load_world(config["world"])
         self.step_count = 0
+        # policy catalog: {"label": {} or {"checkpoint": path}} in the config;
+        # "scorer" is always available. Per-NPC ad-hoc checkpoints join it, so
+        # a global switch can always come back to any assigned policy.
+        self.policy_catalog: dict[str, object] = {
+            label: (HandAuthoredScorer() if "checkpoint" not in spec
+                    else LearnedPolicyAdapter(spec["checkpoint"]))
+            for label, spec in {"scorer": {},
+                                **config.get("policies", {})}.items()
+        }
         self.npcs: list[LiveNpc] = self._build_npcs()
 
     @classmethod
@@ -83,10 +92,11 @@ class LiveSession:
                     f"npc {name!r}: not in personalities file and no inline ocean")
             personality = lookup[name]
         label = entry.get("policy", "scorer")
-        if label == "scorer":
-            policy = HandAuthoredScorer()
+        if label in self.policy_catalog:
+            policy = self.policy_catalog[label]
         elif "checkpoint" in entry:
             policy = LearnedPolicyAdapter(entry["checkpoint"])
+            self.policy_catalog[label] = policy
         else:
             raise ValueError(f"npc {name!r}: policy {label!r} needs a checkpoint")
         controller = DecisionController(
@@ -121,6 +131,20 @@ class LiveSession:
         if not entry.get("name"):
             raise ValueError("add_npc needs a name")
         self.npcs.append(self._build_one(len(self.npcs), entry))
+
+    def set_policy(self, label: str) -> None:
+        """Switch EVERY NPC to one catalog policy at the next checkpoint.
+
+        Buffers and last locations are kept — same history, different
+        decision-maker — mirroring the personality-edit semantics."""
+        if label not in self.policy_catalog:
+            raise ValueError(f"no policy {label!r} in the catalog "
+                             f"({sorted(self.policy_catalog)})")
+        policy = self.policy_catalog[label]
+        for npc in self.npcs:
+            npc.policy = policy
+            npc.policy_label = label
+            npc.controller.policy = policy
 
     # -- world mutation ---------------------------------------------------------
     def _entry(self, location: str):
@@ -213,9 +237,12 @@ class LiveSession:
 
     # -- reporting --------------------------------------------------------------
     def state(self) -> dict:
+        labels = {npc.policy_label for npc in self.npcs}
         return {
             "world": self.config["world"],
             "step_count": self.step_count,
+            "policies": sorted(self.policy_catalog),
+            "active_policy": labels.pop() if len(labels) == 1 else "mixed",
             "locations": [
                 {"id": loc_id, "unlocked": entry.unlocked,
                  "events": [

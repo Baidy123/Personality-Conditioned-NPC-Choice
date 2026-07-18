@@ -229,6 +229,15 @@ cleanup, removing the manual copy step.
     updated `/state`. Runtime edits and additions are in-memory only:
     `/reset` restores the startup config roster. Like every world change,
     a personality change takes effect at the next `/step`.
+  - `POST /policy` (added 2026-07-18) — `{policy: label}` switches EVERY
+    NPC to one policy from the catalog (the config's `"policies"` shelf
+    of labelled checkpoints, plus the always-present `scorer`; per-NPC
+    ad-hoc checkpoints join the catalog under their label). Buffers and
+    last locations are kept — same history, different decision-maker —
+    and the switch shows at the next `/step`. `/state` reports
+    `policies` (catalog labels) and `active_policy` (one label, or
+    `"mixed"` for a heterogeneous roster). Unity renders this as a
+    Policy dropdown on the live bar.
   - `POST /reset` — authored world state restored (reload from file),
     controllers cleared, rngs re-seeded, runtime NPC edits/additions
     discarded. Returns the fresh `/state`.

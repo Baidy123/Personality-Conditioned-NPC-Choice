@@ -91,6 +91,11 @@ Checkpoint shelf (seeds s0–s4 exist for each):
 - `npcs`: any number; `{"name": ...}` looks up the roster, inline
   `"ocean"` overrides, learned policies use
   `{"policy": "<label>", "checkpoint": "results/..."}` as above.
+- `policies`: the in-game shelf — every labelled checkpoint here (plus
+  `scorer`, always present) appears in the live bar's Policy dropdown, which
+  switches ALL NPCs at once at the next step (history kept). Per-NPC
+  assignments in `npcs` still work for a mixed roster; the dropdown then
+  shows `mixed` until you pick something.
 - `selection_temperature`: 0.1 = sharp, in-character behaviour (the value the
   tuning-log personas were validated at); 1.0 = raw sampling, much noisier.
 - The full HTTP interface (endpoints, payloads) is documented at the top of

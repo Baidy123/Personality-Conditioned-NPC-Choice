@@ -5,6 +5,11 @@
   "mode": "sample",
   "selection_temperature": 0.1,
   "seed": 42,
+  "policies": {
+    "nonlinear_2a": {"checkpoint": "results/rq2/models/S0__nonlinear__s0.pt"},
+    "nonlinear_2b": {"checkpoint": "results/rq2b/models/IND__nonlinear__wd0.001__s0.pt"},
+    "agnostic_2a":  {"checkpoint": "results/rq2/models/S0__agnostic_nonlinear__s0.pt"}
+  },
   "npcs": [
     {"name": "Karlach",     "policy": "scorer"},
     {"name": "Shadowheart", "policy": "scorer"},

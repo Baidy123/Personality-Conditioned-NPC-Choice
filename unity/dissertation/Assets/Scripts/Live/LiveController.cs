@@ -26,6 +26,7 @@ namespace Dissertation.Live
         public GameObject eventPanel;
         public GameObject personalityPanel;
         public Button personalityToggleButton;
+        public Dropdown policyDropdown;   // global model switch (catalog from /state)
         public GameObject logPanel;
         public Text logText;
         public Button logToggleButton;
@@ -64,6 +65,7 @@ namespace Dissertation.Live
                 () => TogglePanel(personalityPanel, logPanel));
             logToggleButton.onClick.AddListener(
                 () => TogglePanel(logPanel, personalityPanel));
+            policyDropdown.onValueChanged.AddListener(_ => OnPolicyPicked());
             npcDropdown.onValueChanged.AddListener(_ => LoadSlidersFromSelected());
             for (var i = 0; i < traitSliders.Length; i++)
             {
@@ -181,6 +183,7 @@ namespace Dissertation.Live
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildNpcs();
                 RebuildNpcDropdown();
+                RebuildPolicyDropdown();   // an added NPC can make it "mixed"
                 Log(description);
                 SetStatus($"{description} - takes effect at the next step");
             }, err =>
@@ -244,6 +247,39 @@ namespace Dissertation.Live
             RebuildNpcs();
             RebuildEventPanel();
             RebuildNpcDropdown();
+            RebuildPolicyDropdown();
+        }
+
+        void RebuildPolicyDropdown()
+        {
+            var options = new List<string>(state.policies);
+            if (state.active_policy == "mixed") options.Insert(0, "mixed");
+            policyDropdown.ClearOptions();
+            policyDropdown.AddOptions(options);
+            policyDropdown.SetValueWithoutNotify(
+                Mathf.Max(0, options.IndexOf(state.active_policy)));
+            policyDropdown.RefreshShownValue();
+        }
+
+        void OnPolicyPicked()
+        {
+            if (state == null) return;
+            var label = policyDropdown.options[policyDropdown.value].text;
+            if (label == "mixed" || label == state.active_policy) return;
+            client.Post("/policy",
+                JsonUtility.ToJson(new PolicyRequest { policy = label }), body =>
+            {
+                if (!isActiveAndEnabled) return;
+                state = JsonUtility.FromJson<LiveState>(body);
+                RebuildPolicyDropdown();
+                Log($"policy -> {label} (all NPCs)");
+                SetStatus($"policy -> {label} - takes effect at the next step");
+            }, err =>
+            {
+                if (!isActiveAndEnabled) return;
+                Log($"ERROR policy: {err}");
+                SetStatus($"policy error: {err}");
+            });
         }
 
         void RebuildNpcs()

@@ -284,6 +284,64 @@ def test_add_npc_by_personality_lookup_and_errors(config_path):
         session.add_npc({"name": "Ghost"})    # unknown, no inline ocean
 
 
+def test_policy_catalog_and_global_switch(tmp_path, config_path):
+    import torch
+    from npc_policy.policies import build_architecture
+    torch.manual_seed(0)
+    ckpt = tmp_path / "simple.pt"
+    torch.save({"model": "simple",
+                "state_dict": build_architecture("simple").state_dict()}, ckpt)
+
+    path = write_config(tmp_path, config_path, policies={
+        "scorer": {},
+        "student": {"checkpoint": str(ckpt)},
+    })
+    session = LiveSession.from_config(path)
+    state = session.state()
+    assert state["policies"] == ["scorer", "student"]
+    assert state["active_policy"] == "scorer"
+
+    session.step()
+    where = session.state()["npcs"][0]["location"]
+
+    session.set_policy("student")
+    state = session.state()
+    assert state["active_policy"] == "student"
+    assert all(n["policy"] == "student" for n in state["npcs"])
+    # checkpoint principle: history kept, switch shows at the next step
+    assert state["npcs"][0]["location"] == where
+    step = session.step()                      # student runs without error
+    assert all(s["overridden"] is False for s in step["steps"])
+
+    session.set_policy("scorer")
+    assert session.state()["active_policy"] == "scorer"
+    with pytest.raises(ValueError, match="ghost"):
+        session.set_policy("ghost")
+
+    session.set_policy("student")
+    session.reset()                            # reset -> config assignments
+    assert session.state()["active_policy"] == "scorer"
+
+
+def test_mixed_roster_reports_mixed_active_policy(tmp_path, config_path):
+    import torch
+    from npc_policy.policies import build_architecture
+    torch.manual_seed(0)
+    ckpt = tmp_path / "simple.pt"
+    torch.save({"model": "simple",
+                "state_dict": build_architecture("simple").state_dict()}, ckpt)
+    path = write_config(tmp_path, config_path, npcs=[
+        {"name": "Alice", "policy": "scorer"},
+        {"name": "Bob", "policy": "student", "checkpoint": str(ckpt)},
+    ])
+    session = LiveSession.from_config(path)
+    state = session.state()
+    assert state["active_policy"] == "mixed"
+    assert "student" in state["policies"]      # ad-hoc entry joins the catalog
+    session.set_policy("student")
+    assert session.state()["active_policy"] == "student"
+
+
 def test_step_is_atomic_when_one_npc_fails(config_path):
     session = LiveSession.from_config(config_path)
     session.step()

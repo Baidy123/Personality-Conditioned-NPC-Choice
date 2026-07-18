@@ -165,6 +165,18 @@ def test_npc_add_endpoint_and_reset_discards(base_url):
     assert [n["name"] for n in state["npcs"]] == ["Alice"]
 
 
+def test_policy_switch_endpoint(base_url):
+    status, state = get(base_url + "/state")
+    assert state["policies"] == ["scorer"]
+    assert state["active_policy"] == "scorer"
+
+    status, state = post(base_url + "/policy", {"policy": "scorer"})
+    assert status == 200 and state["active_policy"] == "scorer"
+
+    status, body = post(base_url + "/policy", {"policy": "ghost"})
+    assert status == 400 and "ghost" in body["error"]
+
+
 def test_error_paths(base_url):
     status, body = get(base_url + "/nope")
     assert status == 404 and "error" in body
