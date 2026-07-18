@@ -154,6 +154,22 @@ class DecisionController:
         self.H_A.push(chosen)
         return Decision(option=chosen, index=idx, distribution=dist, trace=trace)
 
+    def commit_forced(self, location: Option, action: Option) -> None:
+        """Record an externally scripted, non-autonomous choice pair
+        (game-layer ``force_npc`` override).
+
+        Buffer updates follow the same structural rules as autonomous choice,
+        so subsequent autonomous decisions see the world as it actually
+        happened. The caller is responsible for marking the step as an
+        override — forced pairs must never enter training or evaluation data.
+        """
+        if location.id != self._last_location_id:
+            self.H_A.clear()
+        self.H_L.push(location)
+        self._last_location_id = location.id
+        self._last_location = location
+        self.H_A.push(action)
+
     # -- lifecycle --------------------------------------------------------------
     def reset(self) -> None:
         """Clear both buffers — start a fresh behaviour sequence."""
