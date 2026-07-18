@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "sequence_id": "S008",
+    "policy": "agnostic_2a",
+    "checkpoint": "results/rq2/models/S0__agnostic_nonlinear__s0.pt",
+    "personality_name": "Shadowheart",
+    "ocean": {
+      "O": 0.1,
+      "C": 0.4,
+      "E": -0.5,
+      "A": 0.1,
+      "N": 0.6
+    },
+    "world": "configs/game_world.json",
+    "seed": 42,
+    "n_cycles": 8,
+    "selection_temperature": 0.1,
+    "generated_at": "2026-07-18T23:04:53"
+  },
+  "steps": [
+    {
+      "cycle": 1,
+      "location": "market",
+      "action": "browse",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.19286332980117749,
+        "library": 0.1378269714698853,
+        "chapel": 0.13470424591848376,
+        "market": 0.21204547055447115,
+        "forest": 0.1585217673945217,
+        "arena": 0.1640382148614608
+      },
+      "action_probs": {
+        "haggle": 0.32662382099436543,
+        "browse": 0.32543201537023075,
+        "trade": 0.3479441636354038
+      }
+    },
+    {
+      "cycle": 2,
+      "location": "forest",
+      "action": "forage",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.1950743317091315,
+        "library": 0.1661176685777047,
+        "chapel": 0.1549679216374952,
+        "market": 0.1433407985143233,
+        "forest": 0.174367114601498,
+        "arena": 0.16613216495984737
+      },
+      "action_probs": {
+        "explore": 0.3874224864919325,
+        "forage": 0.3559708926382363,
+        "rest": 0.25660662086983116
+      }
+    },
+    {
+      "cycle": 3,
+      "location": "tavern",
+      "action": "brawl",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.2108287979461654,
+        "library": 0.16577845675963399,
+        "chapel": 0.15585425147670098,
+        "market": 0.17460375507395579,
+        "forest": 0.11951947264549648,
+        "arena": 0.17341526609804736
+      },
+      "action_probs": {
+        "chat": 0.37350238636539373,
+        "drink": 0.3246191571286432,
+        "brawl": 0.30187845650596307
+      }
+    },
+    {
+      "cycle": 4,
+      "location": "market",
+      "action": "trade",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.1553952019463846,
+        "library": 0.17053056245540976,
+        "chapel": 0.1573621554334805,
+        "market": 0.19429720663036665,
+        "forest": 0.14957931002045768,
+        "arena": 0.1728355635139008
+      },
+      "action_probs": {
+        "haggle": 0.32662382099436543,
+        "browse": 0.32543201537023075,
+        "trade": 0.3479441636354038
+      }
+    },
+    {
+      "cycle": 5,
+      "location": "tavern",
+      "action": "chat",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.1719678309032232,
+        "library": 0.17068729476642083,
+        "chapel": 0.15823913180633853,
+        "market": 0.16660846722720213,
+        "forest": 0.16040306665953044,
+        "arena": 0.1720942086372849
+      },
+      "action_probs": {
+        "chat": 0.37350238636539373,
+        "drink": 0.3246191571286432,
+        "brawl": 0.30187845650596307
+      }
+    },
+    {
+      "cycle": 6,
+      "location": "market",
+      "action": "trade",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.14647316850050066,
+        "library": 0.16744255242157563,
+        "chapel": 0.1531367669646294,
+        "market": 0.1756666370856258,
+        "forest": 0.1917923067668369,
+        "arena": 0.16548856826083153
+      },
+      "action_probs": {
+        "haggle": 0.32662382099436543,
+        "browse": 0.32543201537023075,
+        "trade": 0.3479441636354038
+      }
+    },
+    {
+      "cycle": 7,
+      "location": "forest",
+      "action": "forage",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.1692442948396116,
+        "library": 0.1684358879325177,
+        "chapel": 0.15583256010943095,
+        "market": 0.15492674684737087,
+        "forest": 0.18386911169595352,
+        "arena": 0.16769139857511528
+      },
+      "action_probs": {
+        "explore": 0.3874224864919325,
+        "forage": 0.3559708926382363,
+        "rest": 0.25660662086983116
+      }
+    },
+    {
+      "cycle": 8,
+      "location": "library",
+      "action": "discuss",
+      "moved": true,
+      "location_probs": {
+        "tavern": 0.18577911838797925,
+        "library": 0.1690750325660068,
+        "chapel": 0.15790946676843803,
+        "market": 0.18340603268948283,
+        "forest": 0.1289318388080466,
+        "arena": 0.17489851078004656
+      },
+      "action_probs": {
+        "read": 0.26775477853308344,
+        "research": 0.3179167834895499,
+        "discuss": 0.4143284379773667
+      }
+    }
+  ]
+}
