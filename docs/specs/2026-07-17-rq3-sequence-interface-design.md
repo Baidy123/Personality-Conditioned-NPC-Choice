@@ -150,8 +150,14 @@ byte-identical step lists.
   `docs/plans/2026-07-18-unity-playback-player.md`): on-screen info is
   location name plates + NPC action label only (no step counter; condition
   fields are never parsed by the player); NPC moves in a straight line;
-  recording mode = auto-advance ON + control bar hidden (H key); the
-  recording tool (Unity Recorder vs OBS) is deferred. Perspective may be
+  the auto-advance toggle was removed (2026-07-18, user decision) — stepping
+  is manual (Continue/Space); if recordings need uniform pacing, a scripted
+  pacer can be added at recording time. Recording mode = control bar hidden
+  (H key); the recording tool (Unity Recorder vs OBS) is deferred. The
+  player has three NPC slots (A/B/C, distinct colours, per-slot dropdown)
+  stepped in lockstep by one Continue — demo material only: sequences are
+  independently generated, NPCs do not perceive each other, and single-NPC
+  clips remain the planned study stimulus. Perspective may be
   straight top-down or Stardew-style 3/4 view — a tileset choice; the
   sequence format is perspective-agnostic.
 - **Live demo mode** (lowest priority, after all data collection). A local

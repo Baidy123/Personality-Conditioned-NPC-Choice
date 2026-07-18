@@ -50,16 +50,34 @@ namespace Dissertation.EditorTools
                     kv.Value.Position + new Vector2(0f, 1.15f);
             }
 
-            var npcGo = NewSprite("NPC", circle, new Color(0.13f, 0.13f, 0.16f));
-            npcGo.transform.position = LocationLayout.NpcStart;
-            npcGo.transform.localScale = Vector3.one * 0.55f;
-            npcGo.GetComponent<SpriteRenderer>().sortingOrder = 5;
-            var agent = npcGo.AddComponent<NpcAgent>();
-            var label = NewText("ActionLabel", font, "", 0.11f);
-            label.transform.SetParent(npcGo.transform, false);
-            label.transform.localScale = Vector3.one / 0.55f;   // undo parent scale
-            label.transform.localPosition = new Vector3(0f, 1.5f, 0f);
-            agent.actionLabel = label.GetComponent<TextMesh>();
+            var slotColors = new[]
+            {
+                new Color(0.13f, 0.13f, 0.16f),   // A near-black
+                new Color(0.30f, 0.12f, 0.35f),   // B dark purple
+                new Color(0.05f, 0.28f, 0.32f),   // C dark teal
+            };
+            var agents = new NpcAgent[slotColors.Length];
+            for (var i = 0; i < slotColors.Length; i++)
+            {
+                var slotName = ((char)('A' + i)).ToString();
+                var npcGo = NewSprite("NPC_" + slotName, circle, slotColors[i]);
+                npcGo.transform.position = LocationLayout.NpcStart;
+                npcGo.transform.localScale = Vector3.one * 0.55f;
+                npcGo.GetComponent<SpriteRenderer>().sortingOrder = 5;
+                agents[i] = npcGo.AddComponent<NpcAgent>();
+
+                var badge = NewText("Badge", font, slotName, 0.08f);
+                badge.transform.SetParent(npcGo.transform, false);
+                badge.transform.localScale = Vector3.one / 0.55f;   // undo parent scale
+                badge.transform.localPosition = Vector3.zero;
+                badge.GetComponent<MeshRenderer>().sortingOrder = 11;
+
+                var label = NewText("ActionLabel", font, "", 0.11f);
+                label.transform.SetParent(npcGo.transform, false);
+                label.transform.localScale = Vector3.one / 0.55f;
+                label.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+                agents[i].actionLabel = label.GetComponent<TextMesh>();
+            }
 
             // ------------------------------------------------------------- UI
             var canvasGo = new GameObject("Canvas",
@@ -84,35 +102,42 @@ namespace Dissertation.EditorTools
 
             var res = new DefaultControls.Resources();
 
-            var dropdownGo = DefaultControls.CreateDropdown(res);
-            Place(dropdownGo, bar.transform, 20f, 300f);
+            var dropdowns = new Dropdown[agents.Length];
+            for (var i = 0; i < agents.Length; i++)
+            {
+                var x = 20f + i * 265f;
+                var capGo = DefaultControls.CreateText(res);
+                var cap = capGo.GetComponent<Text>();
+                cap.text = ((char)('A' + i)).ToString();
+                cap.color = Color.white;
+                cap.alignment = TextAnchor.MiddleCenter;
+                Place(capGo, bar.transform, x, 25f);
+                var dropdownGo = DefaultControls.CreateDropdown(res);
+                Place(dropdownGo, bar.transform, x + 30f, 215f);
+                dropdowns[i] = dropdownGo.GetComponent<Dropdown>();
+            }
 
             var continueGo = DefaultControls.CreateButton(res);
             continueGo.GetComponentInChildren<Text>().text = "Continue (Space)";
-            Place(continueGo, bar.transform, 340f, 220f);
+            Place(continueGo, bar.transform, 830f, 200f);
 
             var restartGo = DefaultControls.CreateButton(res);
             restartGo.GetComponentInChildren<Text>().text = "Restart (R)";
-            Place(restartGo, bar.transform, 580f, 160f);
-
-            var autoGo = DefaultControls.CreateToggle(res);
-            autoGo.GetComponentInChildren<Text>().text = "Auto";
-            Place(autoGo, bar.transform, 760f, 120f);
+            Place(restartGo, bar.transform, 1050f, 150f);
 
             var statusGo = DefaultControls.CreateText(res);
             var status = statusGo.GetComponent<Text>();
             status.text = "";
             status.color = Color.white;
             status.alignment = TextAnchor.MiddleLeft;
-            Place(statusGo, bar.transform, 900f, 900f);
+            Place(statusGo, bar.transform, 1230f, 670f);
 
             var ctrl = new GameObject("PlaybackController")
                 .AddComponent<PlaybackController>();
-            ctrl.npc = agent;
-            ctrl.sequenceDropdown = dropdownGo.GetComponent<Dropdown>();
+            ctrl.npcs = agents;
+            ctrl.dropdowns = dropdowns;
             ctrl.continueButton = continueGo.GetComponent<Button>();
             ctrl.restartButton = restartGo.GetComponent<Button>();
-            ctrl.autoToggle = autoGo.GetComponent<Toggle>();
             ctrl.statusText = status;
             ctrl.controlBar = bar;
 

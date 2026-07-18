@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -5,26 +6,33 @@ using UnityEngine.UI;
 
 namespace Dissertation.Playback
 {
-    // Orchestrates one sequence: dropdown -> load JSON -> step on Continue or
-    // auto-advance. Hotkeys: Space = continue, H = hide control bar, R = restart.
-    // Recording mode = Auto ON + control bar hidden: the frame then contains
-    // only the scene, location name plates, and the NPC action label.
+    // Up to three NPC slots (A/B/C), each with its own sequence dropdown;
+    // Continue steps every active NPC in lockstep. Hotkeys: Space = continue,
+    // H = hide control bar, R = restart all. Sequences are generated
+    // independently: NPCs share the map visually but do not perceive each
+    // other, so multi-NPC playback is demo material, not a study stimulus.
     public class PlaybackController : MonoBehaviour
     {
-        public NpcAgent npc;
-        public Dropdown sequenceDropdown;
+        public NpcAgent[] npcs;
+        public Dropdown[] dropdowns;
         public Button continueButton;
         public Button restartButton;
-        public Toggle autoToggle;
         public Text statusText;
         public GameObject controlBar;
-        public float autoIntervalSeconds = 4f;
 
-        Sequence sequence;
-        PlaybackModel model;
-        bool performing;          // NPC currently looping an action
-        float performTimer;
+        Sequence[] sequences;
+        PlaybackModel[] models;
         string[] files = new string[0];
+
+        // side-by-side stands so co-located NPCs never overlap
+        static readonly Vector2[] SlotOffsets =
+        {
+            new Vector2(-0.45f, 0f),
+            new Vector2(0.45f, 0f),
+            new Vector2(0f, -0.55f),
+        };
+
+        static string SlotName(int slot) => ((char)('A' + slot)).ToString();
 
         void Start()
         {
@@ -32,25 +40,39 @@ namespace Dissertation.Playback
             files = Directory.Exists(dir)
                 ? Directory.GetFiles(dir, "*.json").OrderBy(f => f).ToArray()
                 : new string[0];
-            sequenceDropdown.ClearOptions();
-            sequenceDropdown.AddOptions(files.Select(Path.GetFileNameWithoutExtension).ToList());
-            sequenceDropdown.onValueChanged.AddListener(_ => LoadSelected());
+            sequences = new Sequence[npcs.Length];
+            models = new PlaybackModel[npcs.Length];
+            var options = new List<string> { "(none)" };
+            options.AddRange(files.Select(Path.GetFileNameWithoutExtension));
+            for (var i = 0; i < dropdowns.Length; i++)
+            {
+                var slot = i;
+                dropdowns[i].ClearOptions();
+                dropdowns[i].AddOptions(options);
+                dropdowns[i].onValueChanged.AddListener(_ => LoadSlot(slot));
+                npcs[i].gameObject.SetActive(false);
+            }
             continueButton.onClick.AddListener(NextStep);
-            restartButton.onClick.AddListener(LoadSelected);
-            if (files.Length > 0) LoadSelected();
+            restartButton.onClick.AddListener(ReloadAll);
+            if (files.Length > 0) dropdowns[0].value = 1;   // fires LoadSlot(0)
             else SetStatus("no sequences in StreamingAssets/sequences");
         }
 
-        void LoadSelected()
+        void LoadSlot(int slot)
         {
-            performing = false;
-            model = null;
-            sequence = null;
-            var path = files[sequenceDropdown.value];
+            models[slot] = null;
+            sequences[slot] = null;
+            npcs[slot].gameObject.SetActive(false);
+            var sel = dropdowns[slot].value;                // 0 = "(none)"
+            if (sel == 0)
+            {
+                SetStatus($"{SlotName(slot)} cleared");
+                return;
+            }
             Sequence loaded;
             try
             {
-                loaded = Sequence.FromJson(File.ReadAllText(path));
+                loaded = Sequence.FromJson(File.ReadAllText(files[sel - 1]));
                 foreach (var step in loaded.steps)
                     if (!LocationLayout.Entries.ContainsKey(step.location))
                         throw new System.InvalidOperationException(
@@ -58,55 +80,53 @@ namespace Dissertation.Playback
             }
             catch (System.Exception e)
             {
-                SetStatus("load error: " + e.Message);
+                SetStatus($"load error ({SlotName(slot)}): {e.Message}");
                 return;
             }
-            sequence = loaded;
-            model = new PlaybackModel(sequence.steps);
-            npc.Teleport(LocationLayout.NpcStart);
-            SetStatus($"{sequence.meta.sequence_id} ready ({sequence.steps.Count} steps)"
-                      + " - Continue to start");
+            sequences[slot] = loaded;
+            models[slot] = new PlaybackModel(loaded.steps);
+            npcs[slot].gameObject.SetActive(true);
+            npcs[slot].Teleport(LocationLayout.NpcStart + SlotOffsets[slot]);
+            SetStatus($"{SlotName(slot)} = {loaded.meta.sequence_id} "
+                      + $"({loaded.steps.Count} steps) - Continue to start");
+        }
+
+        void ReloadAll()
+        {
+            for (var i = 0; i < dropdowns.Length; i++)
+                if (dropdowns[i].value > 0) LoadSlot(i);
         }
 
         void NextStep()
         {
-            if (model == null || npc.IsWalking) return;
-            var step = model.Advance();
-            if (step == null)
+            var parts = new List<string>();
+            for (var i = 0; i < npcs.Length; i++)
             {
-                npc.StopAll();
-                performing = false;
-                SetStatus($"{sequence.meta.sequence_id} finished - R to restart");
-                return;
+                if (models[i] == null || npcs[i].IsWalking) continue;
+                var step = models[i].Advance();
+                if (step == null)
+                {
+                    npcs[i].StopAll();
+                    parts.Add($"{SlotName(i)} finished");
+                    continue;
+                }
+                var pos = LocationLayout.Entries[step.location].Position
+                          + LocationLayout.NpcOffset + SlotOffsets[i];
+                var slot = i;               // avoid loop-variable capture
+                var action = step.action;
+                if (step.moved) npcs[i].WalkTo(pos, () => npcs[slot].PerformAction(action));
+                else npcs[i].PerformAction(action);
+                parts.Add($"{SlotName(i)} {step.cycle}/{sequences[i].steps.Count} "
+                          + $"{step.location}/{step.action}");
             }
-            performing = false;
-            var pos = LocationLayout.Entries[step.location].Position + LocationLayout.NpcOffset;
-            if (step.moved) npc.WalkTo(pos, () => BeginPerform(step));
-            else BeginPerform(step);
-            SetStatus($"step {step.cycle}/{sequence.steps.Count}: {step.location} / {step.action}");
-        }
-
-        void BeginPerform(SequenceStep step)
-        {
-            npc.PerformAction(step.action);
-            performing = true;
-            performTimer = 0f;
+            if (parts.Count > 0) SetStatus(string.Join("   ", parts));
         }
 
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space)) NextStep();
             if (Input.GetKeyDown(KeyCode.H)) controlBar.SetActive(!controlBar.activeSelf);
-            if (Input.GetKeyDown(KeyCode.R)) LoadSelected();
-            if (performing && autoToggle.isOn)
-            {
-                performTimer += Time.deltaTime;
-                if (performTimer >= autoIntervalSeconds)
-                {
-                    performing = false;
-                    NextStep();
-                }
-            }
+            if (Input.GetKeyDown(KeyCode.R)) ReloadAll();
         }
 
         void SetStatus(string msg)
