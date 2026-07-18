@@ -1,0 +1,4 @@
+sequence_id,file,policy,checkpoint,personality,world,seed,n_cycles,selection_temperature,generated_at
+S001,S001.json,scorer,,Karlach,data/world.json,42,8,0.1,2026-07-18T22:04:19
+S002,S002.json,scorer,,Shadowheart,data/world.json,42,8,0.1,2026-07-18T22:04:19
+S003,S003.json,scorer,,Laezel,data/world.json,42,8,0.1,2026-07-18T22:04:19

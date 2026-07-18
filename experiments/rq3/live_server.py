@@ -1,6 +1,6 @@
 """Local decision service for the Unity live demo — the packaged "NPC brain".
 
-    python -m experiments.rq3.live_server --config experiments/rq3/live_config_demo.json
+    python -m experiments.rq3.live_server [--config configs/live_demo.json]
 
 Run from ``code/``. This is a localhost-only inter-process channel between the
 Unity frontend and the Python decision logic: it never listens beyond
@@ -103,9 +103,13 @@ def make_server(config_path: str | Path, port: int | None = None) -> HTTPServer:
     return HTTPServer(("127.0.0.1", port), handler)
 
 
+DEFAULT_CONFIG_PATH = "configs/live_demo.json"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--config", required=True)
+    ap.add_argument("--config", default=DEFAULT_CONFIG_PATH,
+                    help=f"run config (default: {DEFAULT_CONFIG_PATH})")
     ap.add_argument("--port", type=int, default=None,
                     help="override the config's port")
     args = ap.parse_args()

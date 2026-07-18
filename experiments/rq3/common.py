@@ -32,6 +32,10 @@ class SequenceSpec:
     world_path: str
     n_cycles: int
     seed: int
+    # sampling sharpness (DecisionController): 1.0 = raw policy distribution;
+    # 0.1 = the sharp, in-character setting the tuning-log personas were
+    # validated at. A stimulus-design knob — recorded in meta and manifest.
+    selection_temperature: float = 1.0
 
 
 def generate_sequence(spec: SequenceSpec, policy, world: World) -> dict:
@@ -40,7 +44,8 @@ def generate_sequence(spec: SequenceSpec, policy, world: World) -> dict:
     Same seed + same spec -> identical steps (the controller's rng is the only
     randomness; learned adapters run in eval mode)."""
     ctrl = DecisionController(policy, mode="sample",
-                              rng=np.random.default_rng(spec.seed))
+                              rng=np.random.default_rng(spec.seed),
+                              selection_temperature=spec.selection_temperature)
     steps: list[dict] = []
     prev: str | None = None
     for cycle in range(1, spec.n_cycles + 1):
@@ -69,6 +74,7 @@ def generate_sequence(spec: SequenceSpec, policy, world: World) -> dict:
             "world": spec.world_path,
             "seed": spec.seed,
             "n_cycles": spec.n_cycles,
+            "selection_temperature": spec.selection_temperature,
             "generated_at": datetime.now().isoformat(timespec="seconds"),
         },
         "steps": steps,

@@ -34,12 +34,12 @@ def world(tmp_path):
     return load_world(path)
 
 
-def make_spec(seed=42, n_cycles=5):
+def make_spec(seed=42, n_cycles=5, **kw):
     return SequenceSpec(
         sequence_id="S01", policy_name="scorer", checkpoint="",
         personality_name="high_E",
         personality=Personality.from_traits(extraversion=1.0),
-        world_path="world.json", n_cycles=n_cycles, seed=seed,
+        world_path="world.json", n_cycles=n_cycles, seed=seed, **kw,
     )
 
 
@@ -103,6 +103,16 @@ def test_validate_rejects_inconsistent_moved_and_alien_prob_keys(world):
         validate_sequence(bad3, world)
 
 
+def test_selection_temperature_in_meta_and_reproducible(world):
+    a = generate_sequence(make_spec(seed=9, selection_temperature=0.1),
+                          HandAuthoredScorer(), world)
+    b = generate_sequence(make_spec(seed=9, selection_temperature=0.1),
+                          HandAuthoredScorer(), world)
+    assert a["meta"]["selection_temperature"] == 0.1
+    assert a["steps"] == b["steps"]
+    validate_sequence(a, world)
+
+
 def test_preview_is_one_line_per_sequence(world):
     seq = generate_sequence(make_spec(), HandAuthoredScorer(), world)
     line = format_preview(seq)
@@ -161,6 +171,7 @@ def test_run_config_end_to_end(tmp_path, world):
         rows = list(csv.DictReader(fh))
     assert len(rows) == 8
     assert rows[0]["sequence_id"] == "S001"
+    assert rows[0]["selection_temperature"] == "1.0"   # default, recorded
     assert {r["policy"] for r in rows} == {"scorer", "simple_2b"}
 
     # every written file passes the export gate again on re-read
@@ -190,3 +201,48 @@ def test_run_config_removes_stale_outputs(tmp_path, world):
     assert run_config(cfg_path, preview=False) == 2
     files = sorted(f.name for f in (tmp_path / "out").glob("S*.json"))
     assert files == ["S001.json", "S002.json"]        # S003/S004 cleaned up
+
+
+def test_personality_name_lookup_from_roster_file(tmp_path, world):
+    world_path = tmp_path / "world.json"
+    roster = {"personalities": [
+        {"name": "Karlach", "ocean": {"extraversion": 0.9, "agreeableness": 0.6}},
+    ]}
+    roster_path = tmp_path / "personalities.json"
+    roster_path.write_text(json.dumps(roster), encoding="utf-8")
+
+    cfg_path, cfg = write_config(tmp_path, world_path, [{"name": "scorer"}])
+    cfg["personalities"] = [{"name": "Karlach"}]      # name only -> roster lookup
+    cfg["personalities_file"] = str(roster_path)
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    assert run_config(cfg_path, preview=False) == 2   # 1 personality x 2 seeds
+
+    seq = json.loads((tmp_path / "out" / "S001.json").read_text(encoding="utf-8"))
+    assert seq["meta"]["personality_name"] == "Karlach"
+    assert seq["meta"]["ocean"] == {"O": 0.0, "C": 0.0, "E": 0.9, "A": 0.6, "N": 0.0}
+
+    cfg["personalities"] = [{"name": "Nobody"}]
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    with pytest.raises(ValueError, match="Nobody"):
+        run_config(cfg_path, preview=False)
+
+
+def test_unity_dir_sync_mirrors_and_cleans(tmp_path, world):
+    world_path = tmp_path / "world.json"
+    cfg_path, cfg = write_config(tmp_path, world_path, [{"name": "scorer"}])
+    unity_dir = tmp_path / "unity_seq"
+    cfg["unity_dir"] = str(unity_dir)
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+
+    assert run_config(cfg_path, preview=False) == 4
+    assert sorted(f.name for f in unity_dir.glob("S*.json")) == \
+        [f"S{i:03d}.json" for i in range(1, 5)]
+    # mirrored bytes identical to the archive copy
+    assert (unity_dir / "S001.json").read_bytes() == \
+        (tmp_path / "out" / "S001.json").read_bytes()
+
+    cfg["seeds"] = [42]                               # shrink -> stale cleanup
+    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    assert run_config(cfg_path, preview=False) == 2
+    assert sorted(f.name for f in unity_dir.glob("S*.json")) == \
+        ["S001.json", "S002.json"]

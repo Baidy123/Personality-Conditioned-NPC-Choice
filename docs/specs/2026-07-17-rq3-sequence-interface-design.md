@@ -139,6 +139,12 @@ generation time). `--preview` prints each sequence as text for pre-recording
 quality control. Re-running with the same config and seeds reproduces
 byte-identical step lists.
 
+Usability additions (2026-07-18): the default config is
+`configs/rq3_sequences.json` (`--config` optional); personality entries may
+be name-only references into `personalities_file`; an optional `unity_dir`
+mirrors the written `S*.json` into the Unity playback folder with stale-file
+cleanup, removing the manual copy step.
+
 ## 5. Unity-side contract (specified only; implemented later)
 
 - **Playback player.** Loads a sequence JSON; renders a fixed-camera 2D
@@ -170,7 +176,8 @@ byte-identical step lists.
   pure frontend. NPC count is server-side configuration — Unity renders
   however many the service reports.
 
-  **Server config** (`experiments/rq3/live_config_demo.json`):
+  **Server config** (`configs/live_demo.json`; run configs moved to
+  `configs/` with a change-X-edit-Y README, 2026-07-18):
 
   ```json
   { "world": "data/world.json",

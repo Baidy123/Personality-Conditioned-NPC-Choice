@@ -18,7 +18,7 @@ namespace Dissertation.Live
     {
         public string executable = "python";
         public string arguments =
-            "-m experiments.rq3.live_server --config experiments/rq3/live_config_demo.json";
+            "-m experiments.rq3.live_server --config configs/live_demo.json";
         [Tooltip("Blank = auto: the repo's code/ folder in the editor, the exe folder in builds")]
         public string workingDirectory = "";
 

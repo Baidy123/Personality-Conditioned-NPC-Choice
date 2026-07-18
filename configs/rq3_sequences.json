@@ -1,0 +1,15 @@
+{
+  "out_dir": "data/rq3_sequences/demo",
+  "unity_dir": "unity/dissertation/Assets/StreamingAssets/sequences",
+  "worlds": ["data/world.json"],
+  "personalities_file": "data/personalities.json",
+  "personalities": [
+    {"name": "Karlach"},
+    {"name": "Shadowheart"},
+    {"name": "Laezel"}
+  ],
+  "policies": [{"name": "scorer"}],
+  "n_cycles": 8,
+  "seeds": [42],
+  "selection_temperature": 0.1
+}
