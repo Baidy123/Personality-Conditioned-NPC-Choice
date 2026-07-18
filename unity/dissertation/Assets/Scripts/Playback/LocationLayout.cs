@@ -26,17 +26,22 @@ namespace Dissertation.Playback
         // NPC stands slightly below a block's centre so the name plate stays legible.
         public static readonly Vector2 NpcOffset = new Vector2(0f, -0.55f);
 
-        // side-by-side stands so co-located NPCs never overlap
+        // side-by-side stands so co-located NPCs never overlap (playback uses
+        // the first three; live mode cycles through all six)
         public static readonly Vector2[] SlotOffsets =
         {
             new Vector2(-0.45f, 0f),
             new Vector2(0.45f, 0f),
             new Vector2(0f, -0.55f),
+            new Vector2(-0.9f, -0.55f),
+            new Vector2(0.9f, -0.55f),
+            new Vector2(0f, 0.4f),
         };
 
         // each slot's action label sits on its own height plane above the
         // stand point, so co-located labels never overlap either
-        public static readonly float[] LabelPlanes = { 1.0f, 1.6f, 2.2f };
+        public static readonly float[] LabelPlanes =
+            { 1.0f, 1.6f, 2.2f, 2.8f, 3.4f, 4.0f };
 
         public static readonly Dictionary<string, Entry> Entries =
             new Dictionary<string, Entry>

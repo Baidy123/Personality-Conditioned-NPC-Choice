@@ -151,6 +151,9 @@ def test_npc_edit_endpoint(base_url):
                         {"slot": 5, "ocean": {"extraversion": 0.0}})
     assert status == 400 and "slot" in body["error"]
 
+    status, body = post(base_url + "/npc", {"slot": 0})   # no ocean dict
+    assert status == 400 and "ocean" in body["error"]
+
 
 def test_npc_add_endpoint_and_reset_discards(base_url):
     status, state = post(base_url + "/npc",

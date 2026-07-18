@@ -284,6 +284,32 @@ def test_add_npc_by_personality_lookup_and_errors(config_path):
         session.add_npc({"name": "Ghost"})    # unknown, no inline ocean
 
 
+def test_step_is_atomic_when_one_npc_fails(config_path):
+    session = LiveSession.from_config(config_path)
+    session.step()
+    before = {
+        npc.slot: [o.id for o in npc.controller.H_L.recent_to_old()]
+        for npc in session.npcs
+    }
+    count_before = session.step_count
+
+    # second NPC's decision blows up mid-cycle
+    def boom(*args, **kwargs):
+        raise RuntimeError("policy exploded")
+    session.npcs[1].controller.choose_location = boom
+
+    with pytest.raises(RuntimeError, match="exploded"):
+        session.step()
+
+    # first NPC's already-committed buffers were rolled back
+    after = {
+        npc.slot: [o.id for o in npc.controller.H_L.recent_to_old()]
+        for npc in session.npcs
+    }
+    assert after == before
+    assert session.step_count == count_before
+
+
 # ------------------------------------------- controller commit_forced (unit) --
 
 def _options(world, loc_id, act_id):

@@ -12,9 +12,13 @@ namespace Dissertation.Live
     {
         public string baseUrl = "http://127.0.0.1:8973";
 
+        public int timeoutSeconds = 10;    // a hung server must not hang the UI
+
         public void Get(string path, Action<string> onOk, Action<string> onError)
         {
-            StartCoroutine(Run(UnityWebRequest.Get(baseUrl + path), onOk, onError));
+            var req = UnityWebRequest.Get(baseUrl + path);
+            req.timeout = timeoutSeconds;
+            StartCoroutine(Run(req, onOk, onError));
         }
 
         public void Post(string path, string jsonBody,
@@ -26,6 +30,7 @@ namespace Dissertation.Live
             req.uploadHandler = new UploadHandlerRaw(payload);
             req.downloadHandler = new DownloadHandlerBuffer();
             req.SetRequestHeader("Content-Type", "application/json");
+            req.timeout = timeoutSeconds;
             StartCoroutine(Run(req, onOk, onError));
         }
 

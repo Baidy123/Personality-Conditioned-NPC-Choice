@@ -168,36 +168,46 @@ class LiveSession:
         return [{"id": o.id, "p": float(p)}
                 for o, p in zip(options, distribution, strict=True)]
 
-    def step(self) -> dict:
-        """One decision cycle for every NPC (the checkpoint)."""
-        force = self._active_force()
-        steps = []
-        for npc in self.npcs:
-            prev = npc.controller.current_location_id
-            if force is not None:
-                loc_id, act_id = force
-                loc = self.world.effective_location(loc_id)
-                act = next(a for a in self.world.actions_at(loc_id)
-                           if a.id == act_id)
-                npc.controller.commit_forced(loc, act)
-                steps.append({
-                    "slot": npc.slot, "name": npc.name,
-                    "location": loc_id, "action": act_id,
-                    "moved": loc_id != prev, "overridden": True,
-                    "location_probs": [], "action_probs": [],
-                })
-                continue
-            locations = self.world.resolve()
-            d_loc = npc.controller.choose_location(npc.personality, locations)
-            actions = self.world.actions_at(d_loc.option.id)
-            d_act = npc.controller.choose_action(npc.personality, actions)
-            steps.append({
+    def _step_npc(self, npc: LiveNpc, force: tuple[str, str] | None) -> dict:
+        prev = npc.controller.current_location_id
+        if force is not None:
+            loc_id, act_id = force
+            loc = self.world.effective_location(loc_id)
+            act = next(a for a in self.world.actions_at(loc_id)
+                       if a.id == act_id)
+            npc.controller.commit_forced(loc, act)
+            return {
                 "slot": npc.slot, "name": npc.name,
-                "location": d_loc.option.id, "action": d_act.option.id,
-                "moved": d_loc.option.id != prev, "overridden": False,
-                "location_probs": self._probs(locations, d_loc.distribution),
-                "action_probs": self._probs(actions, d_act.distribution),
-            })
+                "location": loc_id, "action": act_id,
+                "moved": loc_id != prev, "overridden": True,
+                "location_probs": [], "action_probs": [],
+            }
+        locations = self.world.resolve()
+        d_loc = npc.controller.choose_location(npc.personality, locations)
+        actions = self.world.actions_at(d_loc.option.id)
+        d_act = npc.controller.choose_action(npc.personality, actions)
+        return {
+            "slot": npc.slot, "name": npc.name,
+            "location": d_loc.option.id, "action": d_act.option.id,
+            "moved": d_loc.option.id != prev, "overridden": False,
+            "location_probs": self._probs(locations, d_loc.distribution),
+            "action_probs": self._probs(actions, d_act.distribution),
+        }
+
+    def step(self) -> dict:
+        """One decision cycle for every NPC (the checkpoint).
+
+        Atomic: if any NPC's decision fails midway, every controller is
+        rolled back and ``step_count`` is untouched, so a 400 leaves the
+        session exactly where it was."""
+        force = self._active_force()
+        snaps = [npc.controller.snapshot() for npc in self.npcs]
+        try:
+            steps = [self._step_npc(npc, force) for npc in self.npcs]
+        except Exception:
+            for npc, snap in zip(self.npcs, snaps):
+                npc.controller.restore(snap)
+            raise
         self.step_count += 1
         return {"step_count": self.step_count, "steps": steps}
 

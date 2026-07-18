@@ -77,6 +77,7 @@ namespace Dissertation.Live
         // ---------------------------------------------------------- requests --
         void Connect()
         {
+            busy = false;                  // clear a flag stranded by a hang
             // auto-start the brain if a launcher is wired; even if that fails,
             // the retry loop can still reach a manually started server
             if (launcher != null && !launcher.IsRunning)
@@ -92,10 +93,12 @@ namespace Dissertation.Live
             const int attempts = 12;               // ~5 s of patience for boot
             for (var i = 0; i < attempts; i++)
             {
+                if (!enabled) yield break;         // mode switched mid-connect
                 var done = false;
                 var success = false;
                 client.Get("/state", body =>
                 {
+                    if (!isActiveAndEnabled) { done = true; return; }
                     state = JsonUtility.FromJson<LiveState>(body);
                     RebuildAll();
                     var names = new List<string>();
@@ -126,10 +129,12 @@ namespace Dissertation.Live
             client.Post("/step", null, body =>
             {
                 busy = false;
+                if (!isActiveAndEnabled) return;   // mode switched mid-request
                 Animate(JsonUtility.FromJson<StepResponse>(body));
             }, err =>
             {
                 busy = false;
+                if (!isActiveAndEnabled) return;
                 Log($"ERROR step: {err}");
                 SetStatus($"step error: {err}");
             });
@@ -140,6 +145,7 @@ namespace Dissertation.Live
             if (state == null) return;
             client.Post("/reset", null, body =>
             {
+                if (!isActiveAndEnabled) return;   // mode switched mid-request
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildAll();
                 Log("reset: authored world and startup roster restored");
@@ -155,6 +161,7 @@ namespace Dissertation.Live
         {
             client.Post("/event", json, body =>
             {
+                if (!isActiveAndEnabled) return;   // mode switched mid-request
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildEventPanel();     // NPCs unaffected: changes apply next step
                 Log(description);
@@ -170,6 +177,7 @@ namespace Dissertation.Live
         {
             client.Post("/npc", json, body =>
             {
+                if (!isActiveAndEnabled) return;   // mode switched mid-request
                 state = JsonUtility.FromJson<LiveState>(body);
                 RebuildNpcs();
                 RebuildNpcDropdown();
@@ -355,6 +363,8 @@ namespace Dissertation.Live
 
         void Update()
         {
+            // typing a new NPC's name must not fire hotkeys ("r" = Reset!)
+            if (newNpcName != null && newNpcName.isFocused) return;
             if (Input.GetKeyDown(KeyCode.Space)) Step();
             if (Input.GetKeyDown(KeyCode.R)) ResetSession();
             if (Input.GetKeyDown(KeyCode.H))

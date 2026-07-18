@@ -60,10 +60,13 @@ class LiveHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:            # noqa: N802
         try:
+            # always drain the body first, even for routes that ignore it:
+            # closing a socket with unread bytes triggers a TCP-reset race
+            # that intermittently destroys the response
+            body = self._read_body()
             if self.path == "/step":
                 self._send(200, self.session.step())
             elif self.path == "/event":
-                body = self._read_body()
                 if "unlocked" in body:
                     self.session.set_unlocked(body["location"], body["unlocked"])
                 else:
@@ -71,10 +74,11 @@ class LiveHandler(BaseHTTPRequestHandler):
                                            body["active"])
                 self._send(200, self.session.state())
             elif self.path == "/npc":
-                body = self._read_body()
                 if "slot" in body:
+                    if "ocean" not in body:
+                        raise ValueError("npc edit needs an 'ocean' dict")
                     self.session.set_personality(
-                        body["slot"], body.get("ocean", {}),
+                        body["slot"], body["ocean"],
                         reset_buffers=bool(body.get("reset_buffers", False)))
                 else:
                     self.session.add_npc(body)

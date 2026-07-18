@@ -158,6 +158,14 @@ class RecentBuffer:
         """Buffer contents ordered newest -> oldest (the order ``alpha_j`` expects)."""
         return list(reversed(self._items))
 
+    def snapshot(self) -> list[Option]:
+        """Copy of the contents (oldest -> newest) for state rollback."""
+        return list(self._items)
+
+    def restore(self, items: list[Option]) -> None:
+        """Replace the contents with a previous :meth:`snapshot`."""
+        self._items = deque(items, maxlen=self.maxlen)
+
     def __len__(self) -> int:
         return len(self._items)
 

@@ -170,6 +170,27 @@ class DecisionController:
         self._last_location = location
         self.H_A.push(action)
 
+    def snapshot(self) -> dict:
+        """Full mutable state (buffers, last location, rng) for rollback.
+
+        Lets a caller stepping several NPCs make the whole cycle atomic:
+        snapshot every controller, and restore on any failure."""
+        return {
+            "H_L": self.H_L.snapshot(),
+            "H_A": self.H_A.snapshot(),
+            "last_id": self._last_location_id,
+            "last": self._last_location,
+            "rng_state": self.rng.bit_generator.state,
+        }
+
+    def restore(self, snap: dict) -> None:
+        """Return to a previous :meth:`snapshot` exactly (incl. rng stream)."""
+        self.H_L.restore(snap["H_L"])
+        self.H_A.restore(snap["H_A"])
+        self._last_location_id = snap["last_id"]
+        self._last_location = snap["last"]
+        self.rng.bit_generator.state = snap["rng_state"]
+
     # -- lifecycle --------------------------------------------------------------
     def reset(self) -> None:
         """Clear both buffers — start a fresh behaviour sequence."""
