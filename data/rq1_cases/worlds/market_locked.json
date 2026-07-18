@@ -117,6 +117,17 @@
             "cooperation": 0.5
           }
         }
+      ],
+      "events": [
+        {
+          "name": "guest_lecture",
+          "active": false,
+          "buff": {
+            "social": 0.25,
+            "stimulation": 0.15
+          },
+          "force_npc": null
+        }
       ]
     },
     {
@@ -169,6 +180,17 @@
             "exploration": 0.05,
             "helping": 0.3
           }
+        }
+      ],
+      "events": [
+        {
+          "name": "holy_day",
+          "active": false,
+          "buff": {
+            "social": 0.2,
+            "structure": 0.1
+          },
+          "force_npc": null
         }
       ]
     },
@@ -226,6 +248,18 @@
           }
         }
       ],
+      "events": [
+        {
+          "name": "festival",
+          "active": false,
+          "buff": {
+            "social": 0.15,
+            "stimulation": 0.2,
+            "exploration": 0.1
+          },
+          "force_npc": null
+        }
+      ],
       "unlocked": false
     },
     {
@@ -277,6 +311,18 @@
             "risk": 0.05,
             "exploration": 0.05
           }
+        }
+      ],
+      "events": [
+        {
+          "name": "storm",
+          "active": false,
+          "buff": {
+            "risk": 0.3,
+            "exploration": -0.2,
+            "stimulation": 0.1
+          },
+          "force_npc": null
         }
       ]
     },
@@ -370,6 +416,17 @@
             "risk": 0.8,
             "exploration": 0.1
           }
+        }
+      ],
+      "events": [
+        {
+          "name": "grand_tournament",
+          "active": false,
+          "buff": {
+            "social": 0.2,
+            "stimulation": 0.2
+          },
+          "force_npc": "arena/spectate"
         }
       ]
     },

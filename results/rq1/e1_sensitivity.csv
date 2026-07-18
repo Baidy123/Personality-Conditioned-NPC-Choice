@@ -1,6 +1,6 @@
-trait,tvd_base_location,tvd_rule_location,tvd_rule_location_ctx_avg,tvd_rule_action_avg
-openness,0.1638,0.1638,0.2782,0.2044
-conscientiousness,0.2794,0.2794,0.2985,0.3283
-extraversion,0.5140,0.5140,0.5097,0.1689
-agreeableness,0.0948,0.0948,0.0982,0.2299
-neuroticism,0.3545,0.5002,0.4748,0.5264
+trait,tvd_base_location,tvd_rule_location,tvd_rule_location_ctx_avg,tvd_rule_action_avg,tvd_rule_action_empty
+openness,0.1638,0.1638,0.2782,0.2044,0.1103
+conscientiousness,0.2794,0.2794,0.2985,0.3283,0.1749
+extraversion,0.5140,0.5140,0.5097,0.1689,0.1705
+agreeableness,0.0948,0.0948,0.0982,0.2299,0.2227
+neuroticism,0.3545,0.5002,0.4748,0.5264,0.2693
