@@ -93,17 +93,6 @@ python -m experiments.rq2.run_2b
 `run_label_consistency export|score` measures annotator test-retest agreement,
 the practical ceiling on any 2B score.
 
-**RQ3 — human study** -> `results/rq3/`
-
-```bash
-python -m experiments.rq3.design_personas    # pick the persona set by measured separation
-python -m experiments.rq3.gen_sequences      # stimuli; --preview prints the trails
-python -m experiments.rq3.analyse_survey --export <qualtrics_export.tsv>
-```
-
-`plot_meeting6.py` and `plot_trait_pointing.py` render the result figures from
-the same export.
-
 ## Game modes (Unity playback + live demo)
 
 See **`configs/README.md`** — it is the front door for anything you would want to
@@ -129,7 +118,7 @@ npc_policy/          the policy package
 
 configs/             run configs for the game modes — start at configs/README.md
 data/                world.json, personalities.json, generated cases, 2B dataset
-experiments/         rq1/ rq2/ rq3/ — the analyses above
+experiments/         rq1/ rq2/ — the analyses above; rq3/ drives the Unity modes
 examples/            demo.py, acceptance_check.py, table/figure renderers
 results/             experiment outputs, trained checkpoints
 tests/               pytest suite
