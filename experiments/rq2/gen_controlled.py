@@ -1,4 +1,4 @@
-"""Controlled-dataset generation for Study 2A (design §2).
+"""Controlled-dataset generation for Study 2A.
 
 Outputs (``data/rq2_controlled/``; smoke mode uses ``…_smoke/``):
 
@@ -53,7 +53,7 @@ ROLLOUT_VARIANTS = ("full", "celebration", "war_camp", "market_locked")
 ROUNDS_PER_TRAJ = 50            # → 100 cases per trajectory (50 location + 50 action)
 
 # Pool sizes. Master pool ≈ 190k so every filtered split retains ≥ 105k
-# (TRAIN_SIZE + VAL_SIZE); the arena_locked block only feeds G6 (design §2).
+# (TRAIN_SIZE + VAL_SIZE); the arena_locked block only feeds G6.
 # arena_locked was raised 300 → 500 trajectories after measuring G6 eligibility:
 # rollout location cases in arena-unlocked worlds always list arena as a
 # candidate (0% eligible), so the plan's 300 left G6 ≈ 12k short of 105k.
@@ -217,7 +217,7 @@ class SyntheticSampler:
 def rollout_records(world_name: str, world, scorer: HandAuthoredScorer,
                     n_traj: int, rng: np.random.Generator,
                     rounds: int = ROUNDS_PER_TRAJ) -> list[tuple[ControlledCase, dict]]:
-    """Trajectory cases: every decision's inputs + ``trace.P_rule`` (design §2)."""
+    """Trajectory cases: every decision's inputs + ``trace.P_rule``."""
     records: list[tuple[ControlledCase, dict]] = []
     for _ in range(n_traj):
         p = Personality(rng.uniform(-1.0, 1.0, 5))
@@ -257,7 +257,7 @@ def rollout_records(world_name: str, world, scorer: HandAuthoredScorer,
 
 # ------------------------------------------------------------- split filters --
 def g1_region(case: ControlledCase) -> bool:
-    """Excluded personality region: O > 0.5 ∧ C < −0.5 (research spec §6)."""
+    """Excluded personality region: O > 0.5 ∧ C < −0.5."""
     return case.personality[0] > 0.5 and case.personality[1] < -0.5
 
 
@@ -314,7 +314,7 @@ TRAIN_FILTERS = {
 def targeted_records(split: str, sampler: SyntheticSampler, worlds: dict,
                      scorer: HandAuthoredScorer, n: int,
                      rng: np.random.Generator, rounds: int) -> list[tuple[ControlledCase, dict]]:
-    """Generate ``n`` cases satisfying ``split``'s held-out condition (design §2)."""
+    """Generate ``n`` cases satisfying ``split``'s held-out condition."""
     tag = {"source": "targeted", "world": "full"}
     out: list[tuple[ControlledCase, dict]] = []
 

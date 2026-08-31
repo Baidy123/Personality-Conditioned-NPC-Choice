@@ -1,12 +1,12 @@
-"""Provisional trait-to-feature weight tables ``W^L`` and ``W^A`` (``project_flow.md`` §2).
+"""Provisional trait-to-feature weight tables ``W^L`` and ``W^A``.
 
-``W^L`` is ``(N_TRAITS, 8)`` over ``LOCATION_TAGS``; ``W^A`` is ``(N_TRAITS, 11)`` over
+``W^L`` is ``(N_TRAITS, 9)`` over ``LOCATION_TAGS``; ``W^A`` is ``(N_TRAITS, 11)`` over
 ``ACTION_TAGS``. Rows follow ``OCEAN`` order. The base score is
 ``base_i^d = p^T W^d o_i^d``. The same E row also drives the history term
 ``compat_E_i^d = W^d[E, :] · o_i^d``.
 
-**All values are hand-authored starting points (PROVISIONAL, ``[values TBD]`` in
-§2).** They encode plausible directions only and must be examined empirically
+**All values are hand-authored starting points (PROVISIONAL, ``[values TBD]``).**
+They encode plausible directions only and must be examined empirically
 (RQ1), not assumed correct. The two tables are independent because a feature can
 act differently at the two stages.
 
@@ -44,7 +44,7 @@ _W_A = {
     "conscientiousness":[ 0.0, -0.3,  0.8,  0.4,  0.1, -0.5, -0.1,  0.2,  0.2, -0.3,  0.3],
     "extraversion":     [ 0.8,  0.6,  0.0,  0.0,  0.0,  0.0,  0.0,  0.5,  0.0,  0.0,  0.0],  # sparse (A)
     # A->conflict -0.7 -> -0.9 in tuning round 3: low-A combat drive is the only
-    # action-level channel for "loves legitimate fighting" (docs/tuning_log.md).
+    # action-level channel for "loves legitimate fighting" (tuning log).
     "agreeableness":    [ 0.3,  0.0,  0.1,  0.0,  0.0, -0.1,  0.0,  0.6,  0.8, -0.9, -0.2],
     "neuroticism":      [-0.3, -0.3,  0.3,  0.1,  0.0, -0.4, -0.2,  0.0,  0.1,  0.2, -0.1],
 }
@@ -70,7 +70,7 @@ def default_W_action() -> np.ndarray:
 # seeded from the last four columns of the fallback W^A.
 
 # LOCATION_TAGS = [social, stimulation, structure, cognitive, physical, risk, exploration, privacy, conflict]
-# Tuning round 1 (2026-07-02, docs/tuning_log.md): b_social 0.50->0.475,
+# Tuning round 1 (2026-07-02): b_social 0.50->0.475,
 # w_social 1.0->0.8, C[O,cognitive] 0.30->0.45, w_cognitive 0.6->0.7.
 # Round 4 (v1.2): conflict column added — ideal combat-venue level is driven by
 # low A (harshness) and low N (fearlessness): mu_conflict = 0.10 - 0.35A - 0.20N.

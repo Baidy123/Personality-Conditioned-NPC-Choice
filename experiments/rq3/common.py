@@ -1,5 +1,5 @@
 """RQ3 sequence-generation core: one (personality, policy, world, seed) spec ->
-one replayable sequence dict (spec: docs/specs/2026-07-17-rq3-sequence-interface-design.md).
+one replayable sequence dict.
 
 The sequence dict is exactly what is written to JSON for the Unity playback
 player. ``location_probs`` / ``action_probs`` are research-archive fields the

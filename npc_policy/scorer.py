@@ -1,7 +1,6 @@
 """Hand-authored scorer v1.1: ideal-point base + familiarity reweighting.
 
-Implements ``project_flow.md`` §2 (spec:
-``docs/specs/2026-07-02-equation-v1.1-design.md``). For a decision
+For a decision
 level ``d in {L, A}`` over candidates ``o_1..o_m`` (native schema) with relation
 features ``rep``/``fam`` from the relevant bounded buffer — ``fam`` is the
 recency-weighted semantic similarity, stored as ``Relations.sim``; ``nov`` is a
@@ -24,10 +23,10 @@ learned-model input feature only:
 
 ``rep`` is the repetition (satiation) penalty; since v1.2 its strength is
 modulated by Conscientiousness — high C tolerates routine, low C gets bored
-faster (pilot evidence: docs/tuning_log.md round 4). ``gamma`` makes high C
+faster (pilot evidence: tuning round 4). ``gamma`` makes high C
 favour recently similar options (routine), high O avoid them (novelty
 seeking), and — since v1.3 — high N cling to them (anxiety keeps to the
-recently familiar; docs/tuning_log.md round 7). The two N channels model
+recently familiar; tuning round 7). The two N channels model
 different facets: the temperature is Volatility (erratic base preferences),
 the familiarity term is Withdrawal/Anxiety (stick to the recent and safe).
 They partially cancel in magnitude — the temperature divides the familiarity

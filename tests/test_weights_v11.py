@@ -31,5 +31,5 @@ def test_ranges():
 
 
 def test_W_rel_seeded_from_fallback_W_action():
-    # spec §3: W_rel starts as the last four columns of the v1 W^A
+    # W_rel starts as the last four columns of the v1 W^A
     assert np.array_equal(default_W_rel_action(), default_W_action()[:, 7:])

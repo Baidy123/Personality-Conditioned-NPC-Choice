@@ -1,4 +1,4 @@
-"""Study 2A metrics: main table, figures, diagnostics (design §4).
+"""Study 2A metrics: main table, figures, diagnostics.
 
 Reads the run results and models written by ``train.py`` plus the test sets from
 ``gen_controlled.py``; writes CSVs and figures to ``results/rq2/``. G-split models
@@ -128,7 +128,7 @@ def aggregate(per_run: list[dict]) -> list[dict]:
 
 
 def eval_splits_for(meta: dict, available: list[str]) -> list[str]:
-    """Which test sets a run is evaluated on (design §4, amended):
+    """Which test sets a run is evaluated on:
 
     S0 main runs (full context, full data) → every test set, so each G-split
     gets an S0-trained reference on identical cases; other S0 variants

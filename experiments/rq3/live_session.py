@@ -2,9 +2,8 @@
 
 One ``LiveSession`` owns the mutable world state and one
 ``DecisionController`` per configured NPC. ``state()`` / ``step()`` return
-dicts shaped exactly like the ``/state`` and ``/step`` payloads in
-``docs/specs/2026-07-17-rq3-sequence-interface-design.md`` (section 5, live
-mode): arrays rather than maps so Unity's JsonUtility can parse them, and the
+dicts shaped exactly like the ``/state`` and ``/step`` payloads served by
+``live_server.py``: arrays rather than maps so Unity's JsonUtility can parse them, and the
 override flag is spelled ``overridden`` because ``override`` is a C# keyword.
 
 World mutation never touches the frozen core dataclasses: entries are swapped

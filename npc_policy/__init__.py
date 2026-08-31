@@ -1,6 +1,5 @@
 """NPC personality-conditioned choice — core representation and hand-authored scorer.
 
-See ``project_flow.md`` §1–§3 for the design these modules implement.
 """
 
 from .schema import (

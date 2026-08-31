@@ -1,8 +1,8 @@
 """Core data structures: Option, Personality, and the bounded recent buffers.
 
-An ``Option`` stores its **native** feature vector (8 for a location, 11 for an
+An ``Option`` stores its **native** feature vector (9 for a location, 11 for an
 action) plus a ``level`` tag, and keeps a stable ``id`` so exact repetition can be
-detected separately from semantic similarity (``project_flow.md`` §1). The unified
+detected separately from semantic similarity. The unified
 twelve-dimensional learned-model vector is produced on demand by ``to_padded12``;
 it is interface padding, not stored state.
 """
@@ -134,7 +134,7 @@ class RecentBuffer:
     Used for both the recent-location buffer ``H_t^L`` and the location-local
     recent-action buffer ``H_t^A``. The action buffer must be ``clear()``-ed by the
     decision controller whenever the selected location changes
-    (``project_flow.md`` §5).
+    (see ``controller.py``).
     """
 
     maxlen: int

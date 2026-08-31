@@ -1,4 +1,4 @@
-"""v1.1 scorer behaviour (spec §5: the six required checks)."""
+"""v1.1 scorer behaviour: the six required checks."""
 import numpy as np
 
 from npc_policy.config import ScorerConfig

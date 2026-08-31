@@ -47,7 +47,7 @@ def _atomic_write(path: Path, text: str) -> None:
 
 def _assign_splits(records: list[tuple[IndependentCase, dict]],
                    rng: np.random.Generator) -> dict[str, list[str]]:
-    """Spec §4: structured filters first (isolation enforced here, not by the
+    """Structured filters first (isolation enforced here, not by the
     AI following instructions), then proportional general-pool splitting."""
     pers = [t["id"] for c, t in records if in_pers_region(c)]
     family = [t["id"] for c, t in records
@@ -151,7 +151,7 @@ def run_import(raw_dir: Path = IND_DATA / "raw",
     }
     _atomic_write(out_dir / "meta.json", json.dumps(meta, indent=2))
 
-    # report: aggregates only — test-case details stay blind (spec §4)
+    # report: aggregates only — test-case details stay blind
     trainval = [(c, t) for c, t in kept if t["group"] in ("train", "val")]
     lines = [f"accepted {len(kept)} / raw {len(kept) + len(rejected)}",
              "rejections: " + json.dumps(Counter(r["reason"] for r in rejected)),

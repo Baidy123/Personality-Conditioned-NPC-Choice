@@ -1,7 +1,6 @@
 """Learned-model input features — the fixed per-candidate layout ``phi_i``.
 
-Spec: ``docs/specs/2026-07-09-rq2-models-and-2a-experiments.md`` §2. This module
-is the numpy reference for the feature order; ``learned.py`` rebuilds the same
+This module is the numpy reference for the feature order; ``learned.py`` rebuilds the same
 layout in torch (kept in sync by ``tests/test_learned.py``).
 
 ``phi_i`` contains only candidate-varying terms — the softmax over one candidate

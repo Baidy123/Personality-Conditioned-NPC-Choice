@@ -77,7 +77,7 @@ def main() -> None:
     # ------------------------------------------------- action-level curves ---
     # One diagnostic (trait, location) pair per panel: the action set where the
     # trait's designed channel should be most visible. A gets two panels — its
-    # home level is actions (checklist §E2), so it carries the heaviest claim.
+    # home level is actions, so it carries the heaviest claim.
     panels = [
         ("openness", "library"),
         ("conscientiousness", "arena"),

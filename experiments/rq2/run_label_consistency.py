@@ -5,7 +5,7 @@ annotator on different occasions. That irreducible variability caps what *any*
 system can score against these labels, so a raw 68% means little until the
 ceiling is known.
 
-Two steps (see ``docs/rq2_runbook.md``):
+Two steps:
 
   export  →  re-annotate the SAME cases in N fresh chat sessions  →  score
 

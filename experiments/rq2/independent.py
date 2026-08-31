@@ -1,7 +1,6 @@
 """Study 2B independent-dataset library: parse, validate, enrich, model inputs.
 
-Design: ``docs/specs/2026-07-11-rq2-2b-pipeline-design.md``. Raw batches are
-names-only JSON authored by a chat LLM (guide: ``docs/rq2b_generation_guide.md``);
+Raw batches are names-only JSON carrying an externally authored choice label;
 this module owns every number: feature vectors come from ``data/world.json`` and
 rep/sim/nov from ``npc_policy.relations``. The scorer plays no part here.
 """
@@ -27,7 +26,7 @@ TRAITS = ("O", "C", "E", "A", "N")
 _TRAIT_KW = {"O": "openness", "C": "conscientiousness", "E": "extraversion",
              "A": "agreeableness", "N": "neuroticism"}
 
-# split targets (spec §4; train/val raised 2026-07-12, spec amendment — the
+# split targets (train/val raised 2026-07-12 — the
 # 2026-07-09 550/100 was a review-throughput guess, not a scientific target);
 # general pool scales proportionally to these
 GENERAL_TARGETS = {"train": 1200, "val": 150, "test_iid": 75}
@@ -53,7 +52,7 @@ def load_2b_world() -> World:
 
 # ------------------------------------------------------------------ validate --
 def validate_case(raw: dict, world: World) -> str | None:
-    """Reason code for a rule violation (spec §2), or ``None`` if valid."""
+    """Reason code for a rule violation, or ``None`` if valid."""
     p = raw.get("personality")
     if not isinstance(p, dict) or set(p) != set(TRAITS):
         return "traits_missing"
@@ -137,7 +136,7 @@ def parse_raw_file(path: Path) -> tuple[str, list[tuple[int, dict]], list[dict]]
 
 
 # raw-format keys; anything else (e.g. hallucinated feature numbers) is ignored
-# with a warning at import (spec §2)
+# with a warning at import
 KNOWN_KEYS = {"personality", "decision_type", "selected_location",
               "recent_locations", "recent_actions_same_location",
               "candidates", "choice", "reason", "review_status"}
@@ -192,7 +191,7 @@ def enrich_case(raw: dict, world: World, source: str) -> IndependentCase:
 
 # ------------------------------------------------------------- split filters --
 def in_pers_region(case: IndependentCase) -> bool:
-    """G1 region O > 0.5 ∧ C < −0.5 (same thresholds as 2A, spec §4)."""
+    """G1 region O > 0.5 ∧ C < −0.5 (same thresholds as 2A)."""
     return case.personality[0] > 0.5 and case.personality[1] < -0.5
 
 

@@ -10,7 +10,7 @@ the full ``ScoreTrace`` is still recorded) or any object with the shape above.
 ``LearnedPolicyAdapter`` gives trained RQ2 checkpoints that shape: it computes
 relation features from the buffer exactly as the scorer does, then delegates to
 ``learned.predict_distribution``. Spec:
-``docs/specs/2026-07-17-rq3-sequence-interface-design.md``.
+``experiments/rq3/common.py``.
 """
 
 from __future__ import annotations

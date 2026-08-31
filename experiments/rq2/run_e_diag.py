@@ -1,4 +1,4 @@
-"""E1–E4 structural diagnostic on the trained S0 students (design §5).
+"""E1–E4 structural diagnostic on the trained S0 students.
 
 A ``StudentTraceAdapter`` duck-types the scorer interface the RQ1 pipeline uses
 (``trace(personality, candidates, buffer=…, level=…)``), so trained students run
@@ -7,7 +7,7 @@ choices need the selected location's context, which that interface does not
 carry — the adapter holds ``current_location``, set by the local trajectory
 runner after each location decision.
 
-Pre-registered expectation (research spec §8): the simple model fails to track
+Pre-registered expectation: the simple model fails to track
 the N-temperature channel (E1 N-sweep entropy curve); the nonlinear model
 follows it.
 

@@ -1,4 +1,4 @@
-"""Phase-2 acceptance scorecard (docs/specs/2026-07-02-phase2-acceptance-checklist.md).
+"""Phase-2 acceptance scorecard for the hand-authored scorer.
 
 Evaluates checks A1-A6 (directions), B1-B4 (magnitudes), C1-C4 (memory
 behaviour), and F1-F6 (combined BG3-inspired dev profiles) against the current

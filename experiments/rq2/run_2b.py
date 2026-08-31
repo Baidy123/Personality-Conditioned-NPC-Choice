@@ -199,7 +199,7 @@ def eval_main(argv=None) -> None:
     write_csv(args.results / "main_table.csv", list(table[0].keys()),
               [list(r.values()) for r in table])
 
-    # per-case records (spec §6): which cases each system gets wrong
+    # per-case records: which cases each system gets wrong
     write_csv(args.results / "diagnostics.csv",
               ["system", "seed", "case_id", "group", "decision_type", "top1", "nll"],
               diag_rows)

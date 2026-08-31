@@ -1,5 +1,5 @@
 """Decision controller — owns the two recent-choice buffers and the nested
-location -> action decision flow (``project_flow.md`` §5).
+location -> action decision flow.
 
 This is the "manager": callers never touch the buffers directly. The controller
 guarantees the structural rules that are easy to get wrong by hand:

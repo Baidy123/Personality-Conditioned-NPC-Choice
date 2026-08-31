@@ -1,8 +1,7 @@
 """Derived recent-choice relation features: rep / sim / nov.
 
 For each current candidate ``o_i`` and a relevant bounded buffer ``H`` (newest
-first), with recency weights ``alpha_j >= 0`` summing to one
-(``project_flow.md`` §2):
+first), with recency weights ``alpha_j >= 0`` summing to one:
 
     rep_i = sum_j alpha_j * 1[id(o_i) == id(h_j)]
     sim_i = sum_j alpha_j * cosine(o_i.features, h_j.features)

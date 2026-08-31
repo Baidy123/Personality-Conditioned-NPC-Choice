@@ -1,11 +1,11 @@
 # NPC Policy — core representation & hand-authored scorer
 
-Initial scaffold for the MSc dissertation *"Personality-conditioned discrete NPC
-choice with bounded recent-choice context"*. This package implements the core of
-`project_flow.md` §1–§2: the representation, the bounded recent-choice memory, the
-hand-authored scorer (with its full equations), the controller that drives the
-nested location → action decision, and the world loader / local-event resolver that
-keeps authored content (and a future game engine) out of the policy code.
+Code for the MSc dissertation *"Personality-conditioned discrete NPC choice with
+bounded recent-choice context"*. This package implements the representation, the
+bounded recent-choice memory, the hand-authored scorer (with its full equations),
+the controller that drives the nested location → action decision, and the world
+loader / local-event resolver that keeps authored content (and a future game
+engine) out of the policy code.
 
 ## Quick start
 
@@ -97,7 +97,7 @@ experiments/rq1/    # RQ1 automated analyses (gen_cases + run_e1..e4 -> results/
 Dependency direction: `schema` → `representation` / `weights` → `relations` /
 `scorer` → `controller` / `world` / `cases` → `demo`.
 
-## Representation (`project_flow.md` §1)
+## Representation
 
 - **Personality:** OCEAN vector in `[-1, 1]` (`Personality`).
 - **Location schema (9, v1.2):** `social, stimulation, structure, cognitive, physical,
@@ -161,7 +161,7 @@ Global events (the upper-layer switches that toggle `unlocked` / `active`, e.g.
 "war won" unlocking a camp or activating a tavern celebration) are handled at the
 game-engine layer; in the JSON these flags are set directly.
 
-## Scorer equations (`scorer.py`, from `project_flow.md` §2)
+## Scorer equations (`scorer.py`)
 
 For decision level `d ∈ {L, A}`, candidate `o_i` in its native schema, relation
 features from the relevant buffer (`fam` = recency-weighted similarity, stored as
@@ -191,7 +191,7 @@ only the temperature applies).
 ## Status of values
 
 Everything marked `PROVISIONAL` in `config.py` or `weights.py` is a starting value,
-not a decided one (`project_flow.md` §9):
+not a decided one:
 
 - the coefficients `lambda_R / kappa_C / lambda_O / lambda_C / lambda_N / lambda_Nf`, base temperature
   `tau_0`, `recency_decay`, buffer lengths, and the `base_form` switch live in
@@ -204,24 +204,24 @@ not a decided one (`project_flow.md` §9):
 
 These values must be examined empirically (RQ1), not assumed correct.
 
-## Status & next steps (maps to `project_flow.md` §10)
+## Status & next steps
 
 Done:
 
-- [x] Representation: location (8) / action (11) schemas, 12-dim padding, `Option`,
-      `Personality`, FIFO buffers (§1).
+- [x] Representation: location (9) / action (11) schemas, 12-dim padding, `Option`,
+      `Personality`, FIFO buffers.
 - [x] Hand-authored scorer with the v1.1 equations (ideal-point base + bilinear
       fallback, gamma-familiarity memory term, bidirectional N temperature) and
       `rep / sim / nov` relation features.
 - [x] `DecisionController`: nested location → action cycle, buffer ownership, the
-      action-buffer reset rule (§5).
+      action-buffer reset rule.
 - [x] World loader + local-event resolution (`unlocked`, active-event buffs); content
-      authored in `data/*.json` (§5b).
+      authored in `data/*.json`.
 - [x] Decision-case formats with JSON (de)serialisation (`cases.py`), native vectors.
 
-- [x] Matched-case generator (§10 step 2) and the automated RQ1 analyses
-      (§10 step 3): trait sensitivity, profile distinguishability, trajectory
-      patterns, memory ablations (`experiments/rq1/`).
+- [x] Matched-case generator and the automated RQ1 analyses: trait sensitivity,
+      profile distinguishability, trajectory patterns, memory ablations
+      (`experiments/rq1/`).
 - [x] Learned-policy layer (simple / nonlinear / agnostic under the shared
       12-dim interface) and the 2A controlled pipeline: dataset generation,
       130 training runs (S0 + G1–G6 + ablations + data sizes), metrics, and
@@ -232,12 +232,15 @@ Done:
       (playback player and live demo with the local decision service;
       `experiments/rq3/`, `unity/dissertation`, `configs/README.md`).
 
+- [x] RQ3 human study: persona design by measured behavioural separation,
+      stimulus generation, Qualtrics survey build, and the analysis of the
+      collected responses (`experiments/rq3/`, `results/rq3/`).
+
 Next:
-- [ ] Human-study protocol (with supervisor), ethics, stimulus recording,
-      and the study itself — the sole evidence source for RQ3.
-- [ ] Study 3 comparative automated evaluation write-up on the independent
-      test cases.
+- [ ] Comparative automated evaluation write-up on the independent test cases.
 - [ ] Dissertation writing.
 
 Global-event switches (toggling `unlocked` / `active`) are deferred to game-engine
-integration; `force_npc` is stored but unused (game layer, excluded from data per §5c).
+integration. `force_npc` (a scripted narrative override of an autonomous choice) is
+stored but unused: it belongs to the game layer and is excluded from all training
+and evaluation data, because it does not express personality-conditioned choice.

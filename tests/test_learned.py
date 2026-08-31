@@ -1,4 +1,4 @@
-"""Model-layer tests (spec: docs/specs/2026-07-09-rq2-model-layer-design.md §5)."""
+"""Model-layer tests."""
 
 from __future__ import annotations
 
@@ -460,7 +460,7 @@ class TestGradientSmoke:
         assert final < 0.05
 
     def test_simple_exactly_fits_bilinear_teacher(self):
-        # spec §4c: with zero relations and the N temperature disabled, the
+        # with zero relations and the N temperature disabled, the
         # bilinear teacher lies inside the simple model's representable class.
         # lambda_N = 0 because the personality-dependent temperature is on the
         # spec's not-representable list; 200 cases per decision type so the fit

@@ -33,7 +33,7 @@ from .common import read_pool
 from .independent import IND_DATA, IND_RESULTS
 
 TRAITS = ("O", "C", "E", "A", "N")
-# designed channel signs (project_flow §3a, equation v1.3); "." = no memory channel
+# designed channel signs (scorer equation v1.3); "." = no memory channel
 EXPECTED = {"O": "-", "C": "+", "E": ".", "A": ".", "N": "+"}
 BANDS = (("high", 0.3, 1.01), ("mid", -0.3, 0.3), ("low", -1.01, -0.3))
 

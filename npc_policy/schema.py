@@ -1,10 +1,10 @@
 """Semantic schemas (location / action) and OCEAN personality axes.
 
 Location and action use separate native schemas that share their first seven
-features (``project_flow.md`` §1, ``[SET as v1]``):
+features (``[SET as v1]``):
 
-- location (8): social, stimulation, structure, cognitive, physical, risk,
-  exploration, privacy
+- location (9): social, stimulation, structure, cognitive, physical, risk,
+  exploration, privacy, conflict
 - action (11): the shared seven, then cooperation, helping, conflict, control
 
 A unified twelve-dimensional order (``MODEL_TAGS``) is used only at the learned-
@@ -44,13 +44,13 @@ MODEL_TAGS: tuple[str, ...] = (
     "control",
 )  # 12
 
-# --- v1.1 base-form split (project_flow.md §2) ----------------------------------
+# --- v1.1 base-form split -------------------------------------------------------
 # Intensity features use the ideal-point base form; the four action-only
 # relational features keep a linear form. Layout guarantee (relied on by the
 # scorer): in the native action vector the intensity block comes first and the
 # relational block last.
 INTENSITY_TAGS: dict[str, tuple[str, ...]] = {
-    "location": LOCATION_TAGS,   # all 8
+    "location": LOCATION_TAGS,   # all 9
     "action": _SHARED,           # shared 7 (privacy is location-only)
 }
 RELATIONAL_TAGS: tuple[str, ...] = ("cooperation", "helping", "conflict", "control")

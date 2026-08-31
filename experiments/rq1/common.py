@@ -1,9 +1,8 @@
 """Shared utilities for the RQ1 personality-expression experiments.
 
 RQ1 asks to what extent the representation and decision structure produce
-*consistent* and *distinguishable* personality-conditioned choice patterns
-(project_flow.md §10 steps 2-3). Four analyses share the matched cases written
-by ``gen_cases.py``:
+*consistent* and *distinguishable* personality-conditioned choice patterns.
+Four analyses share the matched cases written by ``gen_cases.py``:
 
   E1 (run_e1)  single-trait sensitivity        -> "personality-conditioned"
   E2 (run_e2)  profile distinguishability      -> "distinguishable"

@@ -1,4 +1,4 @@
-"""Decision-case data formats for both datasets (``project_flow.md`` §3).
+"""Decision-case data formats for both datasets.
 
 Both datasets share the same input structure:
 
@@ -14,7 +14,7 @@ They differ only in the label:
 
 - ``ControlledCase`` carries the scorer's full ``target_distribution`` (soft label);
 - ``IndependentCase`` carries a single ``target_choice`` index (provisional v1 hard
-  label; pairwise / ranked forms remain open, ``project_flow.md`` §3b/§9).
+  label; pairwise / ranked forms remain open).
 
 ``to_dict`` / ``from_dict`` give a stable, JSON-serialisable on-disk form. Provenance
 fields on ``IndependentCase`` keep the manual-review trail required by the design

@@ -1,4 +1,4 @@
-"""Matched-case generator for RQ1 (project_flow.md §10 step 2).
+"""Matched-case generator for the RQ1 personality-expression analyses.
 
 Produces ``data/rq1_cases/``:
 

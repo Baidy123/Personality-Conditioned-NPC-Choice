@@ -1,17 +1,17 @@
 """All provisional scorer constants in one place.
 
-Every value here is **PROVISIONAL / TBD** (``project_flow.md`` §9). They are
+Every value here is **PROVISIONAL / TBD**. They are
 collected so pilot tuning touches a single object. Defaults are deliberately
 mild starting points, not validated values.
 
 Per-decision-level coefficients (the ``lambda``s and ``tau_0``) live in
 ``LevelParams``; ``ScorerConfig`` holds one set for location and one for action.
 Both default to identical values, so behaviour matches a single tied set until
-one level is deliberately tuned (``project_flow.md`` §2/§9, the ``^d`` superscript).
+one level is deliberately tuned (the ``^d`` superscript in the equations).
 
-v1.1 (spec: docs/specs/2026-07-02-equation-v1.1-design.md):
-``lambda_E`` and ``epsilon`` were removed; ``lambda_C`` and ``base_form`` added.
-v1.3 (spec: docs/specs/2026-07-06-equation-v1.3-design.md): ``lambda_Nf``
+v1.1: ``lambda_E`` and ``epsilon`` were removed; ``lambda_C`` and
+``base_form`` added.
+v1.3: ``lambda_Nf``
 added — Neuroticism joins the familiarity channel (anxiety clings to recently
 familiar options).
 """
@@ -31,7 +31,7 @@ class LevelParams:
     # round 7 (v1.3) rebalanced the memory term so it expresses personality
     # instead of acting as a uniform anti-repeat force: lambda_R 1.2 -> 0.7,
     # kappa_C 0.5 -> 0.8, lambda_O/lambda_C 1.0 -> 2.0, lambda_Nf added
-    # (2026-07-02 / 2026-07-06, docs/tuning_log.md).
+    # (tuning rounds, 2026-07-02 / 2026-07-06).
     tau_0: float = 1.0     # base sharpness knob                       [PROVISIONAL]
     lambda_R: float = 0.7  # repetition penalty (satiation)            [PROVISIONAL]
     kappa_C: float = 0.8   # C discount on satiation: high C tolerates
@@ -54,7 +54,7 @@ class LevelParams:
 
 @dataclass(frozen=True)
 class ScorerConfig:
-    # --- buffer lengths (project_flow.md §1) -----------------------------------
+    # --- buffer lengths --------------------------------------------------------
     K_L: int = 3          # recent-location FIFO length        [PROVISIONAL]
     K_A: int = 3          # local recent-action FIFO length    [PROVISIONAL]
 
@@ -68,7 +68,7 @@ class ScorerConfig:
     base_form: str = "ideal_point"
 
     # --- per-level equation coefficients ---------------------------------------
-    # Levels started tied; round 5 (docs/tuning_log.md) sharpened the location
+    # Levels started tied; tuning round 5 sharpened the location
     # base (tau_0 0.9) after the training_yard/arena merge shrank the world and
     # pushed the openness endpoint TVD under its 0.15 floor. Grid-searched:
     # 0.95-0.9 pass everything, 0.85 collapses Shadowheart's trajectory (C3).

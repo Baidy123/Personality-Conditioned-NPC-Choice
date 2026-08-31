@@ -1,4 +1,4 @@
-"""Study 2A training runs — resumable, device-agnostic (design §3).
+"""Study 2A training runs — resumable, device-agnostic.
 
 One run = split × model × seed (``common.run_matrix``, 130 runs full / 4 smoke).
 Each run writes ``results/rq2/runs/<run_id>.json`` and ``models/<run_id>.pt``
@@ -42,7 +42,7 @@ def pick_device(arg: str) -> torch.device:
 
 
 def batch_to(b: PolicyBatch, device: torch.device, dtype: torch.dtype) -> PolicyBatch:
-    """Move a batch to the training device/dtype (design §3: f32 CUDA, f64 CPU)."""
+    """Move a batch to the training device/dtype (f32 CUDA, f64 CPU)."""
     return replace(
         b,
         p=b.p.to(device=device, dtype=dtype),

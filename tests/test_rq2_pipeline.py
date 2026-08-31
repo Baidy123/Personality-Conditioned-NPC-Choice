@@ -1,5 +1,4 @@
-"""Acceptance tests for the Study 2A pipeline (design spec §6:
-docs/specs/2026-07-10-rq2-2a-pipeline-design.md)."""
+"""Acceptance tests for the Study 2A pipeline."""
 
 from __future__ import annotations
 
@@ -418,7 +417,7 @@ class TestTraining:
     @pytest.fixture(scope="class")
     @classmethod
     def tiny_cases(cls):
-        """Representable teacher (bilinear, N temperature off) — design §6 item 3."""
+        """Representable teacher (bilinear, N temperature off)."""
         from experiments.rq2 import gen_controlled as g
         from npc_policy import load_world
         from npc_policy.config import LevelParams

@@ -7,7 +7,7 @@ Unity frontend and the Python decision logic: it never listens beyond
 127.0.0.1 and involves no browser. In the released build it runs invisibly as
 a PyInstaller subprocess that Unity starts and stops.
 
-Endpoints (spec: docs/specs/2026-07-17-rq3-sequence-interface-design.md §5):
+Endpoints:
 
     GET  /state   world + events + unlock flags + NPC roster
     POST /step    one decision cycle for every NPC

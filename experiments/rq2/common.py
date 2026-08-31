@@ -1,6 +1,6 @@
 """Shared utilities for the RQ2 Study 2A experiments.
 
-Design: ``docs/specs/2026-07-10-rq2-2a-pipeline-design.md``. Pool records pair a
+Pool records pair a
 ``ControlledCase`` with generation tags (``"gen"``: id / source / world) used only
 by the split filters — tags never reach a model. All randomness in this package
 derives from ``GEN_SEED`` (generation) or the run seed (training).
@@ -177,7 +177,7 @@ class RunSpec:
 
 
 def run_matrix(smoke: bool = False) -> list[RunSpec]:
-    """The full 130-run matrix (design §3), or a 4-run smoke subset."""
+    """The full 130-run matrix, or a 4-run smoke subset."""
     if smoke:
         return [
             RunSpec("S0", "simple", 0),

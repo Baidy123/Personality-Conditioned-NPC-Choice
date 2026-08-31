@@ -1,7 +1,5 @@
 """RQ2 learned policies — the only torch module in ``npc_policy``.
 
-Design record: ``docs/specs/2026-07-09-rq2-model-layer-design.md``; model forms:
-``docs/specs/2026-07-09-rq2-models-and-2a-experiments.md`` §2–§4.
 
 All models score each candidate independently and softmax within the batch mask,
 so variable candidate-set sizes and candidate-order equivariance hold by
@@ -157,7 +155,7 @@ def predict_distribution(
 
 
 class NonlinearPolicy(nn.Module):
-    """Dual-tower compatibility network (research spec §3; sizes provisional).
+    """Dual-tower compatibility network (sizes provisional).
 
     ``head`` sees ``[e_p, e_o, e_p ⊙ e_o, e_c]`` — the elementwise product gives
     it a multiplicative personality–option interaction directly.
