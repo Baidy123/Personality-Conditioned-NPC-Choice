@@ -1,246 +1,151 @@
-# NPC Policy — core representation & hand-authored scorer
+# Personality-Conditioned NPC Choice
 
-Code for the MSc dissertation *"Personality-conditioned discrete NPC choice with
-bounded recent-choice context"*. This package implements the representation, the
-bounded recent-choice memory, the hand-authored scorer (with its full equations),
-the controller that drives the nested location → action decision, and the world
-loader / local-event resolver that keeps authored content (and a future game
-engine) out of the policy code.
+Code for an MSc dissertation on personality-conditioned discrete NPC choice with
+bounded recent-choice context. An NPC picks a **location**, then an **action** at
+that location, conditioned on an OCEAN personality vector, the options currently
+available, and a short memory of what it recently did.
 
-## Quick start
+Four policies share one interface: a hand-authored scorer, a personality-agnostic
+control, and simple / nonlinear learned models. A Unity project replays the
+generated behaviour sequences and runs a live demo.
+
+## Install
+
+Python 3.11+. Every command below runs from `code/`.
 
 ```bash
-cd code
 pip install -r requirements.txt
-python -m examples.demo
+python -m pytest -q          # 181 tests, all should pass
+python -m examples.demo 5    # 5 decision cycles per NPC
 ```
+
+`torch` is only needed for the learned models (`npc_policy/learned.py`, all of
+`experiments/rq2`); `matplotlib` only for the figure scripts. The hand-authored
+scorer runs on numpy alone.
+
+## Using a policy in your own code
+
+```python
+import numpy as np
+from npc_policy import DecisionController, HandAuthoredScorer, load_world, load_personalities
+
+world = load_world("data/world.json")
+npcs  = load_personalities("data/personalities.json")
+
+ctrl = DecisionController(
+    HandAuthoredScorer(), mode="sample",
+    rng=np.random.default_rng(42), selection_temperature=0.1,
+)
+
+karlach = npcs["Karlach"]
+for _ in range(10):
+    loc = ctrl.choose_location(karlach, world.resolve())
+    act = ctrl.choose_action(karlach, world.actions_at(loc.option.id))
+    print(loc.option.id, "->", act.option.id)
+```
+
+`world.resolve()` returns the locations that are currently unlocked, with active
+event buffs already applied. The controller owns both memory buffers and clears
+the action buffer automatically when the location changes. `mode="argmax"` gives
+reproducible choices; `mode="sample"` draws from the distribution.
+
+Need the distribution rather than a choice? `scorer.distribution(...)`. Need the
+intermediate quantities (base score, mu, gamma, rep/sim/nov, temperature)?
+`scorer.trace(...)`.
 
 ## Running the experiments
 
-Every command runs from `code/`; run `python -m pytest -q` first to confirm
-the environment (expected: all green).
+**RQ1 — behavioural expression** -> `results/rq1/`
 
-**RQ1 — behavioural-expression analyses** (outputs → `results/rq1/`):
-
-```powershell
-python -m experiments.rq1.gen_cases   # matched cases (profiles x contexts x world variants)
-python -m experiments.rq1.run_e1      # E1 trait sensitivity curves
-python -m experiments.rq1.run_e2      # E2 profile-distance correlation
-python -m experiments.rq1.run_e3      # E3 trajectory patterns (named + sweep profiles)
-python -m experiments.rq1.run_e4      # E4 memory/context ablations
+```bash
+python -m experiments.rq1.gen_cases   # matched cases; run this first
+python -m experiments.rq1.run_e1      # trait-sensitivity curves
+python -m experiments.rq1.run_e2      # profile-distance correlation
+python -m experiments.rq1.run_e3      # trajectory patterns
+python -m experiments.rq1.run_e4      # memory-context ablations
 ```
 
-Run `gen_cases` first; E1–E4 are independent of each other after that.
+E1-E4 are independent of each other once `gen_cases` has run.
 
-**RQ2 — policy learning** (outputs → `results/rq2/`, `results/rq2b/`):
+**RQ2 / 2A — learning from the hand-authored scorer** -> `results/rq2/`
 
-2A, controlled supervision from the hand-authored scorer. Run the four steps in
-order; add `--smoke` to every one of them first for a fast end-to-end check.
+Run the four in order. Pass `--smoke` to all of them first for a fast
+end-to-end check before committing to the full matrix.
 
-```powershell
-python -m experiments.rq2.gen_controlled   # dataset (train / val / G1-G6 splits)
-python -m experiments.rq2.train            # 130 runs, resumable
+```bash
+python -m experiments.rq2.gen_controlled   # dataset: train / val / G1-G6 splits
+python -m experiments.rq2.train            # 130 runs; resumable, hours on CPU
 python -m experiments.rq2.run_2a           # metrics, main table, figures
-python -m experiments.rq2.run_e_diag       # E1-E4 structural diagnostic
+python -m experiments.rq2.run_e_diag       # E1-E4 diagnostic on the students
 ```
 
-`train` takes `--device cuda` and `--only <run-prefix>` for a single run.
+`train` takes `--device cuda` and `--only <run-prefix>` to repeat a single run.
 
-2B, independent supervision from the externally labelled dataset in
-`data/rq2_independent/`:
+**RQ2 / 2B — learning from the independent labels** -> `results/rq2b/`
 
-```powershell
+```bash
 python -m experiments.rq2.import_independent   # raw batches -> reviewed splits
-python -m experiments.rq2.run_label_probe      # label health check, run before training
+python -m experiments.rq2.run_label_probe      # label health check; run before training
 python -m experiments.rq2.train_2b
 python -m experiments.rq2.run_2b
 ```
 
-**Game modes (playback generation + live demo):** see `configs/README.md` —
-the change-X-edit-Y map, both run commands, and model/checkpoint selection.
+`run_label_consistency export|score` measures annotator test-retest agreement,
+the practical ceiling on any 2B score.
 
-## What is implemented (verified)
+**RQ3 — human study** -> `results/rq3/`
 
-1. Given a personality, a candidate set, and the relevant memory, produce a
-   **choice distribution** over candidates (for a location or an action decision).
-2. **Nested decision:** the controller runs the full location → action cycle,
-   maintaining both memory buffers and enforcing the reset rule automatically.
-3. **Per-level parameters:** action coefficients (λ, temperature) can be tuned
-   independently of location ones.
-4. **Relation features:** exact repetition (`rep`, by id) is separate from semantic
-   similarity (`sim`, by features).
-5. **Transparency:** `scorer.trace(...)` exposes every intermediate quantity
-   (`base / P_base / mu / gamma / rep / sim / nov / T_N / P_rule`) for the RQ1 analysis.
-6. **Data formats:** JSON read/write for both decision-case types (carrying `level`).
-7. **Selection modes:** `argmax` (reproducible) or `sample` (draw from the distribution).
-
-## Module map
-
-```
-code/npc_policy/
-  schema.py         # feature schemas + OCEAN axes; per-level indexing & 12-dim padding
-  representation.py  # Option, Personality, RecentBuffer
-  weights.py        # v1.1 tables b/C/w (+ W_rel for actions) + fallback W_L / W_A
-  config.py         # ScorerConfig: tunables; LevelParams for location vs action
-  relations.py      # rep / sim / nov from a buffer
-  scorer.py         # HandAuthoredScorer: base score + reweighting -> distribution
-  controller.py     # DecisionController: owns H_L/H_A, nested choice + reset rule
-  world.py          # load world.json + local-event resolution (game-layer boundary)
-  cases.py          # ControlledCase / IndependentCase + (de)serialisation
-data/world.json        # authored locations, action sets, unlocked flags, local events
-data/personalities.json # named NPC OCEAN profiles
-data/rq1_cases/        # generated matched cases (profiles + contexts + world variants)
-examples/demo.py    # end-to-end demo + self-checks
-experiments/rq1/    # RQ1 automated analyses (gen_cases + run_e1..e4 -> results/rq1)
+```bash
+python -m experiments.rq3.design_personas    # pick the persona set by measured separation
+python -m experiments.rq3.gen_sequences      # stimuli; --preview prints the trails
+python -m experiments.rq3.build_qsf          # Qualtrics .qsf, ready to import
+python -m experiments.rq3.analyse_survey --export <qualtrics_export.tsv>
 ```
 
-Dependency direction: `schema` → `representation` / `weights` → `relations` /
-`scorer` → `controller` / `world` / `cases` → `demo`.
+`plot_meeting6.py` and `plot_trait_pointing.py` render the result figures from
+the same export.
 
-## Representation
+## Game modes (Unity playback + live demo)
 
-- **Personality:** OCEAN vector in `[-1, 1]` (`Personality`).
-- **Location schema (9, v1.2):** `social, stimulation, structure, cognitive, physical,
-  risk, exploration, privacy, conflict` (`conflict` = the place hosts combat /
-  open opposition; added in tuning round 4).
-- **Action schema (11):** the shared first seven, then `cooperation, helping,
-  conflict, control`.
-- **Unified 12-dim model vector** (`MODEL_TAGS`): location fills `conflict` natively
-  (v1.2) and pads the three remaining action-only fields with zeros, action pads
-  `privacy` with zero. Interface padding only — used
-  by future learned models, **not** by the scorer. Produced on demand by
-  `Option.to_padded12()`; an `Option` stores its **native** vector (8 or 11).
-- **Option:** carries `id` (identity, for exact repetition) + native `features`
-  (semantics, for similarity) + `level` (`location` / `action`).
-- **Memory buffers (`RecentBuffer`, FIFO):** `H_L` recent locations (length `K_L`);
-  `H_A` recent actions at the *current* location (length `K_A`), reset on a location
-  change. Both store full `Option`s (id + features). Provisional `K_L = K_A = 3`.
+See **`configs/README.md`** — it is the front door for anything you would want to
+change: which sequences get generated, the world and character rosters, how to
+pick which trained model an NPC runs on, the artwork, and both run commands.
 
-## One decision cycle (controller view)
+## Layout
 
 ```
-(1) choose_location(personality, available_locations)
-    read H_L -> relations.py computes rep/sim/nov for each location
-    -> scorer: ideal-point base (b/C/w) -> reweight q (gamma*fam - lambda_R*rep) -> P_rule  (level="location")
-    -> pick a location L_t from P_rule
-    -> if L_t != previous location: clear H_A      # the reset rule, automatic
-    -> push L_t into H_L
+npc_policy/          the policy package
+  schema.py            feature schemas + OCEAN axes, per-level indexing, 12-dim padding
+  representation.py    Option, Personality, RecentBuffer
+  weights.py           hand-authored tables b / C / w / W_rel (+ bilinear fallback)
+  config.py            ScorerConfig; LevelParams holds location vs action coefficients
+  relations.py         rep / sim / nov computed against a buffer
+  scorer.py            HandAuthoredScorer; its docstring carries the full equations
+  learned.py           simple / nonlinear / agnostic torch models
+  features.py          the learned-model input layout, numpy reference
+  policies.py          one calling convention shared by all four policies
+  controller.py        DecisionController: nested choice, buffer ownership, reset rule
+  world.py             world loading + local-event resolution
+  cases.py             decision-case formats and JSON (de)serialisation
 
-(2) choose_action(personality, actions_at(L_t))
-    read H_A (empty right after a location change) -> rep/sim/nov for each action
-    -> scorer: same structure with the action tables (+ W_rel)      (level="action")
-    -> pick an action -> push it into H_A
-
--> wait for the next checkpoint, back to (1)
+configs/             run configs for the game modes — start at configs/README.md
+data/                world.json, personalities.json, generated cases, 2B dataset
+experiments/         rq1/ rq2/ rq3/ — the analyses above
+examples/            demo.py, acceptance_check.py, table/figure renderers
+results/             experiment outputs, trained checkpoints
+tests/               pytest suite
+unity/dissertation/  Unity project: playback player + live demo
 ```
 
-Location and action share the **same equation structure**; they differ only in
-which tables are used, which memory is read, and which per-level coefficients apply.
+Dependency direction: `schema` -> `representation` / `weights` -> `relations` /
+`scorer` -> `controller` / `world` / `cases`.
 
-## World content & local events (`world.py`)
+## Where the numbers come from
 
-Content lives in `data/*.json`, not in code. `load_world` / `load_personalities`
-read it into `Option` / `Personality` objects, so changing the world means editing
-JSON only. A live game engine is just another source feeding the same policy inputs
-`(personality, candidates, memory, level)` — the same door.
+Everything marked `PROVISIONAL` in `config.py` and `weights.py` is a starting
+value, tuned by hand and examined empirically in RQ1, not a validated constant.
+Change coefficients in `config.py`, tables in `weights.py`;
+`python -m examples.make_tables_figures` renders the current values.
 
-Each location (see `location_schema_figure.html`, Listing 1) carries base `features`,
-its action set, a game-layer `unlocked` flag, and a set of **local events**. A local
-event has `active`, a `buff` (temporary feature deltas added while active, location
-features only), and `force_npc` (a scripted override). `unlocked`, the events, and
-`force_npc` stay in the game layer — the model never sees them.
-
-`World.resolve()` produces the current location candidate set:
-
-1. drop locations whose `unlocked` is false;
-2. for each remaining location, add every **active** event's `buff` to the base
-   features, clamped to `[0, 1]`, giving the **effective** features;
-3. the scorer receives only these effective options.
-
-Global events (the upper-layer switches that toggle `unlocked` / `active`, e.g.
-"war won" unlocking a camp or activating a tavern celebration) are handled at the
-game-engine layer; in the JSON these flags are set directly.
-
-## Scorer equations (`scorer.py`)
-
-For decision level `d ∈ {L, A}`, candidate `o_i` in its native schema, relation
-features from the relevant buffer (`fam` = recency-weighted similarity, stored as
-`sim`; `nov` is a learned-model input feature only):
-
-```
-# base_form = ideal_point (default)
-mu_f(p)  = clip(b_f + Σ_t C[t,f]·p_t, 0, 1)        # intensity features
-base_i   = − Σ_f w_f·(o_i[f] − mu_f(p))²
-           + Σ_t Σ_f p_t·W_rel[t,f]·o_i[f]         # action relational features only
-
-# base_form = bilinear (debugging fallback)
-base_i   = p^T W^d o_i^d
-
-# memory + temperature (shared)
-gamma    = lambda_C·C − lambda_O·O + lambda_Nf·N   # v1.3: N clings to the familiar
-rho      = lambda_R·(1 − kappa_C·C)     # v1.2: routine-tolerant satiation
-q_i      = base_i / tau_0 + gamma·fam_i − rho·rep_i
-T_N      = exp(lambda_N·N)
-P_rule   = softmax(q / T_N)
-```
-
-When the relevant buffer is empty, `rep = fam = 0`, so `P_rule = softmax(base/tau_0 / T_N)`
-(the first action after a location change uses the unadjusted base distribution;
-only the temperature applies).
-
-## Status of values
-
-Everything marked `PROVISIONAL` in `config.py` or `weights.py` is a starting value,
-not a decided one:
-
-- the coefficients `lambda_R / kappa_C / lambda_O / lambda_C / lambda_N / lambda_Nf`, base temperature
-  `tau_0`, `recency_decay`, buffer lengths, and the `base_form` switch live in
-  `config.py` (location and action each get their own `LevelParams`, defaulting to
-  equal values);
-- the v1.1 tables `b / C / w` (per level) and `W_rel` live in `weights.py`, alongside
-  the fallback `W_L` / `W_A`. All are hand-authored provisional directions to be
-  tuned there; `python -m examples.make_tables_figures` renders the current values
-  to `docs/v12_tables.png` / `docs/v12_ideal_levels_demo.png`.
-
-These values must be examined empirically (RQ1), not assumed correct.
-
-## Status & next steps
-
-Done:
-
-- [x] Representation: location (9) / action (11) schemas, 12-dim padding, `Option`,
-      `Personality`, FIFO buffers.
-- [x] Hand-authored scorer with the v1.1 equations (ideal-point base + bilinear
-      fallback, gamma-familiarity memory term, bidirectional N temperature) and
-      `rep / sim / nov` relation features.
-- [x] `DecisionController`: nested location → action cycle, buffer ownership, the
-      action-buffer reset rule.
-- [x] World loader + local-event resolution (`unlocked`, active-event buffs); content
-      authored in `data/*.json`.
-- [x] Decision-case formats with JSON (de)serialisation (`cases.py`), native vectors.
-
-- [x] Matched-case generator and the automated RQ1 analyses: trait sensitivity,
-      profile distinguishability, trajectory patterns, memory ablations
-      (`experiments/rq1/`).
-- [x] Learned-policy layer (simple / nonlinear / agnostic under the shared
-      12-dim interface) and the 2A controlled pipeline: dataset generation,
-      130 training runs (S0 + G1–G6 + ablations + data sizes), metrics, and
-      the E1–E4 structural diagnostic (`experiments/rq2/`).
-- [x] 2B independent pipeline: externally labelled dataset with import/review
-      gates, label probe, training, and evaluation (`results/rq2b/`).
-- [x] RQ3 tooling: sequence pipeline + Unity evaluation environment
-      (playback player and live demo with the local decision service;
-      `experiments/rq3/`, `unity/dissertation`, `configs/README.md`).
-
-- [x] RQ3 human study: persona design by measured behavioural separation,
-      stimulus generation, Qualtrics survey build, and the analysis of the
-      collected responses (`experiments/rq3/`, `results/rq3/`).
-
-Next:
-- [ ] Comparative automated evaluation write-up on the independent test cases.
-- [ ] Dissertation writing.
-
-Global-event switches (toggling `unlocked` / `active`) are deferred to game-engine
-integration. `force_npc` (a scripted narrative override of an autonomous choice) is
-stored but unused: it belongs to the game layer and is excluded from all training
-and evaluation data, because it does not express personality-conditioned choice.
+World content lives in `data/*.json`, not in code, so changing the world means
+editing JSON only.

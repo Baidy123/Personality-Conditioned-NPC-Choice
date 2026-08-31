@@ -1,2 +1,8 @@
 numpy>=1.26
 pytest>=8
+
+# learned policies (npc_policy/learned.py, all of experiments/rq2)
+torch>=2.1
+
+# figure scripts (experiments/rq1, rq2, rq3; examples/make_*_figures.py)
+matplotlib>=3.8
