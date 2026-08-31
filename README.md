@@ -98,7 +98,6 @@ the practical ceiling on any 2B score.
 ```bash
 python -m experiments.rq3.design_personas    # pick the persona set by measured separation
 python -m experiments.rq3.gen_sequences      # stimuli; --preview prints the trails
-python -m experiments.rq3.build_qsf          # Qualtrics .qsf, ready to import
 python -m experiments.rq3.analyse_survey --export <qualtrics_export.tsv>
 ```
 

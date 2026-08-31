@@ -2,7 +2,7 @@
 and side-by-side preference results.
 
 Reads the Qualtrics TSV export (UTF-16, three header rows), the stimulus
-assignment written by build_survey.py, and the persona definitions, and reports:
+assignment in ``results/rq3/survey/``, and the persona definitions, and reports:
 
   1. sample composition and exclusions;
   2. blind personality identification per policy (against the 1/3 chance line)

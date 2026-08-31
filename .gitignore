@@ -7,3 +7,12 @@ docs/
 results/rq2_smoke_local_backup/
 NUL
 results/rq2b/consistency/prompts.md
+
+# survey instrument / questionnaire design (kept on disk, not published)
+experiments/rq3/build_survey.py
+experiments/rq3/build_qsf.py
+results/rq3/survey/rq3_survey.qsf
+results/rq3/survey/rq3_survey.txt
+results/rq3/survey/rq3_probe.qsf
+results/rq3/survey/rq3_probe.txt
+results/rq3/survey/group*.md
