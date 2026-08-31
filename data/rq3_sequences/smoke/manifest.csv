@@ -1,3 +1,0 @@
-sequence_id,file,policy,checkpoint,personality,world,seed,n_cycles,generated_at
-S001,S001.json,scorer,,high_E,data/world.json,42,8,2026-07-17T18:08:22
-S002,S002.json,scorer,,low_E_high_N,data/world.json,42,8,2026-07-17T18:08:22

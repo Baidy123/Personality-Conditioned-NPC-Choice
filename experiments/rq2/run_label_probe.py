@@ -123,18 +123,17 @@ def main(argv=None) -> None:
     rho_rows = [r for r in table if "_" not in r["trait"]]
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), sharey=True)
     x = np.arange(len(TRAITS))
-    for ax, what, title in [(axes[0], "sim", "familiarity (sim)"),
-                            (axes[1], "rep", "exact repetition (rep)")]:
+    for ax, what, xlabel in [(axes[0], "sim", "familiarity (sim)"),
+                             (axes[1], "rep", "exact repetition (rep)")]:
         ax.bar(x - 0.2, [r[f"ai_{what}_rho"] for r in rho_rows], width=0.38,
                color="#0072B2", label="independent labels")
         ax.bar(x + 0.2, [r[f"sc_{what}_rho"] for r in rho_rows], width=0.38,
                color="#009E73", label="hand-authored scorer")
         ax.axhline(0, color="black", lw=0.8)
         ax.set_xticks(x, [f"{t}\n({EXPECTED[t]})" for t in TRAITS])
-        ax.set_title(title)
+        ax.set_xlabel(xlabel)
     axes[0].set_ylabel("Spearman ρ (trait vs Δ of chosen option)\n+ clings   −  avoids")
     axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("Do the independent labels follow the designed memory channels?")
     fig.savefig(args.results / "label_probe.png", bbox_inches="tight")
     plt.close(fig)
 

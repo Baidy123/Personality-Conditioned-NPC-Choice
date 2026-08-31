@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "purpose": "Human-readable Chinese labels for world option ids, used when rendering behaviour sequences as questionnaire text. Presentation only — no scorer or model reads this file.",
+    "format": "地点（动作）→ 地点（动作） → ...",
+    "extend": "add a location or action to data/world.json, then add its label here"
+  },
+  "locations": {
+    "tavern": "酒馆",
+    "library": "图书馆",
+    "chapel": "教堂",
+    "market": "集市",
+    "forest": "树林",
+    "arena": "竞技场",
+    "enemy_camp": "敌营"
+  },
+  "actions": {
+    "chat": "闲聊",
+    "drink": "喝酒",
+    "brawl": "斗殴",
+    "read": "读书",
+    "research": "查资料",
+    "discuss": "讨论",
+    "pray": "祷告",
+    "meditate": "冥想",
+    "confess": "忏悔",
+    "haggle": "讨价还价",
+    "browse": "逛摊子",
+    "trade": "做买卖",
+    "explore": "探路",
+    "forage": "采集",
+    "rest": "歇脚",
+    "fight": "比武",
+    "spar": "对练",
+    "drill": "操练",
+    "coach": "指点他人",
+    "spectate": "观战",
+    "bet": "下注",
+    "raid": "突袭",
+    "scout": "侦查"
+  }
+}

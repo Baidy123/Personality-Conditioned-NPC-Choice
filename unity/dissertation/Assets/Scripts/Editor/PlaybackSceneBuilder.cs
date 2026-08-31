@@ -64,7 +64,8 @@ namespace Dissertation.EditorTools
                 block.transform.position = kv.Value.Position;
                 FitSprite(block, 2.4f, 1.7f);
                 // plate is not parented: the block's non-uniform scale would distort it
-                var plate = NewText(kv.Key + "_label", font, kv.Key, 0.12f);
+                // 中文 + English (Labels loads StreamingAssets/labels.json, works in-editor)
+                var plate = NewText(kv.Key + "_label", font, Labels.Location(kv.Key), 0.12f);
                 plate.transform.position =
                     kv.Value.Position + new Vector2(0f, 1.15f);
             }
@@ -546,9 +547,13 @@ namespace Dissertation.EditorTools
             go.transform.localScale = new Vector3(width / size.x, height / size.y, 1f);
         }
 
+        // Alpha is deliberately low: the action label rides above the NPC and
+        // frequently overlaps a location name plate, and an opaque frame blanks
+        // the place name out from under it. 0.35 still lifts the text off the
+        // block art while leaving whatever sits behind it readable.
         static SpriteRenderer AttachLabelBox(GameObject label, Sprite square)
         {
-            var box = NewSprite("LabelBox", square, new Color(0f, 0f, 0f, 0.75f));
+            var box = NewSprite("LabelBox", square, new Color(0f, 0f, 0f, 0.35f));
             box.transform.SetParent(label.transform, false);
             box.transform.localScale = new Vector3(0.1f, 0.1f, 1f);
             var sr = box.GetComponent<SpriteRenderer>();

@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "purpose": "Candidate personality profiles for the Study-3 human evaluation. Six are selected from these by experiments/rq3/select_personas.py on measured behavioural separation; the rest are recorded as rejected candidates.",
+    "created": "2026-08-04",
+    "vector_order": ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"],
+    "design_rules": [
+      "R1 — each profile has at least two traits at |value| >= 0.6, so no profile is behaviourally flat.",
+      "R2 — every trait takes both a high and a low value across the candidate set, so no trait is untestable by construction.",
+      "R3 — descriptions name dispositions only. Naming a place or an activity would turn the three-alternative identification task into word matching and inflate every policy's score."
+    ],
+    "description_limits": "three short clauses, <= 20 characters (zh) / <= 12 words (en), matched length across candidates"
+  },
+  "candidates": [
+    {
+      "id": "P1",
+      "archetype": "scholar",
+      "vector": [0.7, 0.7, -0.6, 0.1, 0.2],
+      "description_zh": "求知欲很强，做事有条理，不太爱跟人打交道",
+      "description_en": "Highly curious, methodical, keeps away from other people"
+    },
+    {
+      "id": "P2",
+      "archetype": "warrior",
+      "vector": [-0.5, 0.3, 0.2, -0.9, -0.7],
+      "description_zh": "强硬好斗，说话不留情面，心理素质极硬",
+      "description_en": "Combative and blunt, spares nobody, extremely hard to rattle"
+    },
+    {
+      "id": "P3",
+      "archetype": "socialite",
+      "vector": [0.2, -0.6, 0.9, 0.7, -0.5],
+      "description_zh": "热情外向，乐于助人，做事随性没什么计划",
+      "description_en": "Warm and outgoing, eager to help, acts on impulse"
+    },
+    {
+      "id": "P4",
+      "archetype": "anxious recluse",
+      "vector": [0.0, 0.2, -0.8, 0.0, 0.8],
+      "description_zh": "怕生退缩，容易紧张不安，遇事往后躲",
+      "description_en": "Shy and withdrawn, easily rattled, shrinks from trouble"
+    },
+    {
+      "id": "P5",
+      "archetype": "adventurer",
+      "vector": [0.9, -0.5, 0.7, 0.3, -0.6],
+      "description_zh": "什么新鲜事都想试，坐不住，天不怕地不怕",
+      "description_en": "Tries anything new, never sits still, afraid of nothing"
+    },
+    {
+      "id": "P6",
+      "archetype": "craftsman",
+      "vector": [-0.6, 0.9, -0.4, 0.6, -0.3],
+      "description_zh": "循规蹈矩，做事极其可靠，不喜欢变化",
+      "description_en": "Sticks to the rules, utterly dependable, dislikes change"
+    },
+    {
+      "id": "P7",
+      "archetype": "schemer",
+      "vector": [0.6, 0.7, 0.1, -0.8, 0.5],
+      "description_zh": "精明算计，不轻易信任别人，心思重",
+      "description_en": "Shrewd and calculating, slow to trust, always brooding"
+    },
+    {
+      "id": "P8",
+      "archetype": "peacemaker",
+      "vector": [0.1, 0.3, 0.3, 0.9, 0.2],
+      "description_zh": "与人为善，尽量不跟人起冲突，性格温和",
+      "description_en": "Kind to everyone, avoids all conflict, gentle by nature"
+    },
+    {
+      "id": "P9",
+      "archetype": "hedonist",
+      "vector": [0.2, -0.8, 0.7, 0.1, 0.3],
+      "description_zh": "及时行乐，没什么定性，想到什么做什么",
+      "description_en": "Lives for the moment, no follow-through, acts on whims"
+    },
+    {
+      "id": "P10",
+      "archetype": "veteran",
+      "vector": [-0.4, 0.7, -0.5, -0.2, -0.9],
+      "description_zh": "波澜不惊，按部就班，什么事都吓不倒",
+      "description_en": "Unshakeable, works to a routine, nothing frightens him"
+    }
+  ]
+}

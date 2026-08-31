@@ -36,6 +36,9 @@ from .train_2b import NONLINEAR_MODELS, SIMPLE_MODELS
 SYSTEM_COLORS = {"uniform": "#CCCCCC", "agnostic_simple": "#999999",
                  "agnostic_nonlinear": "#CC79A7", "scorer": "#009E73",
                  "simple": "#0072B2", "nonlinear": "#E69F00"}
+# What the figures call each system. The code key stays "simple" (run ids, CSV
+# columns, lookups); the report calls that model the linear one.
+FIG_LABEL = {"simple": "linear", "agnostic_simple": "agnostic_linear"}
 # RQ2 asks about acquisition and generalisation, not about which policy is better.
 # The scorer is fit to the author's intuitions and the learned models to these
 # labels, so a horse race between them is confounded (revised 2026-07-12; policy
@@ -45,6 +48,10 @@ SYSTEM_COLORS = {"uniform": "#CCCCCC", "agnostic_simple": "#999999",
 PLOT_SYSTEMS = ("uniform", "agnostic_simple", "agnostic_nonlinear",
                 "simple", "nonlinear")
 _TINY = np.finfo(float).tiny
+
+
+def fig_label(name: str) -> str:
+    return FIG_LABEL.get(name, name)
 
 
 def scorer_probs(case: IndependentCase) -> np.ndarray:
@@ -109,6 +116,32 @@ def _rows_for(system: str, seed, per_case: list[dict],
 
 def _std(xs):
     return float(np.std(xs, ddof=1)) if len(xs) > 1 else 0.0
+
+
+def draw_group_bars(ax, table: list[dict]) -> None:
+    """Top-1 per system × test group — standalone, and the right panel of the
+    combined report figure drawn by ``make_combined_figure``."""
+    plot_groups = ("all",) + TEST_GROUPS
+    x = np.arange(len(plot_groups))
+    systems = [s for s in PLOT_SYSTEMS if any(r["system"] == s for r in table)]
+    for i, sys_ in enumerate(systems):
+        ys, es = [], []
+        for grp in plot_groups:
+            rows = [r for r in table if r["system"] == sys_ and r["group"] == grp
+                    and r["decision_type"] == "all"]
+            ys.append(rows[0]["top1_mean"] if rows else np.nan)
+            es.append(rows[0]["top1_std"] if rows else 0.0)
+        off = (i - (len(systems) - 1) / 2) * 0.8 / len(systems)
+        ax.bar(x + off, ys, width=0.75 / len(systems), yerr=es,
+               color=SYSTEM_COLORS[sys_], label=fig_label(sys_), capsize=2)
+    ax.set_xticks(x, plot_groups)
+    ax.set_ylabel("top-1 accuracy")
+    # Headroom so the legend clears the bars; both report panels carry their
+    # legend in the same corner (upper left).
+    ax.set_ylim(0, ax.get_ylim()[1] * 1.30)
+    ax.legend(frameon=False, loc="upper left", fontsize=7, ncol=2,
+              handlelength=1.2, labelspacing=0.3, columnspacing=1.0,
+              borderaxespad=0.2)
 
 
 def eval_main(argv=None) -> None:
@@ -208,7 +241,8 @@ def eval_main(argv=None) -> None:
             ax.errorbar([r["n_train"] for r in pts],
                         [r["top1_mean"] for r in pts],
                         yerr=[r["top1_std"] for r in pts],
-                        marker="o", color=SYSTEM_COLORS[fam], label=fam)
+                        marker="o", color=SYSTEM_COLORS[fam],
+                        label=fig_label(fam))
         agn = [r for r in table if r["system"] == "agnostic_nonlinear"
                and r["group"] == "all" and r["decision_type"] == "all"]
         if agn:
@@ -218,7 +252,6 @@ def eval_main(argv=None) -> None:
         ax.set_xscale("log")
         ax.set_xlabel("training cases")
         ax.set_ylabel("top-1 accuracy (all test groups)")
-        ax.set_title("Does more independently labelled data help?")
         lo, hi = ax.get_ylim()                  # headroom so the legend clears the curves
         ax.set_ylim(lo, hi + 0.22 * (hi - lo))
         ax.legend(frameon=False, loc="upper right", fontsize=7,
@@ -228,26 +261,7 @@ def eval_main(argv=None) -> None:
 
     # figure: top-1 per system × group
     fig, ax = plt.subplots(figsize=(9, 4.5))
-    plot_groups = ("all",) + TEST_GROUPS
-    x = np.arange(len(plot_groups))
-    systems = [s for s in PLOT_SYSTEMS if any(r["system"] == s for r in table)]
-    for i, sys_ in enumerate(systems):
-        ys, es = [], []
-        for grp in plot_groups:
-            rows = [r for r in table if r["system"] == sys_ and r["group"] == grp
-                    and r["decision_type"] == "all"]
-            ys.append(rows[0]["top1_mean"] if rows else np.nan)
-            es.append(rows[0]["top1_std"] if rows else 0.0)
-        off = (i - (len(systems) - 1) / 2) * 0.8 / len(systems)
-        ax.bar(x + off, ys, width=0.75 / len(systems), yerr=es,
-               color=SYSTEM_COLORS[sys_], label=sys_, capsize=2)
-    ax.set_xticks(x, plot_groups)
-    ax.set_ylabel("top-1 accuracy")
-    ax.set_title("Agreement with independent labels, per test group")
-    ax.set_ylim(0, ax.get_ylim()[1] * 1.18)     # headroom so the legend clears the bars
-    ax.legend(frameon=False, loc="upper right", fontsize=7, ncol=2,
-              handlelength=1.2, labelspacing=0.3, columnspacing=1.0,
-              borderaxespad=0.2)
+    draw_group_bars(ax, table)
     fig.savefig(args.results / "group_bars.png", bbox_inches="tight")
     plt.close(fig)
     print(f"written: {args.results / 'main_table.csv'}, group_bars.png, diagnostics.csv")

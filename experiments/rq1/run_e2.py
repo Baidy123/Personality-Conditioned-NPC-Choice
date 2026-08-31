@@ -10,12 +10,17 @@ Statistics: Spearman rho on all pairs + Mantel permutation test (the pairs of
 a distance matrix are not independent, so a naive p-value would overstate
 significance; Mantel permutes profiles, not pairs).
 
-Outputs: results/rq1/e2_scatter.png, e2_binned.csv, e2_summary.csv
+Outputs: results/rq1/e2_scatter.png, e2_binned.csv, e2_summary.csv, and the
+combined RQ1 expression figure e1e2_expression.png — panel (a) is E1's
+per-trait channel strength (read back from e1_sensitivity.csv, so run_e1 must
+have run), panel (b) is this experiment's scatter.
 
 Run from ``code/``:  python -m experiments.rq1.run_e2
 """
 
 from __future__ import annotations
+
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,15 +28,33 @@ import numpy as np
 from npc_policy import HandAuthoredScorer
 
 from .common import (
-    RESULTS, action_buffer, load_cases, location_buffer, mantel,
-    pairwise_jsd, personality_of, setup_style, spearman, world_for, write_csv,
+    RESULTS, TRAITS, action_buffer, load_cases, location_buffer, mantel,
+    pairwise_jsd, personality_of, plot_expression_strength, read_csv,
+    setup_style, spearman, world_for, write_csv,
 )
 
 N_BINS = 12
 MANTEL_PERMS = 9999
 
+# E1 CSV columns -> the three bars of the expression-strength panel.
+STRENGTH_COLS = {"base": "tvd_base_location", "rule": "tvd_rule_location",
+                 "act": "tvd_rule_action_empty"}
 
-def main() -> None:
+
+def read_strength() -> dict[str, dict[str, float]]:
+    """E1's endpoint TVDs, keyed as ``plot_expression_strength`` expects."""
+    rows = {r["trait"]: r for r in read_csv(RESULTS / "e1_sensitivity.csv")}
+    return {t: {k: float(rows[t][c]) for k, c in STRENGTH_COLS.items()}
+            for t in TRAITS}
+
+
+def main(argv=None) -> None:
+    ap = argparse.ArgumentParser(description="E2 profile distinguishability")
+    ap.add_argument("--figures-only", action="store_true",
+                    help="redraw the figures from an existing e2_summary.csv; "
+                         "skips the Mantel permutations (the slow part) and "
+                         "leaves the CSVs untouched")
+    args = ap.parse_args(argv)
     setup_style()
     cases = load_cases()
     scorer = HandAuthoredScorer()
@@ -73,7 +96,11 @@ def main() -> None:
     rho = spearman(x, y)
     rho_loc = spearman(x, D_loc[iu])
     rho_act = spearman(x, D_act[iu])
-    rho_m, p_m = mantel(D_pers, D_beh, n_perm=MANTEL_PERMS, seed=0)
+    if args.figures_only:      # the permutations are ~13 min; the annotation
+        prev = read_csv(RESULTS / "e2_summary.csv")[0]      # is what needs them
+        rho_m, p_m = float(prev["mantel_rho"]), float(prev["mantel_p"])
+    else:
+        rho_m, p_m = mantel(D_pers, D_beh, n_perm=MANTEL_PERMS, seed=0)
 
     # Channel-strength-weighted personality distance: the plain Euclidean
     # metric counts channels a level deliberately leaves silent (A at the
@@ -82,10 +109,8 @@ def main() -> None:
     # from the same scorer via E1, so it is not independent validation) —
     # report both numbers.
     def weighted_rho(level_col: str, D_level: np.ndarray) -> float:
-        e1 = (RESULTS / "e1_sensitivity.csv").read_text().strip().splitlines()
-        header = e1[0].split(",")
-        w = np.array([float(line.split(",")[header.index(level_col)])
-                      for line in e1[1:]])
+        w = np.array([float(r[level_col])
+                      for r in read_csv(RESULTS / "e1_sensitivity.csv")])
         v = vecs * w
         d = np.sqrt(((v[:, None, :] - v[None, :, :]) ** 2).sum(axis=2))
         return spearman(d[iu], D_level[iu])
@@ -108,22 +133,51 @@ def main() -> None:
         stds.append(float(y[m].std()))
         counts.append(int(m.sum()))
 
+    def draw_scatter(ax) -> None:
+        ax.scatter(x, y, s=4, alpha=0.08, color="#0072B2", edgecolors="none",
+                   rasterized=True)
+        # Binned means, not a fitted trend: the bars are the within-bin spread
+        # of the same points, which is what keeps the polyline readable as a
+        # summary of the cloud. (A standard error would be both invisible —
+        # thousands of pairs per bin — and unjustified, since pairs are not
+        # independent; that non-independence is what the Mantel test handles.)
+        ax.errorbar(centers, means, yerr=stds, color="#D55E00", marker="o",
+                    markersize=5, capsize=3, elinewidth=1.0,
+                    label="binned mean ±1 sd")
+        ax.set_xlabel("personality distance (Euclidean, OCEAN space)")
+        ax.set_ylabel("behavioural distance (mean JSD over matched contexts)")
+        ax.text(0.02, 0.95, f"Spearman rho = {rho:.3f}\nMantel p = {p_m:.4f} "
+                f"({MANTEL_PERMS} perms)", transform=ax.transAxes, va="top",
+                fontsize=10, bbox=dict(boxstyle="round", fc="white", ec="0.8"))
+        ax.legend(frameon=False, loc="lower right")
+
     fig, ax = plt.subplots(figsize=(8, 5.5))
-    ax.scatter(x, y, s=4, alpha=0.08, color="#0072B2", edgecolors="none",
-               rasterized=True)
-    ax.plot(centers, means, color="#D55E00", marker="o", markersize=5,
-            label="binned mean")
-    ax.set_xlabel("personality distance (Euclidean, OCEAN space)")
-    ax.set_ylabel("behavioural distance (mean JSD over matched contexts)")
-    ax.set_title(f"Distinguishability: {n} random profiles, "
-                 f"{n * (n - 1) // 2} pairs, {n_ctx} contexts")
-    ax.text(0.02, 0.95, f"Spearman rho = {rho:.3f}\nMantel p = {p_m:.4f} "
-            f"({MANTEL_PERMS} perms)", transform=ax.transAxes, va="top",
-            fontsize=10, bbox=dict(boxstyle="round", fc="white", ec="0.8"))
-    ax.legend(frameon=False, loc="lower right")
+    draw_scatter(ax)
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e2_scatter.png", bbox_inches="tight")
     plt.close(fig)
+
+    # ------------------------------------------- combined expression figure --
+    # E1's per-trait channel strengths and E2's profile-level distinguishability
+    # are the two halves of one claim, so the report reads them as one figure.
+    # Nothing is printed above either panel: the caption names left and right.
+    try:
+        strength = read_strength()
+    except FileNotFoundError:
+        print("    (e1e2_expression.png skipped — run run_e1 first)")
+    else:
+        fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.8),
+                                 gridspec_kw={"width_ratios": (1.15, 1.0)})
+        plot_expression_strength(axes[0], strength)
+        draw_scatter(axes[1])
+        fig.tight_layout()
+        fig.savefig(RESULTS / "e1e2_expression.png", bbox_inches="tight")
+        plt.close(fig)
+
+    if args.figures_only:
+        print(f"redrawn: {RESULTS / 'e2_scatter.png'}, "
+              f"{RESULTS / 'e1e2_expression.png'}")
+        return
 
     write_csv(RESULTS / "e2_binned.csv",
               ["pers_dist_bin_center", "beh_dist_mean", "beh_dist_std", "n_pairs"],
@@ -147,7 +201,8 @@ def main() -> None:
     print(f"    channel-strength-weighted personality distance: "
           f"location {rho_loc_w:.3f}, action {rho_act_w:.3f} "
           "(consistency check, weights from E1)")
-    print(f"figure: {RESULTS / 'e2_scatter.png'}")
+    print(f"figures: {RESULTS / 'e2_scatter.png'}, "
+          f"{RESULTS / 'e1e2_expression.png'}")
 
 
 if __name__ == "__main__":

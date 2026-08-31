@@ -1,0 +1,108 @@
+{
+  "parameters": {
+    "n_cycles": 10,
+    "n_seeds": 30,
+    "selection_temperature": 0.1,
+    "select": 6,
+    "policy": "hand_authored_scorer",
+    "world": "C:\\Users\\76992\\Desktop\\MSc_dissertation\\code\\data\\world.json",
+    "enforce_coverage": true,
+    "coverage_threshold": 0.5
+  },
+  "criterion": "maximin pairwise sequence-level separation ratio, subject to every trait spanning +/-0.5",
+  "selected": [
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P8"
+  ],
+  "worst_pair_ratio": 4.3489,
+  "trait_span": {
+    "O": [
+      -0.6,
+      0.9
+    ],
+    "C": [
+      -0.6,
+      0.9
+    ],
+    "E": [
+      -0.8,
+      0.9
+    ],
+    "A": [
+      -0.9,
+      0.9
+    ],
+    "N": [
+      -0.7,
+      0.8
+    ]
+  },
+  "within_profile_noise": {
+    "P1": 0.121,
+    "P2": 0.0282,
+    "P3": 0.0073,
+    "P4": 0.1251,
+    "P5": 0.0788,
+    "P6": 0.0792,
+    "P7": 0.2142,
+    "P8": 0.0521,
+    "P9": 0.2389,
+    "P10": 0.1053
+  },
+  "dropped": [
+    "P1",
+    "P7",
+    "P9",
+    "P10"
+  ],
+  "runner_up_sets": [
+    {
+      "ids": [
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P10"
+      ],
+      "worst_pair_ratio": 3.6847
+    },
+    {
+      "ids": [
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P8",
+        "P10"
+      ],
+      "worst_pair_ratio": 3.6847
+    },
+    {
+      "ids": [
+        "P2",
+        "P4",
+        "P5",
+        "P6",
+        "P8",
+        "P10"
+      ],
+      "worst_pair_ratio": 3.6847
+    },
+    {
+      "ids": [
+        "P2",
+        "P3",
+        "P5",
+        "P6",
+        "P7",
+        "P10"
+      ],
+      "worst_pair_ratio": 2.7804
+    }
+  ]
+}

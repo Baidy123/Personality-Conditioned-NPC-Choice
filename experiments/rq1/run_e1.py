@@ -4,6 +4,8 @@ Sweeps each OCEAN trait from -1 to +1 (others 0) over matched contexts and
 measures how strongly the choice distribution responds:
 
   - sensitivity curves: P_rule per location vs trait value (empty memory);
+    the figures label it "probability of choosing this location/action" —
+    P_rule is the internal name, not a label a reader of the report can decode;
   - expression strength: endpoint TVD per trait, on P_base and on P_rule
     (their gap quantifies how much the N temperature dilutes each trait's
     preference signal), plus the action level (empty memory, mean over the
@@ -24,9 +26,9 @@ import numpy as np
 from npc_policy import HandAuthoredScorer
 
 from .common import (
-    LOC_COLORS, RESULTS, TRAIT_SHORT, TRAITS,
+    LOC_COLORS, RESULTS, TRAITS,
     action_buffer, load_cases, location_buffer, personality_of,
-    setup_style, tvd, world_for, write_csv,
+    plot_expression_strength, setup_style, tvd, world_for, write_csv,
 )
 
 
@@ -56,14 +58,17 @@ def main() -> None:
         ])
         for k, lid in enumerate(ids):
             ax.plot(values, P[:, k], color=LOC_COLORS[lid], label=lid)
-        ax.set_title(f"{TRAIT_SHORT[trait]} ({trait})")
-        ax.set_xlabel("trait value")
-        ax.set_ylabel("P_rule")
+        # No panel title (the report caption numbers and names the figure);
+        # the trait a panel sweeps is named on its x-axis instead.
+        ax.set_xlabel(f"{trait} value (other traits at 0)")
+        ax.set_ylabel("probability of choosing this location")
+        # sharex/sharey hide the inner panels' tick values; every panel is read
+        # on its own, so put them back rather than leaving bare axis labels.
+        ax.tick_params(labelbottom=True, labelleft=True)
     axes.flat[5].axis("off")     # five traits, six slots
 
     handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=len(ids), frameon=False)
-    fig.suptitle("Location-choice sensitivity to single traits (empty memory)", y=1.0)
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e1_curves.png", bbox_inches="tight")
@@ -74,19 +79,19 @@ def main() -> None:
     # trait's designed channel should be most visible. A gets two panels — its
     # home level is actions (checklist §E2), so it carries the heaviest claim.
     panels = [
-        ("openness", "library", "O @ library"),
-        ("conscientiousness", "arena", "C @ arena"),
-        ("extraversion", "tavern", "E @ tavern"),
-        ("agreeableness", "tavern", "A @ tavern"),
-        ("agreeableness", "arena", "A @ arena"),
-        ("neuroticism", "arena", "N @ arena"),
+        ("openness", "library"),
+        ("conscientiousness", "arena"),
+        ("extraversion", "tavern"),
+        ("agreeableness", "tavern"),
+        ("agreeableness", "arena"),
+        ("neuroticism", "arena"),
     ]
     # Okabe-Ito order, assigned per panel (action sets differ between panels;
     # identity is carried by each panel's own legend).
     action_cycle = ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9"]
 
     fig, axes = plt.subplots(2, 3, figsize=(13, 7), sharex=True)
-    for ax, (trait, loc_id, title) in zip(axes.flat, panels):
+    for ax, (trait, loc_id) in zip(axes.flat, panels):
         acts = world.actions_at(loc_id)
         P = np.stack([
             scorer.distribution(personality_of(sweep_entry(trait, v)), acts, level="action")
@@ -95,12 +100,10 @@ def main() -> None:
         for k, a in enumerate(acts):
             ax.plot(values, P[:, k], color=action_cycle[k % len(action_cycle)],
                     label=a.id)
-        ax.set_title(title)
-        ax.set_ylabel("P_rule")
-        ax.set_xlabel(f"{TRAIT_SHORT[trait]} value")
+        ax.set_ylabel("probability of choosing this action")
+        ax.set_xlabel(f"{trait} value, actions at the {loc_id}")
+        ax.tick_params(labelbottom=True)  # sharex hides the top row's values
         ax.legend(frameon=False, fontsize=8)
-    fig.suptitle("Action-choice sensitivity at diagnostic locations "
-                 "(empty action memory)", y=1.0)
     fig.tight_layout()
     fig.savefig(RESULTS / "e1_action_curves.png", bbox_inches="tight")
     plt.close(fig)
@@ -165,17 +168,7 @@ def main() -> None:
                "tvd_rule_action_empty"], rows)
 
     fig, ax = plt.subplots(figsize=(9, 4.5))
-    x = np.arange(len(TRAITS))
-    bars = [("P_base (location)", "base", "#BBBBBB"),
-            ("P_rule (location)", "rule", "#0072B2"),
-            ("P_rule (action)", "act", "#E69F00")]
-    for i, (label, key, color) in enumerate(bars):
-        vals = [strength[t][key] for t in TRAITS]
-        ax.bar(x + (i - 1) * 0.26, vals, width=0.24, color=color, label=label)
-    ax.set_xticks(x, [TRAIT_SHORT[t] for t in TRAITS])
-    ax.set_ylabel("endpoint TVD (trait -1 vs +1)")
-    ax.set_title("Expression strength per trait channel")
-    ax.legend(frameon=False)
+    plot_expression_strength(ax, strength)
     fig.savefig(RESULTS / "e1_strength.png", bbox_inches="tight")
     plt.close(fig)
 

@@ -1,0 +1,42 @@
+{
+  "_comment": "Study-3 human-evaluation stimuli: 6 personas x 3 policies = 18 sequences. Personas come from data/rq3_personas.json (designed by experiments/rq3/design_personas.py); the OCEAN values are copied inline so this file reproduces the stimulus set on its own. Per-persona seeds keep the three policies matched within a persona while stopping the personality-agnostic control from emitting one identical trail six times. n_cycles and selection_temperature must match the values the personas were selected under, or the measured separation no longer applies. Run: python -m experiments.rq3.gen_sequences --config configs/rq3_study.json --preview",
+
+  "out_dir": "data/rq3_sequences/study",
+  "unity_dir": "unity/dissertation/Assets/StreamingAssets/sequences",
+  "worlds": ["data/world.json"],
+
+  "personalities": [
+    {"name": "H1", "seeds": [42],
+     "ocean": {"openness": 0.12, "conscientiousness": 0.25, "extraversion": 0.64,
+               "agreeableness": -0.63, "neuroticism": -0.65}},
+    {"name": "H2", "seeds": [43],
+     "ocean": {"openness": 0.06, "conscientiousness": 0.66, "extraversion": 0.33,
+               "agreeableness": 0.74, "neuroticism": -0.08}},
+    {"name": "H3", "seeds": [44],
+     "ocean": {"openness": -0.08, "conscientiousness": 0.27, "extraversion": 0.60,
+               "agreeableness": -0.16, "neuroticism": -0.77}},
+    {"name": "H4", "seeds": [45],
+     "ocean": {"openness": -0.46, "conscientiousness": -0.69, "extraversion": -0.49,
+               "agreeableness": -0.71, "neuroticism": -0.35}},
+    {"name": "H5", "seeds": [46],
+     "ocean": {"openness": 0.16, "conscientiousness": 0.18, "extraversion": -0.48,
+               "agreeableness": 0.78, "neuroticism": -0.55}},
+    {"name": "H6", "seeds": [47],
+     "ocean": {"openness": 0.43, "conscientiousness": -0.13, "extraversion": -0.62,
+               "agreeableness": -0.16, "neuroticism": 0.56}}
+  ],
+
+  "_temperature_note": "selection_temperature is per policy, matched on post-temperature output entropy (~0.56 nats over six locations) rather than set to one shared value. A shared value is not neutral: the controller applies it to whatever distribution a policy emits, and the scorer's is far flatter (top-1 location 0.27-0.35) than the hard-label-trained nonlinear model's (0.43-0.97). At a shared 0.1 the scorer sharpens into character while the nonlinear model locks onto one option for all ten cycles — which measures distribution sharpness, not what the model learned. The agnostic control takes the nonlinear model's temperature, not its own entropy match: it is that model with personality zeroed, so any second difference between them would confound the floor.",
+
+  "policies": [
+    {"name": "scorer", "selection_temperature": 0.1},
+    {"name": "nonlinear_2b", "selection_temperature": 0.6,
+     "checkpoint": "results/rq2b/models/IND__nonlinear__wd0.001__s2.pt"},
+    {"name": "agnostic_nonlinear_2b", "selection_temperature": 0.6,
+     "checkpoint": "results/rq2b/models/IND__agnostic_nonlinear__wd0.001__s2.pt"}
+  ],
+
+  "n_cycles": 10,
+  "seeds": [42],
+  "selection_temperature": 0.1
+}

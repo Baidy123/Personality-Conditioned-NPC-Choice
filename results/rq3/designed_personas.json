@@ -1,0 +1,175 @@
+{
+  "parameters": {
+    "samples": 600,
+    "n_seeds": 20,
+    "n_cycles": 10,
+    "selection_temperature": 0.1,
+    "trait_cap": 0.8,
+    "min_strong_traits": 2,
+    "gen_seed": 20260804,
+    "policy": "hand_authored_scorer"
+  },
+  "channels": [
+    "loud_share",
+    "conflict_share",
+    "coop_share",
+    "move_rate",
+    "coverage"
+  ],
+  "criterion": "maximin channel-space distance / within-profile channel noise",
+  "worst_pair_channel_distance": 0.7295,
+  "noise_cap": 0.12,
+  "coverage": 0.25,
+  "personas": [
+    {
+      "rank": 1,
+      "vector": [
+        0.43,
+        -0.13,
+        -0.62,
+        -0.16,
+        0.56
+      ],
+      "ocean": {
+        "O": 0.43,
+        "C": -0.13,
+        "E": -0.62,
+        "A": -0.16,
+        "N": 0.56
+      },
+      "channels": {
+        "loud_share": 0.005,
+        "conflict_share": 0.0,
+        "coop_share": 0.125,
+        "move_rate": 0.88,
+        "coverage": 0.5083
+      },
+      "channel_noise": 0.1424
+    },
+    {
+      "rank": 2,
+      "vector": [
+        0.16,
+        0.18,
+        -0.48,
+        0.78,
+        -0.55
+      ],
+      "ocean": {
+        "O": 0.16,
+        "C": 0.18,
+        "E": -0.48,
+        "A": 0.78,
+        "N": -0.55
+      },
+      "channels": {
+        "loud_share": 0.425,
+        "conflict_share": 0.0,
+        "coop_share": 0.765,
+        "move_rate": 1.0,
+        "coverage": 0.8
+      },
+      "channel_noise": 0.098
+    },
+    {
+      "rank": 3,
+      "vector": [
+        -0.46,
+        -0.69,
+        -0.49,
+        -0.71,
+        -0.35
+      ],
+      "ocean": {
+        "O": -0.46,
+        "C": -0.69,
+        "E": -0.49,
+        "A": -0.71,
+        "N": -0.35
+      },
+      "channels": {
+        "loud_share": 0.5,
+        "conflict_share": 0.475,
+        "coop_share": 0.135,
+        "move_rate": 1.0,
+        "coverage": 0.7333
+      },
+      "channel_noise": 0.1087
+    },
+    {
+      "rank": 4,
+      "vector": [
+        0.12,
+        0.25,
+        0.64,
+        -0.63,
+        -0.65
+      ],
+      "ocean": {
+        "O": 0.12,
+        "C": 0.25,
+        "E": 0.64,
+        "A": -0.63,
+        "N": -0.65
+      },
+      "channels": {
+        "loud_share": 1.0,
+        "conflict_share": 0.995,
+        "coop_share": 0.005,
+        "move_rate": 0.995,
+        "coverage": 0.5
+      },
+      "channel_noise": 0.0377
+    },
+    {
+      "rank": 5,
+      "vector": [
+        0.06,
+        0.66,
+        0.33,
+        0.74,
+        -0.08
+      ],
+      "ocean": {
+        "O": 0.06,
+        "C": 0.66,
+        "E": 0.33,
+        "A": 0.74,
+        "N": -0.08
+      },
+      "channels": {
+        "loud_share": 1.0,
+        "conflict_share": 0.0,
+        "coop_share": 0.995,
+        "move_rate": 0.52,
+        "coverage": 0.3333
+      },
+      "channel_noise": 0.0953
+    },
+    {
+      "rank": 6,
+      "vector": [
+        -0.08,
+        0.27,
+        0.6,
+        -0.16,
+        -0.77
+      ],
+      "ocean": {
+        "O": -0.08,
+        "C": 0.27,
+        "E": 0.6,
+        "A": -0.16,
+        "N": -0.77
+      },
+      "channels": {
+        "loud_share": 1.0,
+        "conflict_share": 0.36,
+        "coop_share": 0.615,
+        "move_rate": 1.0,
+        "coverage": 0.5
+      },
+      "channel_noise": 0.1169
+    }
+  ]
+}

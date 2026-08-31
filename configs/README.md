@@ -16,7 +16,7 @@ run configs live here, and this table says where everything else is.
 
 **The research/game split (decided 2026-07-18).** `data/world.json` and
 `data/personalities.json` are the RQ1/RQ2 research sources — frozen; changing
-them means a documented tuning round (`docs/tuning_log.md`). The
+them means a documented tuning round. The
 `configs/game_*.json` files started as exact copies and are what BOTH game
 modes (playback generation and live demo) actually read — edit them freely.
 If a future tuning round changes the research files and you want the game to

@@ -1,0 +1,772 @@
+[[AdvancedFormat]]
+
+[[Block:引言]]
+
+[[Question:DB]]
+[[ID:consent_text]]
+<p>这是曼彻斯特大学机器人学硕士论文的一项研究。你会看到几段游戏角色的行为记录， 需要判断这些角色分别是什么样的人。全程约十分钟。</p> <p>研究不收集任何能识别你身份的信息，只保存你的作答。你可以在任何时候关闭页面退出， 已作答的部分不会被使用。</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:consent]]
+你是否同意参与？
+[[Choices]]
+同意
+不同意
+
+[[Block:说明]]
+
+[[Question:DB]]
+[[ID:howto]]
+<p>下面每一页显示一个游戏角色连续十次的行动记录。这个世界里有酒馆、集市、 教堂、图书馆、树林、竞技场几个地方，角色每次自己决定去哪里、做什么。</p> <p>每页先给这个角色的性格打分，再从三段描述里挑出最像他的一段。凭直觉即可，没有标准答案。</p>
+
+[[Block:G1_H1_scorer]]
+
+[[Question:DB]]
+[[ID:H1_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S001 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价）</p>
+
+[[Question:Matrix]]
+[[ID:H1_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H1_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+
+[[Block:G1_H2_nn]]
+
+[[Question:DB]]
+[[ID:H2_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S005 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 教堂（祷告） → 集市（做买卖） → 图书馆（讨论） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖）</p>
+
+[[Question:Matrix]]
+[[ID:H2_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H2_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G1_H3_agno]]
+
+[[Question:DB]]
+[[ID:H3_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S009 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">图书馆（读书） → 教堂（忏悔） → 图书馆（讨论） → 图书馆（读书） → 集市（逛摊子） → 竞技场（操练） → 树林（歇脚） → 集市（讨价还价） → 集市（做买卖） → 教堂（祷告）</p>
+
+[[Question:Matrix]]
+[[ID:H3_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H3_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+喜欢热闹，交际广，跟人相处软硬都来
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G1_H4_scorer]]
+
+[[Question:DB]]
+[[ID:H4_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S010 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（采集） → 竞技场（比武） → 教堂（忏悔） → 集市（讨价还价） → 树林（采集） → 竞技场（比武） → 教堂（忏悔） → 树林（采集） → 集市（逛摊子） → 竞技场（比武）</p>
+
+[[Question:Matrix]]
+[[ID:H4_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H4_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G1_H5_nn]]
+
+[[Question:DB]]
+[[ID:H5_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S014 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">图书馆（读书） → 图书馆（查资料） → 树林（探路） → 图书馆（查资料） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（查资料） → 图书馆（读书） → 图书馆（查资料）</p>
+
+[[Question:Matrix]]
+[[ID:H5_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H5_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G1_H6_agno]]
+
+[[Question:DB]]
+[[ID:H6_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S018 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 教堂（祷告） → 竞技场（对练） → 图书馆（讨论） → 教堂（祷告） → 集市（做买卖） → 教堂（忏悔） → 教堂（冥想） → 图书馆（查资料） → 树林（探路）</p>
+
+[[Question:Matrix]]
+[[ID:H6_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H6_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G1_cmp_H3]]
+
+[[Question:DB]]
+[[ID:cmp_H3_stim]]
+<p>这个角色的设定是：<strong>喜欢热闹，交际广，跟人相处软硬都来</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S007 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">酒馆（闲聊） → 集市（做买卖） → 竞技场（指点他人） → 酒馆（闲聊） → 集市（讨价还价） → 竞技场（指点他人） → 集市（做买卖） → 酒馆（闲聊） → 竞技场（指点他人） → 集市（讨价还价）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S008 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">酒馆（闲聊） → 酒馆（闲聊） → 酒馆（闲聊） → 酒馆（闲聊） → 集市（做买卖） → 竞技场（对练） → 竞技场（对练） → 竞技场（比武） → 竞技场（对练） → 竞技场（比武）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H3_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H3_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:G1_cmp_H6]]
+
+[[Question:DB]]
+[[ID:cmp_H6_stim]]
+<p>这个角色的设定是：<strong>神经质，躲着人多的场合，一刻也安定不下来</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S016 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（采集） → 图书馆（读书） → 树林（采集） → 图书馆（查资料） → 教堂（祷告） → 树林（采集） → 教堂（忏悔） → 图书馆（查资料） → 教堂（冥想） → 树林（探路）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S017 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">教堂（冥想） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（读书） → 图书馆（查资料） → 教堂（冥想）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H6_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H6_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:比较说明_1]]
+
+[[Question:DB]]
+[[ID:cmp_intro_1]]
+<p>接下来的两页换一种做法：先告诉你这个角色的设定， 再给你两段由<strong>不同系统</strong>生成的行为记录。请判断哪一段更符合设定。</p>
+
+[[Block:G2_H1_nn]]
+
+[[Question:DB]]
+[[ID:H1_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S002 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">竞技场（比武） → 竞技场（对练） → 竞技场（对练） → 竞技场（比武） → 竞技场（比武） → 竞技场（对练） → 竞技场（比武） → 竞技场（比武） → 竞技场（比武） → 竞技场（比武）</p>
+
+[[Question:Matrix]]
+[[ID:H1_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H1_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+
+[[Block:G2_H2_agno]]
+
+[[Question:DB]]
+[[ID:H2_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S006 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">教堂（祷告） → 酒馆（喝酒） → 教堂（祷告） → 集市（逛摊子） → 教堂（冥想） → 竞技场（观战） → 图书馆（读书） → 教堂（祷告） → 图书馆（讨论） → 树林（采集）</p>
+
+[[Question:Matrix]]
+[[ID:H2_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H2_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G2_H3_scorer]]
+
+[[Question:DB]]
+[[ID:H3_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S007 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">酒馆（闲聊） → 集市（做买卖） → 竞技场（指点他人） → 酒馆（闲聊） → 集市（讨价还价） → 竞技场（指点他人） → 集市（做买卖） → 酒馆（闲聊） → 竞技场（指点他人） → 集市（讨价还价）</p>
+
+[[Question:Matrix]]
+[[ID:H3_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H3_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+喜欢热闹，交际广，跟人相处软硬都来
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G2_H4_nn]]
+
+[[Question:DB]]
+[[ID:H4_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S011 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚）</p>
+
+[[Question:Matrix]]
+[[ID:H4_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H4_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G2_H5_agno]]
+
+[[Question:DB]]
+[[ID:H5_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S015 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（探路） → 图书馆（查资料） → 树林（探路） → 教堂（冥想） → 教堂（忏悔） → 树林（采集） → 集市（讨价还价） → 集市（做买卖） → 酒馆（闲聊） → 教堂（冥想）</p>
+
+[[Question:Matrix]]
+[[ID:H5_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H5_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G2_H6_scorer]]
+
+[[Question:DB]]
+[[ID:H6_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S016 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（采集） → 图书馆（读书） → 树林（采集） → 图书馆（查资料） → 教堂（祷告） → 树林（采集） → 教堂（忏悔） → 图书馆（查资料） → 教堂（冥想） → 树林（探路）</p>
+
+[[Question:Matrix]]
+[[ID:H6_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H6_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G2_cmp_H2]]
+
+[[Question:DB]]
+[[ID:cmp_H2_stim]]
+<p>这个角色的设定是：<strong>与人为善，爱与人打交道，喜欢守着熟悉的地方</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S004 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S005 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 教堂（祷告） → 集市（做买卖） → 图书馆（讨论） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H2_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H2_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:G2_cmp_H5]]
+
+[[Question:DB]]
+[[ID:cmp_H5_stim]]
+<p>这个角色的设定是：<strong>性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S013 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 图书馆（讨论） → 树林（采集） → 集市（做买卖） → 教堂（忏悔） → 集市（做买卖） → 树林（采集） → 图书馆（讨论） → 酒馆（闲聊） → 教堂（忏悔）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S014 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">图书馆（读书） → 图书馆（查资料） → 树林（探路） → 图书馆（查资料） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（查资料） → 图书馆（读书） → 图书馆（查资料）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H5_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H5_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:比较说明_2]]
+
+[[Question:DB]]
+[[ID:cmp_intro_2]]
+<p>接下来的两页换一种做法：先告诉你这个角色的设定， 再给你两段由<strong>不同系统</strong>生成的行为记录。请判断哪一段更符合设定。</p>
+
+[[Block:G3_H1_agno]]
+
+[[Question:DB]]
+[[ID:H1_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S003 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（逛摊子） → 树林（歇脚） → 酒馆（斗殴） → 集市（做买卖） → 图书馆（读书） → 教堂（忏悔） → 教堂（忏悔） → 教堂（祷告） → 教堂（祷告） → 树林（歇脚）</p>
+
+[[Question:Matrix]]
+[[ID:H1_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H1_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+
+[[Block:G3_H2_scorer]]
+
+[[Question:DB]]
+[[ID:H2_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S004 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖） → 酒馆（闲聊） → 集市（做买卖） → 集市（做买卖） → 集市（做买卖）</p>
+
+[[Question:Matrix]]
+[[ID:H2_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H2_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G3_H3_nn]]
+
+[[Question:DB]]
+[[ID:H3_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S008 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">酒馆（闲聊） → 酒馆（闲聊） → 酒馆（闲聊） → 酒馆（闲聊） → 集市（做买卖） → 竞技场（对练） → 竞技场（对练） → 竞技场（比武） → 竞技场（对练） → 竞技场（比武）</p>
+
+[[Question:Matrix]]
+[[ID:H3_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H3_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+与人为善，爱与人打交道，喜欢守着熟悉的地方
+喜欢热闹，交际广，跟人相处软硬都来
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G3_H4_agno]]
+
+[[Question:DB]]
+[[ID:H4_agno_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S012 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">教堂（冥想） → 集市（做买卖） → 教堂（冥想） → 树林（歇脚） → 教堂（冥想） → 教堂（忏悔） → 集市（逛摊子） → 竞技场（操练） → 树林（歇脚） → 教堂（祷告）</p>
+
+[[Question:Matrix]]
+[[ID:H4_agno_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H4_agno_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G3_H5_scorer]]
+
+[[Question:DB]]
+[[ID:H5_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S013 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（做买卖） → 图书馆（讨论） → 树林（采集） → 集市（做买卖） → 教堂（忏悔） → 集市（做买卖） → 树林（采集） → 图书馆（讨论） → 酒馆（闲聊） → 教堂（忏悔）</p>
+
+[[Question:Matrix]]
+[[ID:H5_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H5_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+
+[[Block:G3_H6_nn]]
+
+[[Question:DB]]
+[[ID:H6_nn_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S017 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">教堂（冥想） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（读书） → 教堂（冥想） → 图书馆（读书） → 图书馆（读书） → 图书馆（查资料） → 教堂（冥想）</p>
+
+[[Question:Matrix]]
+[[ID:H6_nn_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H6_nn_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+性子温和，乐意搭把手，喜欢到处逛却不爱在人堆里久留
+神经质，躲着人多的场合，一刻也安定不下来
+
+[[Block:G3_cmp_H1]]
+
+[[Question:DB]]
+[[ID:cmp_H1_stim]]
+<p>这个角色的设定是：<strong>喜欢热闹，争强好胜，跟谁都要争个高下</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S001 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S002 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">竞技场（比武） → 竞技场（对练） → 竞技场（对练） → 竞技场（比武） → 竞技场（比武） → 竞技场（对练） → 竞技场（比武） → 竞技场（比武） → 竞技场（比武） → 竞技场（比武）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H1_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H1_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:G3_cmp_H4]]
+
+[[Question:DB]]
+[[ID:cmp_H4_stim]]
+<p>这个角色的设定是：<strong>孤僻乖戾，谁也不肯搭理，做事没个定准</strong></p><hr><p><strong>甲</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S010 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（采集） → 竞技场（比武） → 教堂（忏悔） → 集市（讨价还价） → 树林（采集） → 竞技场（比武） → 教堂（忏悔） → 树林（采集） → 集市（逛摊子） → 竞技场（比武）</p><hr><p><strong>乙</strong></p><div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S011 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚） → 树林（歇脚）</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H4_fit]]
+哪一段更符合上面的设定？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Question:MC:SingleAnswer]]
+[[ID:cmp_H4_alive]]
+哪一段更像一个有自己脾气的活人？
+[[Choices]]
+甲
+乙
+两个差不多
+
+[[Block:比较说明_3]]
+
+[[Question:DB]]
+[[ID:cmp_intro_3]]
+<p>接下来的两页换一种做法：先告诉你这个角色的设定， 再给你两段由<strong>不同系统</strong>生成的行为记录。请判断哪一段更符合设定。</p>
+
+[[Block:背景]]
+
+[[Question:MC:SingleAnswer]]
+[[ID:age]]
+你的年龄段？
+[[Choices]]
+18–24
+25–34
+35–44
+45 及以上
+
+[[Question:MC:SingleAnswer]]
+[[ID:gaming]]
+你平时玩电子游戏吗？
+[[Choices]]
+几乎不玩
+偶尔玩
+经常玩
+
+[[Block:结束]]
+
+[[Question:DB]]
+[[ID:thanks]]
+<p>问卷到此结束，感谢参与。</p>
+

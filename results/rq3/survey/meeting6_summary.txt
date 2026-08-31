@@ -1,0 +1,41 @@
+RQ3 meeting-6 figures — dissertation_ver1.51_August 8, 2026_17.25.tsv
+responses used: 21  (participants per stimulus: 7)
+
+per policy (mean over its 6 stimuli; error bar in the figure = min..max over those 6)
+policy                      id mean       id range  agr mean      agr range
+hand-authored scorer          0.667   0.43–1.00       0.667   0.43–1.00   
+nonlinear 2B                  0.452   0.14–0.71       0.619   0.43–0.86   
+agnostic control              0.190   0.00–0.57       0.690   0.43–1.00   
+
+agreement baseline: E[modal share] under uniform guessing over 3 options, n = 7 -> 0.525 (simulated, 200k draws). Chance for identification = 1/3. The two are different because the maximum of a small sample sits above its mean.
+
+per stimulus
+seq   persona  policy                        id  agree   modal (votes)
+S001  H1       hand-authored scorer        0.86   0.86   H1 (H1:6 H4:1)
+S004  H2       hand-authored scorer        1.00   1.00   H2 (H2:7)
+S007  H3       hand-authored scorer        0.57   0.57   H3 (H3:4 H2:3)
+S010  H4       hand-authored scorer        0.43   0.43   H4 (H4:3 H6:2 H5:2)
+S013  H5       hand-authored scorer        0.43   0.43   H5 (H5:3 H3:2 H4:2)
+S016  H6       hand-authored scorer        0.71   0.71   H6 (H6:5 H5:2)
+S002  H1       nonlinear 2B                0.71   0.71   H1 (H1:5 H3:2)
+S005  H2       nonlinear 2B                0.71   0.71   H2 (H2:5 H5:2)
+S008  H3       nonlinear 2B                0.43   0.43   H2 (H2:3 H3:3 H6:1)
+S011  H4       nonlinear 2B                0.43   0.43   H6 (H6:3 H4:3 H5:1)
+S014  H5       nonlinear 2B                0.14   0.86   H4 (H4:6 H5:1)
+S017  H6       nonlinear 2B                0.29   0.57   H5 (H5:4 H6:2 H1:1)
+S003  H1       agnostic control            0.14   0.71   H4 (H4:5 H3:1 H1:1)
+S006  H2       agnostic control            0.14   0.57   H5 (H5:4 H1:2 H2:1)
+S009  H3       agnostic control            0.00   1.00   H6 (H6:7)
+S012  H4       agnostic control            0.14   0.43   H6 (H6:3 H5:3 H4:1)
+S015  H5       agnostic control            0.57   0.57   H5 (H5:4 H4:3)
+S018  H6       agnostic control            0.14   0.86   H5 (H5:6 H6:1)
+
+what does the agnostic control read as? (supervisor's 'neutral personality' question)
+per-stimulus modal picks under the control:
+  intended H1: modal pick H4 (0.71 of 7)
+  intended H2: modal pick H5 (0.57 of 7)
+  intended H3: modal pick H6 (1.00 of 7)
+  intended H4: modal pick H6 (0.43 of 7)
+  intended H5: modal pick H5 (0.57 of 7)
+  intended H6: modal pick H5 (0.86 of 7)
+pooled control votes over all its trials: H5:17 H6:11 H4:9 H1:3 H3:1 H2:1

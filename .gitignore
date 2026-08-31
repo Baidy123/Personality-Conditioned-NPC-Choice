@@ -3,5 +3,7 @@ __pycache__/
 .pytest_cache/
 data/rq2_controlled_smoke/
 data/rq2_controlled/pool.jsonl
-docs/*.pdf
+docs/
 results/rq2_smoke_local_backup/
+NUL
+results/rq2b/consistency/prompts.md

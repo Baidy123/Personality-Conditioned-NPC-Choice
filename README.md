@@ -32,10 +32,29 @@ python -m experiments.rq1.run_e4      # E4 memory/context ablations
 
 Run `gen_cases` first; E1–E4 are independent of each other after that.
 
-**RQ2 — policy learning (2A controlled + 2B independent):** follow
-`docs/rq2_runbook.md` step by step (2A: `gen_controlled → train → run_2a →
-run_e_diag`, smoke first; 2B: `import_independent → run_label_probe →
-train_2b → run_2b`, generation protocol in `docs/rq2b_generation_guide.md`).
+**RQ2 — policy learning** (outputs → `results/rq2/`, `results/rq2b/`):
+
+2A, controlled supervision from the hand-authored scorer. Run the four steps in
+order; add `--smoke` to every one of them first for a fast end-to-end check.
+
+```powershell
+python -m experiments.rq2.gen_controlled   # dataset (train / val / G1-G6 splits)
+python -m experiments.rq2.train            # 130 runs, resumable
+python -m experiments.rq2.run_2a           # metrics, main table, figures
+python -m experiments.rq2.run_e_diag       # E1-E4 structural diagnostic
+```
+
+`train` takes `--device cuda` and `--only <run-prefix>` for a single run.
+
+2B, independent supervision from the externally labelled dataset in
+`data/rq2_independent/`:
+
+```powershell
+python -m experiments.rq2.import_independent   # raw batches -> reviewed splits
+python -m experiments.rq2.run_label_probe      # label health check, run before training
+python -m experiments.rq2.train_2b
+python -m experiments.rq2.run_2b
+```
 
 **Game modes (playback generation + live demo):** see `configs/README.md` —
 the change-X-edit-Y map, both run commands, and model/checkpoint selection.
@@ -83,7 +102,7 @@ Dependency direction: `schema` → `representation` / `weights` → `relations` 
 - **Personality:** OCEAN vector in `[-1, 1]` (`Personality`).
 - **Location schema (9, v1.2):** `social, stimulation, structure, cognitive, physical,
   risk, exploration, privacy, conflict` (`conflict` = the place hosts combat /
-  open opposition; added in tuning round 4, see `docs/tuning_log.md`).
+  open opposition; added in tuning round 4).
 - **Action schema (11):** the shared first seven, then `cooperation, helping,
   conflict, control`.
 - **Unified 12-dim model vector** (`MODEL_TAGS`): location fills `conflict` natively
@@ -181,8 +200,7 @@ not a decided one (`project_flow.md` §9):
 - the v1.1 tables `b / C / w` (per level) and `W_rel` live in `weights.py`, alongside
   the fallback `W_L` / `W_A`. All are hand-authored provisional directions to be
   tuned there; `python -m examples.make_tables_figures` renders the current values
-  to `docs/v12_tables.png` / `docs/v12_ideal_levels_demo.png` (walkthrough:
-  `docs/equation_v1.2_tables_example.md`).
+  to `docs/v12_tables.png` / `docs/v12_ideal_levels_demo.png`.
 
 These values must be examined empirically (RQ1), not assumed correct.
 
@@ -203,16 +221,13 @@ Done:
 
 - [x] Matched-case generator (§10 step 2) and the automated RQ1 analyses
       (§10 step 3): trait sensitivity, profile distinguishability, trajectory
-      patterns, memory ablations (`experiments/rq1/`, design record:
-      `docs/specs/2026-07-03-rq1-experiments.md`).
+      patterns, memory ablations (`experiments/rq1/`).
 - [x] Learned-policy layer (simple / nonlinear / agnostic under the shared
       12-dim interface) and the 2A controlled pipeline: dataset generation,
       130 training runs (S0 + G1–G6 + ablations + data sizes), metrics, and
-      the E1–E4 structural diagnostic (`experiments/rq2/`,
-      `docs/rq2_runbook.md`).
-- [x] 2B independent pipeline: AI-assisted generation protocol
-      (`docs/rq2b_generation_guide.md`), import/review gates, label probe,
-      training, and evaluation (`results/rq2b/`).
+      the E1–E4 structural diagnostic (`experiments/rq2/`).
+- [x] 2B independent pipeline: externally labelled dataset with import/review
+      gates, label probe, training, and evaluation (`results/rq2b/`).
 - [x] RQ3 tooling: sequence pipeline + Unity evaluation environment
       (playback player and live demo with the local decision service;
       `experiments/rq3/`, `unity/dissertation`, `configs/README.md`).

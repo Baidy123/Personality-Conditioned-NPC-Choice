@@ -1,0 +1,546 @@
+{
+ "SurveyEntry": {
+  "SurveyID": "SV_0rq3study000001",
+  "SurveyName": "NPC 行为与性格判断",
+  "SurveyDescription": null,
+  "SurveyOwnerID": null,
+  "SurveyBrandID": null,
+  "DivisionID": null,
+  "SurveyLanguage": "ZH-S",
+  "SurveyActiveResponseSet": "RS_0rq3study000001",
+  "SurveyStatus": "Inactive",
+  "SurveyStartDate": "0000-00-00 00:00:00",
+  "SurveyExpirationDate": "0000-00-00 00:00:00",
+  "SurveyCreationDate": "2026-08-05 23:07:19",
+  "CreatorID": null,
+  "LastModified": "2026-08-05 23:07:19",
+  "LastAccessed": "0000-00-00 00:00:00",
+  "LastActivated": "0000-00-00 00:00:00",
+  "Deleted": null
+ },
+ "SurveyElements": [
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "BL",
+   "PrimaryAttribute": "Survey Blocks",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": [
+    {
+     "Type": "Standard",
+     "SubType": "",
+     "Description": "引言",
+     "ID": "BL_1",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID2"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID1"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Collapsed"
+     }
+    },
+    {
+     "Type": "Standard",
+     "SubType": "",
+     "Description": "说明",
+     "ID": "BL_2",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID3"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Collapsed"
+     }
+    },
+    {
+     "Type": "Standard",
+     "SubType": "",
+     "Description": "G1_H1_scorer",
+     "ID": "BL_3",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID4"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID5"
+      },
+      {
+       "Type": "Question",
+       "QuestionID": "QID6"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Collapsed"
+     }
+    },
+    {
+     "Type": "Standard",
+     "SubType": "",
+     "Description": "结束",
+     "ID": "BL_4",
+     "BlockElements": [
+      {
+       "Type": "Question",
+       "QuestionID": "QID7"
+      }
+     ],
+     "Options": {
+      "BlockLocking": "false",
+      "RandomizeQuestions": "false",
+      "BlockVisibility": "Collapsed"
+     }
+    },
+    {
+     "Type": "Trash",
+     "SubType": "",
+     "Description": "Trash / Unused Questions",
+     "ID": "BL_5",
+     "BlockElements": []
+    }
+   ]
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "FL",
+   "PrimaryAttribute": "Survey Flow",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "Type": "Root",
+    "FlowID": "FL_0",
+    "Flow": [
+     {
+      "Type": "Block",
+      "ID": "BL_1",
+      "FlowID": "FL_3",
+      "Autofill": []
+     },
+     {
+      "Type": "Branch",
+      "FlowID": "FL_1",
+      "Description": "不同意参与",
+      "BranchLogic": {
+       "0": {
+        "0": {
+         "LogicType": "Question",
+         "QuestionID": "QID1",
+         "QuestionIsInLoop": "no",
+         "ChoiceLocator": "q://QID1/SelectableChoice/2",
+         "Operator": "Selected",
+         "QuestionIDFromLocator": "QID1",
+         "LeftOperand": "q://QID1/SelectableChoice/2",
+         "Type": "Expression",
+         "Description": "不同意参与"
+        },
+        "Type": "If"
+       },
+       "Type": "BooleanExpression"
+      },
+      "Flow": [
+       {
+        "Type": "EndSurvey",
+        "FlowID": "FL_2"
+       }
+      ]
+     },
+     {
+      "Type": "Block",
+      "ID": "BL_2",
+      "FlowID": "FL_4",
+      "Autofill": []
+     },
+     {
+      "Type": "BlockRandomizer",
+      "FlowID": "FL_6",
+      "SubSet": 1,
+      "ByGroup": false,
+      "EvenPresentation": true,
+      "Flow": [
+       {
+        "Type": "Block",
+        "ID": "BL_3",
+        "FlowID": "FL_5",
+        "Autofill": []
+       }
+      ]
+     },
+     {
+      "Type": "Block",
+      "ID": "BL_4",
+      "FlowID": "FL_7",
+      "Autofill": []
+     }
+    ],
+    "Properties": {
+     "Count": 8,
+     "RemovedFieldsets": []
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SO",
+   "PrimaryAttribute": "Survey Options",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "BackButton": "false",
+    "SaveAndContinue": "true",
+    "SurveyProtection": "PublicSurvey",
+    "BallotBoxStuffingPrevention": "false",
+    "NoIndex": "Yes",
+    "SecureResponseFiles": "true",
+    "SurveyExpiration": "None",
+    "SurveyTermination": "DefaultMessage",
+    "Header": "",
+    "Footer": "",
+    "ProgressBarDisplay": "Text",
+    "PartialData": "+1 week",
+    "ValidationMessage": "",
+    "PreviousButton": "",
+    "NextButton": "",
+    "SurveyTitle": "NPC 行为与性格判断",
+    "SurveyLanguage": "ZH-S",
+    "SurveyStartDate": "0000-00-00 00:00:00",
+    "SurveyExpirationDate": "0000-00-00 00:00:00"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SCO",
+   "PrimaryAttribute": "Scoring",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "ScoringCategories": [],
+    "ScoringCategoryGroups": [],
+    "ScoringSummaryCategory": null,
+    "ScoringSummaryAfterQuestions": 0,
+    "ScoringSummaryAfterSurvey": 0,
+    "DefaultScoringCategory": null,
+    "AutoScoringCategory": null
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "PROJ",
+   "PrimaryAttribute": "CORE",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": "1.1.0",
+   "Payload": {
+    "ProjectCategory": "CORE",
+    "SchemaVersion": "1.1.0"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "STAT",
+   "PrimaryAttribute": "Survey Statistics",
+   "SecondaryAttribute": null,
+   "TertiaryAttribute": null,
+   "Payload": {
+    "MobileCompatible": true,
+    "ID": "Survey Statistics"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "QC",
+   "PrimaryAttribute": "Survey Question Count",
+   "SecondaryAttribute": "7",
+   "TertiaryAttribute": null,
+   "Payload": null
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "RS",
+   "PrimaryAttribute": "RS_0rq3study000001",
+   "SecondaryAttribute": "Default Response Set",
+   "TertiaryAttribute": null,
+   "Payload": null
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID1",
+   "SecondaryAttribute": "你是否同意参与？",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "你是否同意参与？",
+    "DataExportTag": "consent",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "SubSelector": "TX",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "consent",
+    "Choices": {
+     "1": {
+      "Display": "同意"
+     },
+     "2": {
+      "Display": "不同意"
+     }
+    },
+    "ChoiceOrder": [
+     "1",
+     "2"
+    ],
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "ON",
+      "ForceResponseType": "ON",
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 3,
+    "NextAnswerId": 1,
+    "QuestionID": "QID1"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID2",
+   "SecondaryAttribute": "<p>这是曼彻斯特大学机器人学硕士论文的一项研究。你会看到几段游戏角色的行为记录，\n需要判断这些角色分别是什么样的人。全程约十分钟。</p>\n<p>研究不收集任何能识别你身份的信息，只保存你的作答。你",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<p>这是曼彻斯特大学机器人学硕士论文的一项研究。你会看到几段游戏角色的行为记录，\n需要判断这些角色分别是什么样的人。全程约十分钟。</p>\n<p>研究不收集任何能识别你身份的信息，只保存你的作答。你可以在任何时候关闭页面退出，\n已作答的部分不会被使用。</p>",
+    "DataExportTag": "consent_text",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "consent_text",
+    "ChoiceOrder": [],
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 1,
+    "NextAnswerId": 1,
+    "QuestionID": "QID2"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID3",
+   "SecondaryAttribute": "<p>下面每一页显示一个游戏角色连续十次的行动记录。这个世界里有酒馆、集市、\n教堂、图书馆、树林、竞技场几个地方，角色每次自己决定去哪里、做什么。</p>\n<p>每页先给这个角色的性格打分，再从三段描",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<p>下面每一页显示一个游戏角色连续十次的行动记录。这个世界里有酒馆、集市、\n教堂、图书馆、树林、竞技场几个地方，角色每次自己决定去哪里、做什么。</p>\n<p>每页先给这个角色的性格打分，再从三段描述里挑出最像他的一段。凭直觉即可，没有标准答案。</p>",
+    "DataExportTag": "howto",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "howto",
+    "ChoiceOrder": [],
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 1,
+    "NextAnswerId": 1,
+    "QuestionID": "QID3"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID4",
+   "SecondaryAttribute": "<div style=\"padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em\">[视频占位",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<div style=\"padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em\">[视频占位 S001 — 录制后用 --video-base 重新生成]</div><p style=\"font-size:1.15em;line-height:2\">集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价）</p>",
+    "DataExportTag": "H1_scorer_trail",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "H1_scorer_trail",
+    "ChoiceOrder": [],
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 1,
+    "NextAnswerId": 1,
+    "QuestionID": "QID4"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID5",
+   "SecondaryAttribute": "你觉得这个角色大概是怎样的人？",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "你觉得这个角色大概是怎样的人？",
+    "DataExportTag": "H1_scorer_rate",
+    "QuestionType": "Slider",
+    "Selector": "HSLIDER",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText",
+     "CSSliderMin": 1,
+     "CSSliderMax": 7,
+     "GridLines": 7,
+     "SnapToGrid": true,
+     "CustomStart": false,
+     "NotApplicable": false,
+     "MobileFirst": true,
+     "NumDecimals": "0",
+     "ShowValue": true
+    },
+    "Choices": {
+     "1": {
+      "Display": "封闭保守 ←→ 开放好奇"
+     },
+     "2": {
+      "Display": "散漫随性 ←→ 自律有条理"
+     },
+     "3": {
+      "Display": "安静内向 ←→ 活跃外向"
+     },
+     "4": {
+      "Display": "冷淡强硬 ←→ 温和随和"
+     },
+     "5": {
+      "Display": "沉稳平静 ←→ 焦虑易怒"
+     }
+    },
+    "ChoiceOrder": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "ON",
+      "ForceResponseType": "ON",
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "Labels": [],
+    "NextChoiceId": 6,
+    "NextAnswerId": 1,
+    "QuestionID": "QID5"
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID6",
+   "SecondaryAttribute": "下面哪段描述最像这个角色？",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "下面哪段描述最像这个角色？",
+    "DataExportTag": "H1_scorer_choice",
+    "QuestionType": "MC",
+    "Selector": "SAVR",
+    "SubSelector": "TX",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "H1_scorer_choice",
+    "Choices": {
+     "1": {
+      "Display": "喜欢热闹，争强好胜，跟谁都要争个高下"
+     },
+     "2": {
+      "Display": "喜欢热闹，交际广，跟人相处软硬都来"
+     },
+     "3": {
+      "Display": "孤僻乖戾，谁也不肯搭理，做事没个定准"
+     }
+    },
+    "ChoiceOrder": [
+     "1",
+     "2",
+     "3"
+    ],
+    "Validation": {
+     "Settings": {
+      "ForceResponse": "ON",
+      "ForceResponseType": "ON",
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 4,
+    "NextAnswerId": 1,
+    "QuestionID": "QID6",
+    "Randomization": {
+     "Advanced": null,
+     "TotalRandSubset": "",
+     "Type": "All"
+    }
+   }
+  },
+  {
+   "SurveyID": "SV_0rq3study000001",
+   "Element": "SQ",
+   "PrimaryAttribute": "QID7",
+   "SecondaryAttribute": "<p>问卷到此结束，感谢参与。</p>",
+   "TertiaryAttribute": null,
+   "Payload": {
+    "QuestionText": "<p>问卷到此结束，感谢参与。</p>",
+    "DataExportTag": "thanks",
+    "QuestionType": "DB",
+    "Selector": "TB",
+    "Configuration": {
+     "QuestionDescriptionOption": "UseText"
+    },
+    "QuestionDescription": "thanks",
+    "ChoiceOrder": [],
+    "Validation": {
+     "Settings": {
+      "Type": "None"
+     }
+    },
+    "GradingData": [],
+    "Language": [],
+    "NextChoiceId": 1,
+    "NextAnswerId": 1,
+    "QuestionID": "QID7"
+   }
+  }
+ ]
+}

@@ -1,0 +1,156 @@
+{
+ "locations": [
+  {
+   "id": "tavern",
+   "zh": "酒馆",
+   "en": "Tavern"
+  },
+  {
+   "id": "library",
+   "zh": "图书馆",
+   "en": "Library"
+  },
+  {
+   "id": "chapel",
+   "zh": "教堂",
+   "en": "Chapel"
+  },
+  {
+   "id": "market",
+   "zh": "集市",
+   "en": "Market"
+  },
+  {
+   "id": "forest",
+   "zh": "树林",
+   "en": "Forest"
+  },
+  {
+   "id": "arena",
+   "zh": "竞技场",
+   "en": "Arena"
+  },
+  {
+   "id": "enemy_camp",
+   "zh": "敌营",
+   "en": "Enemy Camp"
+  }
+ ],
+ "actions": [
+  {
+   "id": "chat",
+   "zh": "闲聊",
+   "en": "Chat"
+  },
+  {
+   "id": "drink",
+   "zh": "喝酒",
+   "en": "Drink"
+  },
+  {
+   "id": "brawl",
+   "zh": "斗殴",
+   "en": "Brawl"
+  },
+  {
+   "id": "read",
+   "zh": "读书",
+   "en": "Read"
+  },
+  {
+   "id": "research",
+   "zh": "查资料",
+   "en": "Research"
+  },
+  {
+   "id": "discuss",
+   "zh": "讨论",
+   "en": "Discuss"
+  },
+  {
+   "id": "pray",
+   "zh": "祷告",
+   "en": "Pray"
+  },
+  {
+   "id": "meditate",
+   "zh": "冥想",
+   "en": "Meditate"
+  },
+  {
+   "id": "confess",
+   "zh": "忏悔",
+   "en": "Confess"
+  },
+  {
+   "id": "haggle",
+   "zh": "讨价还价",
+   "en": "Haggle"
+  },
+  {
+   "id": "browse",
+   "zh": "逛摊子",
+   "en": "Browse"
+  },
+  {
+   "id": "trade",
+   "zh": "做买卖",
+   "en": "Trade"
+  },
+  {
+   "id": "explore",
+   "zh": "探路",
+   "en": "Explore"
+  },
+  {
+   "id": "forage",
+   "zh": "采集",
+   "en": "Forage"
+  },
+  {
+   "id": "rest",
+   "zh": "歇脚",
+   "en": "Rest"
+  },
+  {
+   "id": "fight",
+   "zh": "比武",
+   "en": "Fight"
+  },
+  {
+   "id": "spar",
+   "zh": "对练",
+   "en": "Spar"
+  },
+  {
+   "id": "drill",
+   "zh": "操练",
+   "en": "Drill"
+  },
+  {
+   "id": "coach",
+   "zh": "指点他人",
+   "en": "Coach"
+  },
+  {
+   "id": "spectate",
+   "zh": "观战",
+   "en": "Spectate"
+  },
+  {
+   "id": "bet",
+   "zh": "下注",
+   "en": "Bet"
+  },
+  {
+   "id": "raid",
+   "zh": "突袭",
+   "en": "Raid"
+  },
+  {
+   "id": "scout",
+   "zh": "侦查",
+   "en": "Scout"
+  }
+ ]
+}

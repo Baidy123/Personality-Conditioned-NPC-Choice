@@ -79,6 +79,32 @@ def setup_style() -> None:
     })
 
 
+# Legend labels for E1's expression-strength bars. P_base / P_rule are the
+# scorer's internal names for the distribution before and after the memory and
+# temperature stages; a figure has to say what they mean without the equation
+# at hand. Shared so the standalone E1 figure and the combined RQ1 expression
+# figure (drawn by run_e2) cannot drift apart in labels or colours.
+STRENGTH_BARS = (
+    ("location choice, before the neuroticism temperature", "base", "#BBBBBB"),
+    ("location choice, full scorer output", "rule", "#0072B2"),
+    ("action choice, full scorer output", "act", "#E69F00"),
+)
+
+
+def plot_expression_strength(ax, strength: dict[str, dict[str, float]]) -> None:
+    """E1's grouped bars: endpoint TVD per trait, three channels."""
+    x = np.arange(len(TRAITS))
+    top = 0.0
+    for i, (label, key, color) in enumerate(STRENGTH_BARS):
+        vals = [strength[t][key] for t in TRAITS]
+        top = max(top, max(vals))
+        ax.bar(x + (i - 1) * 0.26, vals, width=0.24, color=color, label=label)
+    ax.set_xticks(x, [TRAIT_SHORT[t] for t in TRAITS])
+    ax.set_ylabel("endpoint TVD (trait -1 vs +1)")
+    ax.set_ylim(0, top * 1.34)      # headroom so the legend clears the E bar
+    ax.legend(frameon=False, loc="upper left")
+
+
 # ---------------------------------------------------------------- cases I/O --
 def load_cases() -> dict:
     with open(CASES / "cases.json", encoding="utf-8") as f:
@@ -295,6 +321,13 @@ def trajectory_metrics(visits: list[str], acts: list[str] | None = None) -> dict
             sum(1 for a, b in stays if a == b) / len(stays) if stays else 0.0
         )
     return out
+
+
+def read_csv(path: Path) -> list[dict[str, str]]:
+    """Rows of a ``write_csv`` file as dicts (values are plain numbers/ids)."""
+    lines = path.read_text(encoding="utf-8").strip().splitlines()
+    header = lines[0].split(",")
+    return [dict(zip(header, line.split(","))) for line in lines[1:]]
 
 
 def write_csv(path: Path, header: list[str], rows: list[list]) -> None:

@@ -45,6 +45,13 @@ from .common import (
 FAMILY_COLORS = {"simple": "#0072B2", "nonlinear": "#E69F00",
                  "agnostic_simple": "#999999", "agnostic_nonlinear": "#CC79A7",
                  "uniform": "#CCCCCC"}
+# What the figures call each family. The code key stays "simple" (run ids, CSV
+# columns, lookups); the report calls that model the linear one.
+FIG_LABEL = {"simple": "linear", "agnostic_simple": "agnostic_linear"}
+
+
+def fig_label(name: str) -> str:
+    return FIG_LABEL.get(name, name)
 
 
 def load_student(results_dir: Path, run_id: str) -> torch.nn.Module:
@@ -154,6 +161,40 @@ def _read_main_table(path: Path) -> list[dict]:
         return [{k: cast(k, v) for k, v in row.items()} for row in csv.DictReader(f)]
 
 
+def draw_gap_by_split(ax, table: list[dict]) -> None:
+    """Student fidelity per split — standalone, and the left panel of the
+    combined report figure drawn by ``make_combined_figure``.
+
+    G2 (out-of-world spike, exclusion effect ~0) is dropped; the remaining
+    splits are renumbered G1..G5 for display while lookups keep the real ids.
+    """
+    _kept = [g for g in G_SPLITS if g != "G2"]
+    mains = {"S0": "S0"} | {f"G{i + 1}": g for i, g in enumerate(_kept)}
+    x = np.arange(len(mains))
+    series = [("linear", "simple", False), ("nonlinear", "nonlinear", False),
+              ("linear (S0-trained)", "simple", True),
+              ("nonlinear (S0-trained)", "nonlinear", True)]
+    for i, (label, fam, s0_trained) in enumerate(series):
+        ys, es = [], []
+        for real in mains.values():
+            if s0_trained and real == "S0":     # identical to the main S0 bar
+                ys.append(np.nan)
+                es.append(0.0)
+                continue
+            rows = _lookup(table, split="S0" if s0_trained else real, model=fam,
+                           ablation="full", n_train=None, eval_split=real,
+                           decision_type="all")
+            ys.append(rows[0]["kl_mean"] if rows else np.nan)
+            es.append(rows[0]["kl_std"] if rows else 0.0)
+        ax.bar(x + (i - 1.5) * 0.21, ys, width=0.19, yerr=es,
+               color=FAMILY_COLORS[fam], alpha=0.45 if s0_trained else 1.0,
+               label=label, capsize=2)
+    ax.set_xticks(x, list(mains))
+    ax.set_ylabel("KL(teacher ‖ student), nats")
+    ax.legend(frameon=False, loc="upper left", fontsize=7, ncol=2,
+              handlelength=1.2, columnspacing=1.0, borderaxespad=0.2)
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="Study 2A metrics and figures")
     ap.add_argument("--smoke", action="store_true")
@@ -195,36 +236,9 @@ def main(argv=None) -> None:
         write_csv(results_dir / "main_table.csv", list(table[0].keys()),
                   [list(r.values()) for r in table])
 
-    # -- figure: simple-vs-nonlinear gap across splits ---------------------------
-    # G2 (out-of-world spike, exclusion effect ~0) is dropped; the remaining
-    # splits are renumbered G1..G5 for display while lookups keep the real ids.
-    _kept = [g for g in G_SPLITS if g != "G2"]
-    mains = {"S0": "S0"} | {f"G{i + 1}": g for i, g in enumerate(_kept)}
+    # -- figure: linear-vs-nonlinear gap across splits ---------------------------
     fig, ax = plt.subplots(figsize=(9, 4.5))
-    x = np.arange(len(mains))
-    series = [("simple", "simple", False), ("nonlinear", "nonlinear", False),
-              ("simple (S0-trained)", "simple", True),
-              ("nonlinear (S0-trained)", "nonlinear", True)]
-    for i, (label, fam, s0_trained) in enumerate(series):
-        ys, es = [], []
-        for real in mains.values():
-            if s0_trained and real == "S0":     # identical to the main S0 bar
-                ys.append(np.nan)
-                es.append(0.0)
-                continue
-            rows = _lookup(table, split="S0" if s0_trained else real, model=fam,
-                           ablation="full", n_train=None, eval_split=real,
-                           decision_type="all")
-            ys.append(rows[0]["kl_mean"] if rows else np.nan)
-            es.append(rows[0]["kl_std"] if rows else 0.0)
-        ax.bar(x + (i - 1.5) * 0.21, ys, width=0.19, yerr=es,
-               color=FAMILY_COLORS[fam], alpha=0.45 if s0_trained else 1.0,
-               label=label, capsize=2)
-    ax.set_xticks(x, list(mains))
-    ax.set_ylabel("KL(teacher ‖ student), nats")
-    ax.set_title("Student fidelity to the hand-authored policy, per split")
-    ax.legend(frameon=False, loc="upper left", fontsize=7, ncol=2,
-              handlelength=1.2, columnspacing=1.0, borderaxespad=0.2)
+    draw_gap_by_split(ax, table)
     fig.savefig(results_dir / "gap_by_split.png", bbox_inches="tight")
     plt.close(fig)
 
@@ -240,11 +254,11 @@ def main(argv=None) -> None:
                 xs.append(100_000 if n is None else n)   # None = the 100k S0 main runs
                 ys.append(rows[0]["kl_mean"])
                 es.append(rows[0]["kl_std"])
-        ax.errorbar(xs, ys, yerr=es, marker="o", color=FAMILY_COLORS[fam], label=fam)
+        ax.errorbar(xs, ys, yerr=es, marker="o", color=FAMILY_COLORS[fam],
+                    label=fig_label(fam))
     ax.set_xscale("log")
     ax.set_xlabel("training cases")
     ax.set_ylabel("KL(teacher ‖ student), nats")
-    ax.set_title("Effect of training-set size on student fidelity")
     ax.legend(frameon=False, loc="upper right", fontsize=8)
     fig.savefig(results_dir / "data_size_curve.png", bbox_inches="tight")
     plt.close(fig)

@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "purpose": "English display labels for world option ids. Participants read the Chinese labels (rq3_labels_zh.json); this file supplies the English line shown beneath it in Unity and the English rendering of survey materials for the dissertation appendix and ethics record. Presentation only — no scorer or model reads this file.",
+    "extend": "add a location or action to data/world.json, then add its label here and in rq3_labels_zh.json"
+  },
+  "locations": {
+    "tavern": "Tavern",
+    "library": "Library",
+    "chapel": "Chapel",
+    "market": "Market",
+    "forest": "Forest",
+    "arena": "Arena",
+    "enemy_camp": "Enemy Camp"
+  },
+  "actions": {
+    "chat": "Chat",
+    "drink": "Drink",
+    "brawl": "Brawl",
+    "read": "Read",
+    "research": "Research",
+    "discuss": "Discuss",
+    "pray": "Pray",
+    "meditate": "Meditate",
+    "confess": "Confess",
+    "haggle": "Haggle",
+    "browse": "Browse",
+    "trade": "Trade",
+    "explore": "Explore",
+    "forage": "Forage",
+    "rest": "Rest",
+    "fight": "Fight",
+    "spar": "Spar",
+    "drill": "Drill",
+    "coach": "Coach",
+    "spectate": "Spectate",
+    "bet": "Bet",
+    "raid": "Raid",
+    "scout": "Scout"
+  }
+}

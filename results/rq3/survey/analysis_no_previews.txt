@@ -1,0 +1,260 @@
+RQ3 human study — dissertation_ver1.51_August 8, 2026_17.25.tsv
+
+==============================================================================
+1. SAMPLE
+==============================================================================
+responses analysed : 18
+excluded           : 3 (R_0wQ1L1nc4SdjSkp/preview response, R_lAOc6Buxr3RoWt2/preview response, R_srXB8iMcXEPKE13/preview response)
+group (version)    : v1=6, v2=6, v3=6
+duration (s)       : median 580, IQR 385–725, range 139–1043
+finished           : 17/18
+age                : 18–24=12, 25–34=5, 35–44=1
+plays games        : rarely=1, sometimes=5, often=12
+
+==============================================================================
+2. BLIND PERSONALITY IDENTIFICATION  (3-alternative forced choice, chance = 1/3)
+==============================================================================
+policy                   correct/n     rate          95% CI   p (vs 1/3)
+hand-authored scorer         22/36    0.611    [0.45, 0.75]       0.0011
+nonlinear 2B                 16/36    0.444    [0.30, 0.60]       0.1608
+agnostic control              8/36    0.222    [0.12, 0.38]       0.2149
+
+participant-level (each participant sees 2 trails per policy; guards against treating 6 trials from one person as independent)
+policy                   mean per-participant rate      SD    p (perm. vs 1/3)
+hand-authored scorer                         0.611   0.274              0.0007
+nonlinear 2B                                 0.444   0.338              0.2233
+agnostic control                             0.222   0.256              0.1105
+
+pairwise policy contrasts (paired within participant)
+  hand-authored scorer   - agnostic control     Δ = +0.389   p = 0.0019
+  nonlinear 2B           - agnostic control     Δ = +0.222   p = 0.0376
+  hand-authored scorer   - nonlinear 2B         Δ = +0.167   p = 0.1441
+
+per persona × policy (7 participants per cell)
+          hand-authored scorer            nonlinear 2B        agnostic control       row
+H1                  5/6 (0.83)              4/6 (0.67)              1/6 (0.17)10/18 (0.56)
+H2                  6/6 (1.00)              4/6 (0.67)              1/6 (0.17)11/18 (0.61)
+H3                  3/6 (0.50)              3/6 (0.50)              0/6 (0.00)6/18 (0.33)
+H4                  2/6 (0.33)              3/6 (0.50)              1/6 (0.17)6/18 (0.33)
+H5                  2/6 (0.33)              1/6 (0.17)              4/6 (0.67)7/18 (0.39)
+H6                  4/6 (0.67)              1/6 (0.17)              1/6 (0.17)6/18 (0.33)
+
+which description was picked, over all trials of that policy (response-bias check; 42 picks spread over 6 personas, but each persona is only offered as an option on 3 of the 6 stimuli)
+  hand-authored scorer  H1:5 H2:9 H3:5 H4:5 H5:6 H6:6
+  nonlinear 2B          H1:5 H2:6 H3:5 H4:8 H5:8 H6:4
+  agnostic control      H1:2 H2:1 H3:1 H4:7 H5:16 H6:9
+
+below-chance check — a rate under 1/3 means participants were actively misled rather than merely uninformed
+  hand-authored scorer   P(X <= 22 | p=1/3) = 0.9998
+  nonlinear 2B           P(X <= 16 | p=1/3) = 0.9416
+  agnostic control       P(X <= 8 | p=1/3) = 0.1055
+
+TWO BASELINES — DO NOT CONFLATE THEM
+  chance          = 1/3 = 0.333, a theoretical number: pick at random without
+                    reading the trail. Nobody actually answered this way.
+  agnostic control= 0.222 (8/36), a real condition
+                    that 18 participants answered.
+  The control sits BELOW chance, so it is not a zero-information floor: it
+  carries misleading information. With no personality input it emits one
+  behaviour pattern for all six personas, and participants read a definite
+  personality into that pattern, so they converge on the same two or three
+  answers whatever the intended persona was. A participant answering that way
+  can be right for at most about one persona in six.
+    control vs 1/6 : exact binomial p = 0.3702
+    control vs 1/3 : exact binomial p = 0.2149
+  Consequences for reporting:
+    - EFFECT SIZE goes against chance   (scorer +0.278,
+      nonlinear +0.111).
+    - ATTRIBUTION goes against the control: it shows the difference comes from
+      the personality input rather than from the trail format. The margin over
+      the control must NOT be reported as an effect size, because it also
+      contains however far the control's own uniform pattern pushed it below
+      chance.
+
+per stimulus sequence
+  seq    persona  policy                     correct/n
+  S001   H1       hand-authored scorer      5/6 (0.83)
+  S002   H1       nonlinear 2B              4/6 (0.67)
+  S003   H1       agnostic control          1/6 (0.17)
+  S004   H2       hand-authored scorer      6/6 (1.00)
+  S005   H2       nonlinear 2B              4/6 (0.67)
+  S006   H2       agnostic control          1/6 (0.17)
+  S007   H3       hand-authored scorer      3/6 (0.50)
+  S008   H3       nonlinear 2B              3/6 (0.50)
+  S009   H3       agnostic control          0/6 (0.00)
+  S010   H4       hand-authored scorer      2/6 (0.33)
+  S011   H4       nonlinear 2B              3/6 (0.50)
+  S012   H4       agnostic control          1/6 (0.17)
+  S013   H5       hand-authored scorer      2/6 (0.33)
+  S014   H5       nonlinear 2B              1/6 (0.17)
+  S015   H5       agnostic control          4/6 (0.67)
+  S016   H6       hand-authored scorer      4/6 (0.67)
+  S017   H6       nonlinear 2B              1/6 (0.17)
+  S018   H6       agnostic control          1/6 (0.17)
+
+==============================================================================
+3. TRAIT RECOVERY  (sliders 1–7 mapped to [-1, 1]; intended = persona vector)
+==============================================================================
+mean absolute error per trait (lower = closer to the intended profile)
+policy                        O        C        E        A        N     mean
+hand-authored scorer      0.542    0.638    0.423    0.432    0.441    0.495
+nonlinear 2B              0.685    0.586    0.416    0.618    0.628    0.587
+agnostic control          0.553    0.576    0.749    0.549    0.802    0.646
+
+correlation between intended and rated trait value
+(the signal test: does a higher intended trait produce a higher rating?)
+trial level, n = 42 — but only 6 distinct intended values, so the persona-mean column below is the honest effect size
+policy                        O        C        E        A        N
+hand-authored scorer      0.079   -0.025    0.605    0.537    0.301
+nonlinear 2B              0.013    0.038    0.790    0.159   -0.198
+agnostic control          0.307    0.055   -0.166    0.196   -0.222
+
+Spearman rank correlation, trial level — the assumption-free version. The sliders are Likert items, so equal spacing between adjacent points is an assumption, not a fact; ranks need neither that nor any mapping onto the persona scale. Read this row if a reviewer challenges the 1..7 -> [-1, 1] conversion.
+policy                        O        C        E        A        N
+hand-authored scorer      0.090    0.002    0.690    0.430    0.238
+nonlinear 2B             -0.038   -0.102    0.728    0.054   -0.193
+agnostic control          0.381    0.167   -0.171    0.161   -0.287
+
+persona-mean level, n = 6 points per cell
+policy                        O        C        E        A        N
+hand-authored scorer      0.386   -0.070    0.829    0.752    0.514
+nonlinear 2B              0.024    0.089    0.939    0.403   -0.885
+agnostic control          0.614    0.136   -0.332    0.313   -0.457
+
+same, dropping H6 — H6 is the only persona with positive intended N (the other five span -0.77..-0.08), and its description opens with 行动多变、难以捉摸, which is verbatim the high anchor printed on the N slider. Both reasons make the N column a one-persona result.
+policy                        O        C        E        A        N
+hand-authored scorer      0.173    0.008    0.485    0.576   -0.058
+nonlinear 2B              0.340    0.138    0.764    0.187   -0.029
+agnostic control          0.326   -0.009    0.015    0.247   -0.292
+
+mean rating per persona × trait (agnostic control shows the stereotype floor: it has no personality input, so any spread there is read into the trail)
+
+  hand-authored scorer
+  persona        O rated     C rated     E rated     A rated     N rated
+                O intend    C intend    E intend    A intend    N intend
+  H1                0.17       -0.39        0.67       -0.61       -0.56
+                    0.12        0.25        0.64       -0.63       -0.65
+  H2               -0.00        0.28        0.17        0.56       -0.33
+                    0.06        0.66        0.33        0.74       -0.08
+  H3                0.00        0.06        0.56        0.00       -0.22
+                   -0.08        0.27        0.60       -0.16       -0.77
+  H4               -0.11        0.11       -0.28       -0.11       -0.33
+                   -0.46       -0.69       -0.49       -0.71       -0.35
+  H5                0.22       -0.11        0.28        0.06        0.28
+                    0.16        0.18       -0.48        0.78       -0.55
+  H6               -0.06        0.22       -0.61       -0.33        0.33
+                    0.43       -0.13       -0.62       -0.16        0.56
+
+  nonlinear 2B
+  persona        O rated     C rated     E rated     A rated     N rated
+                O intend    C intend    E intend    A intend    N intend
+  H1                0.11        0.22        0.50       -0.17       -0.39
+                    0.12        0.25        0.64       -0.63       -0.65
+  H2               -0.39        0.56       -0.28        0.56       -0.39
+                    0.06        0.66        0.33        0.74       -0.08
+  H3                0.06        0.28        0.50        0.00       -0.33
+                   -0.08        0.27        0.60       -0.16       -0.77
+  H4               -0.61        0.28       -0.56        0.17       -0.44
+                   -0.46       -0.69       -0.49       -0.71       -0.35
+  H5                0.17        0.50       -0.94       -0.06       -0.44
+                    0.16        0.18       -0.48        0.78       -0.55
+  H6               -0.78        0.83       -0.83        0.22       -0.72
+                    0.43       -0.13       -0.62       -0.16        0.56
+
+  agnostic control
+  persona        O rated     C rated     E rated     A rated     N rated
+                O intend    C intend    E intend    A intend    N intend
+  H1               -0.28        0.06       -0.28       -0.44       -0.06
+                    0.12        0.25        0.64       -0.63       -0.65
+  H2               -0.11        0.39       -0.33        0.50        0.00
+                    0.06        0.66        0.33        0.74       -0.08
+  H3               -0.56        0.11       -0.78        0.11        0.67
+                   -0.08        0.27        0.60       -0.16       -0.77
+  H4               -0.44        0.28       -0.67        0.11        0.17
+                   -0.46       -0.69       -0.49       -0.71       -0.35
+  H5                0.39       -0.22       -0.33       -0.17        0.50
+                    0.16        0.18       -0.48        0.78       -0.55
+  H6                0.00       -0.33        0.00        0.44        0.11
+                    0.43       -0.13       -0.62       -0.16        0.56
+
+MAE differences vs the agnostic control (paired by trial, permutation test)
+  hand-authored scorer    O: -0.01 (p=0.877)  C: +0.06 (p=0.544)  E: -0.33 (p=0.002)  A: -0.12 (p=0.221)  N: -0.36 (p=0.002)
+  nonlinear 2B            O: +0.13 (p=0.125)  C: +0.01 (p=0.922)  E: -0.33 (p=0.001)  A: +0.07 (p=0.553)  N: -0.17 (p=0.144)
+
+WHY RAW DISTANCE CANNOT BE THE HEADLINE METRIC
+  Rating everything at the midpoint — reading nothing, moving no slider off 4 —
+  scores an MAE of 0.426, which beats all three policies above. Participants
+  rate more widely than the personas actually differ (rating SD 0.47-0.68
+  against a true SD of 0.27-0.59, worst on O), so their noise inflates every
+  distance while a constant answer has none. Raw MAE and raw Euclidean
+  distance therefore reward not answering, and are reported here only as
+  between-policy comparisons, never as an absolute standard of accuracy.
+
+==============================================================================
+3b. DOES THE RATING POINT AT THE RIGHT PERSONA?  (mean distance to the other five, minus distance to the intended one; 0 = the rating is no closer to the intended persona than to any other)
+==============================================================================
+per trait
+policy                         O         C         E         A         N
+hand-authored scorer      -0.002    -0.027    +0.310    +0.245    +0.173
+nonlinear 2B              +0.020    +0.002    +0.411    +0.101    -0.053
+agnostic control          +0.067    +0.048    -0.074    +0.130    -0.068
+  (p vs 0)            
+hand-authored scorer      0.9621    0.7025    0.0005    0.0024    0.0281
+nonlinear 2B              0.7084    0.9801    0.0001    0.2935    0.5218
+agnostic control          0.1444    0.5307    0.4246    0.1550    0.3572
+
+all five traits at once, averaged within participant
+  hand-authored scorer    +0.336   p vs 0 = 0.0004
+  nonlinear 2B            +0.240   p vs 0 = 0.0084
+  agnostic control        +0.012   p vs 0 = 0.8415
+  hand-authored scorer   - agnostic control     Δ = +0.324   p = 0.0068
+  nonlinear 2B           - agnostic control     Δ = +0.228   p = 0.0534
+  hand-authored scorer   - nonlinear 2B         Δ = +0.096   p = 0.2802
+
+==============================================================================
+4. SIDE-BY-SIDE PREFERENCE  (甲 = hand-authored scorer, 乙 = nonlinear 2B)
+==============================================================================
+
+fit — “fits the stated character better”   (n = 36 judgements)
+  scorer 27   nonlinear 2B 8   tie 1 (3% tie rate)
+  excluding ties: scorer wins 27/35 = 0.771 [0.61, 0.88], exact sign test p = 0.0019
+  per persona: H1: 6/0/0  H2: 5/1/0  H3: 5/1/0  H4: 2/4/0  H5: 3/2/1  H6: 6/0/0
+               (scorer/nonlinear/tie)
+
+alive — “reads more like a person with a temper of its own”   (n = 36 judgements)
+  scorer 26   nonlinear 2B 5   tie 5 (14% tie rate)
+  excluding ties: scorer wins 26/31 = 0.839 [0.67, 0.93], exact sign test p = 0.0002
+  per persona: H1: 5/1/0  H2: 2/2/2  H3: 5/1/0  H4: 5/0/1  H5: 5/0/1  H6: 4/1/1
+               (scorer/nonlinear/tie)
+
+participant-level consistency (each participant makes 2 fit and 2 alive judgements)
+  mixed: 12, scorer: 6   (participants whose 4 judgements all went one way, else mixed)
+
+==============================================================================
+5. PRE-REGISTERED PREDICTION — H6 has the lowest identification rate under every policy
+==============================================================================
+  hand-authored scorer   H6 = 0.67; lowest = H4 (0.33)  -> NOT supported
+  nonlinear 2B           H6 = 0.17; lowest = H5 (0.17); tied lowest with ['H5', 'H6']  -> supported
+  agnostic control       H6 = 0.17; lowest = H3 (0.00)  -> NOT supported
+
+  overall: not supported
+
+==============================================================================
+6. NEAREST-PERSONA RECOVERY FROM THE SLIDERS ALONE (chance = 1/6)
+==============================================================================
+policy                  nearest = intended     rate   mean dist to intended   rank of intended
+hand-authored scorer                 17/36    0.472                   1.328               2.42
+nonlinear 2B                         11/36    0.306                   1.532               2.78
+agnostic control                      6/36    0.167                   1.708               3.22
+  (rank 1 = the intended persona is the closest of the six; chance rank = 3.5)
+
+==============================================================================
+7. COVARIATES AND DATA-QUALITY CHECKS
+==============================================================================
+  duration vs overall accuracy: r = +0.096 (n = 18)
+  plays games rarely     n = 1   accuracy 0.333
+  plays games sometimes  n = 5   accuracy 0.500
+  plays games often      n = 12  accuracy 0.403
+  straight-lined slider sets (all five identical): 6/108
+  note: the comparison block always shows the scorer as 甲 and the nonlinear policy as 乙 in that fixed order, so a left/first-position bias is not separable from the preference itself.
+

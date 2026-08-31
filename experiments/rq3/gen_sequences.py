@@ -10,7 +10,8 @@ Run from ``code/`` (the default config is the user-facing entry point — see
       "worlds": ["data/world.json"],
       "personalities_file": "data/personalities.json",
       "personalities": [ {"name": "Karlach"},                       <- roster lookup
-                         {"name": "high_E", "ocean": {"extraversion": 1.0}} ],
+                         {"name": "high_E", "ocean": {"extraversion": 1.0}},
+                         {"name": "H1", "ocean": {...}, "seeds": [42]} ],   <- per-entry seeds
       "policies":      [ {"name": "scorer"},
                          {"name": "nonlinear_2b",
                           "checkpoint": "results/rq2b/models/<file>.pt"}, ... ],
@@ -18,7 +19,8 @@ Run from ``code/`` (the default config is the user-facing entry point — see
       "seeds": [42] }
 
 A personality entry with an inline ``ocean`` dict stands alone; a name-only
-entry is looked up in ``personalities_file``. ``unity_dir`` (optional) mirrors
+entry is looked up in ``personalities_file``. An entry may override the global
+``seeds`` with its own. ``unity_dir`` (optional) mirrors
 the written ``S*.json`` into the Unity playback folder after generation, with
 the same stale-file cleanup, so no manual copy step exists.
 
@@ -100,7 +102,12 @@ def run_config(config_path: str | Path, preview: bool = False) -> int:
         for pers in cfg["personalities"]:
             personality = resolve_personality(pers, roster)
             for entry, policy in policies:
-                for seed in cfg["seeds"]:
+                # A personality may carry its own seeds. The personality-agnostic
+                # control ignores the personality input, so one global seed would
+                # give it the identical trail for every persona — visibly a bug to
+                # a participant. Per-persona seeds keep the three policies matched
+                # (same persona -> same seed) while separating the personas.
+                for seed in pers.get("seeds", cfg["seeds"]):
                     i += 1
                     spec = SequenceSpec(
                         sequence_id=f"S{i:03d}",
@@ -111,8 +118,16 @@ def run_config(config_path: str | Path, preview: bool = False) -> int:
                         world_path=str(world_path),
                         n_cycles=int(cfg["n_cycles"]),
                         seed=int(seed),
-                        selection_temperature=float(
-                            cfg.get("selection_temperature", 1.0)),
+                        # Per-policy override. One global temperature is not
+                        # neutral across policies: it is applied to whatever
+                        # distribution a policy emits, and the scorer's is far
+                        # flatter than a hard-label-trained model's, so a value
+                        # that sharpens one into character locks the other onto
+                        # a single option. Matching post-temperature entropy
+                        # keeps the comparison about *what* is chosen.
+                        selection_temperature=float(entry.get(
+                            "selection_temperature",
+                            cfg.get("selection_temperature", 1.0))),
                     )
                     seq = generate_sequence(spec, policy, world)
                     validate_sequence(seq, world)

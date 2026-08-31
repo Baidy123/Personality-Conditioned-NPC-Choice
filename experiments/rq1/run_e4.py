@@ -85,22 +85,23 @@ def main() -> None:
 
     # ---- figure: location + action repeat rate, systematic profiles x conditions ----
     sys_ids = [pid for pid, _ in systematic_profiles()]
-    fig, axes = plt.subplots(2, 1, figsize=(12, 7.5), sharex=True)
-    panel = (("repeat_rate", "stickiness: immediate location-repeat rate"),
+    fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    # Title names the level, y label names the rate being plotted; the profile
+    # ticks are repeated on both panels so neither has to be read off the other.
+    panel = (("repeat_rate", "immediate location-repeat rate"),
              (ACTION_METRIC,
-              "action stickiness: action-repeat rate at a fixed location "
-              "(mean over the 6 locations)"))
+              "action-repeat rate at a fixed location\n(mean over the 6 locations)"))
     x = np.arange(len(sys_ids))
-    for ax, (metric, title) in zip(axes, panel):
+    for ax, (metric, ylabel) in zip(axes, panel):
         for i, cond in enumerate(CONDITIONS):
             vals = [agg[(pid, cond)][metric] for pid in sys_ids]
             ax.bar(x + (i - 0.5) * 0.42, vals, width=0.38,
                    color=CONDITION_COLORS[cond], label=cond)
-        ax.set_title(title)
         ax.set_xticks(x, sys_ids)
+        ax.tick_params(labelbottom=True)  # sharex would hide the top panel's
+        ax.set_xlabel("personality profile (neutral + single-trait endpoints)")
+        ax.set_ylabel(ylabel)
     axes[0].legend(frameon=False, ncol=2, title="memory condition")
-    fig.suptitle("What the bounded recent-choice context contributes "
-                 f"(50 rounds x {len(TRAJ_SEEDS)} seeds)", y=0.995)
     fig.tight_layout()
     RESULTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(RESULTS / "e4_ablation.png", bbox_inches="tight")

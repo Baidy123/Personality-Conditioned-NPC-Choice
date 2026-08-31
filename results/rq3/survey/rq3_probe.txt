@@ -1,0 +1,59 @@
+[[AdvancedFormat]]
+
+[[Block:引言]]
+
+[[Question:DB]]
+[[ID:consent_text]]
+<p>这是曼彻斯特大学机器人学硕士论文的一项研究。你会看到几段游戏角色的行为记录， 需要判断这些角色分别是什么样的人。全程约十分钟。</p> <p>研究不收集任何能识别你身份的信息，只保存你的作答。你可以在任何时候关闭页面退出， 已作答的部分不会被使用。</p>
+
+[[Question:MC:SingleAnswer]]
+[[ID:consent]]
+你是否同意参与？
+[[Choices]]
+同意
+不同意
+
+[[Block:说明]]
+
+[[Question:DB]]
+[[ID:howto]]
+<p>下面每一页显示一个游戏角色连续十次的行动记录。这个世界里有酒馆、集市、 教堂、图书馆、树林、竞技场几个地方，角色每次自己决定去哪里、做什么。</p> <p>每页先给这个角色的性格打分，再从三段描述里挑出最像他的一段。凭直觉即可，没有标准答案。</p>
+
+[[Block:G1_H1_scorer]]
+
+[[Question:DB]]
+[[ID:H1_scorer_trail]]
+<div style="padding:2em;border:2px dashed #bbb;color:#888;text-align:center;margin-bottom:1em">[视频占位 S001 — 录制后用 --video-base 重新生成]</div><p style="font-size:1.15em;line-height:2">集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价） → 竞技场（比武） → 酒馆（斗殴） → 集市（讨价还价）</p>
+
+[[Question:Matrix]]
+[[ID:H1_scorer_rate]]
+你觉得这个角色大概是怎样的人？
+[[Choices]]
+封闭保守 ←→ 开放好奇
+散漫随性 ←→ 自律有条理
+安静内向 ←→ 活跃外向
+冷淡强硬 ←→ 温和随和
+沉稳平静 ←→ 焦虑易怒
+[[Answers]]
+1
+2
+3
+4
+5
+6
+7
+
+[[Question:MC:SingleAnswer]]
+[[ID:H1_scorer_choice]]
+下面哪段描述最像这个角色？
+[[Choices]]
+喜欢热闹，争强好胜，跟谁都要争个高下
+喜欢热闹，交际广，跟人相处软硬都来
+孤僻乖戾，谁也不肯搭理，做事没个定准
+
+[[Block:结束]]
+
+[[Question:DB]]
+[[ID:thanks]]
+<p>问卷到此结束，感谢参与。</p>
+

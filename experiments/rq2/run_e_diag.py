@@ -29,7 +29,6 @@ import numpy as np
 from experiments.rq1.common import (
     LOC_COLORS,
     TRAIT_COLORS,
-    TRAIT_SHORT,
     TRAITS,
     TRAJ_TEMPERATURE,
     entropy,
@@ -182,8 +181,11 @@ def main(argv=None) -> None:
                 ax.plot(values, P_t[:, k], color=LOC_COLORS[o.id], label=o.id)
                 ax.plot(values, P_s[:, k], color=LOC_COLORS[o.id], linestyle="--",
                         alpha=0.75)
-            ax.set_title(f"{TRAIT_SHORT[trait]} (teacher solid / student dashed)")
+            # Nothing above the panel: the swept trait goes on the x-axis and
+            # the solid/dashed convention into the caption.
+            ax.set_xlabel(f"{trait} value")
             ax.set_ylabel("P")
+            ax.tick_params(labelbottom=True)   # sharex hides the top row's
         ax = axes.flat[5]
         ent_t = [entropy(scorer.distribution(sweep_p("neuroticism", v), locs,
                                              level="location")) for v in values]
@@ -200,12 +202,9 @@ def main(argv=None) -> None:
         ax.plot(values, ent_mean, color=color, linestyle=dash, label=fam)
         ax.fill_between(values, ent_mean - ent_std, ent_mean + ent_std,
                         color=color, alpha=0.2, linewidth=0)
-        ax.set_title("Neuroticism temperature: choice entropy (pre-registered check)")
-        ax.set_xlabel("N value")
+        ax.set_xlabel("neuroticism value")
         ax.set_ylabel("entropy (nats)")
         ax.legend(frameon=False)
-        fig.suptitle(f"Trait sensitivity: hand-authored policy vs {fam} student",
-                     y=1.0)
         fig.tight_layout()
         fig.savefig(out / f"e1_overlay_{fam}.png", bbox_inches="tight")
         plt.close(fig)
@@ -273,7 +272,6 @@ def main(argv=None) -> None:
                       "nonlinear": "#E69F00"}[pol])
     ax.set_xticks(x, names, rotation=30, ha="right")
     ax.set_ylabel("visit entropy (nats)")
-    ax.set_title("Trajectory diversity: hand-authored policy vs students")
     ax.legend(frameon=False)
     fig.savefig(out / "e3_visit_entropy.png", bbox_inches="tight")
     plt.close(fig)

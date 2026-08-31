@@ -48,7 +48,7 @@ namespace Dissertation.Playback
             performing = true;
             basePosition = transform.position;
             bobT = 0f;
-            actionLabel.text = actionId;
+            actionLabel.text = Labels.Action(actionId);   // 中文 + English, two lines
             FitLabelBox();
         }
 
